@@ -409,9 +409,6 @@ def compose(
             f"{volume_dir_host_rel_path.as_posix()}:{container}",
         )
 
-    # /home/michael/git/repos/OpenStudioLandscapes/.landscapes/2025-07-13-18-26-40-db99ad3811304b75836a8c97a2987c12/OpenCue__OpenCue/OpenCue__DOCKER_COMPOSE/docker_compose/docker-compose.yml
-    # /home/michael/git/repos/OpenStudioLandscapes/.landscapes/2025-07-13-18-26-40-db99ad3811304b75836a8c97a2987c12/OpenCue__OpenCue/OpenCue__compose/docker-compose.override.yml
-
     service_name_flyway = "flyway"
     # Todo
     container_name_flyway = "--".join(
