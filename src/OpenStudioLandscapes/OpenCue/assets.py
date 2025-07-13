@@ -1,4 +1,3 @@
-import os
 import copy
 import json
 import pathlib
@@ -125,6 +124,47 @@ def repository_opencue(
         "env": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "env"]),
         ),
+        "DOCKER_COMPOSE_OVERRIDE": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "DOCKER_COMPOSE_OVERRIDE"]),
+        ),
+    },
+)
+def env_override(
+    context: AssetExecutionContext,
+    env: dict,  # pylint: disable=redefined-outer-name
+    DOCKER_COMPOSE_OVERRIDE: pathlib.Path,  # pylint: disable=redefined-outer-name
+) -> Generator[Output[dict[str, str | None]] | AssetMaterialization, None, None]:
+    """Instead of changing the OpenStudioLandscapes.engine.base.ops.op_env operator,
+    I thought it would be easier to just feed in the additional DOCKER_COMPOSE_OVERRIDE
+    path into the env and go from there."""
+
+    env_in = copy.deepcopy(env)
+
+    env_in.update(
+        expand_dict_vars(
+            dict_to_expand={
+                "DOCKER_COMPOSE_OVERRIDE": DOCKER_COMPOSE_OVERRIDE.as_posix(),
+            },
+            kv=env_in,
+        )
+    )
+
+    yield Output(env_in)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(env_in),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
+        "env": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "env_override"]),
+        ),
         "repository_opencue": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "repository_opencue"]),
         ),
@@ -176,7 +216,7 @@ def clone_repository(
     **ASSET_HEADER,
     ins={
         "env": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "env"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "env_override"]),
         ),
     },
 )
@@ -262,7 +302,7 @@ def compose_networks(
     **ASSET_HEADER,
     ins={
         "env": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "env"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "env_override"]),
         ),
         "compose_networks": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
@@ -333,13 +373,12 @@ def compose(
     elif "network_mode" in compose_networks:
         network_dict = {"network_mode": compose_networks.get("network_mode")}
 
-    parent = (
+    docker_compose_git_repository = (
         pathlib.Path(clone_repository["repository_dir_full"]) / "docker-compose.yml"
     )
 
-    opencue_db_dir_host = (
-            pathlib.Path(env.get("OPENCUE_DB_INSTALL_DESTINATION")) / "postgresql"
-    )
+    opencue_db_dir_host = pathlib.Path(env["OPENCUE_DB_INSTALL_DESTINATION"])
+
     opencue_db_dir_host.mkdir(parents=True, exist_ok=True)
     context.log.info(f"Directory {opencue_db_dir_host.as_posix()} created.")
 
@@ -349,6 +388,29 @@ def compose(
         [f"ayon-{service_name_db}", env.get("LANDSCAPE", "default")]
     )
     # host_name_db = ".".join([service_name_db, env["ROOT_DOMAIN"]])
+    volumes_db = [
+        f"{opencue_db_dir_host.as_posix()}:/var/lib/postgresql/data:rw",
+    ]
+
+    _volume_relative_db = []
+
+    for v in volumes_db:
+
+        host, container = v.split(":", maxsplit=1)
+
+        volume_dir_host_rel_path = get_relative_path_via_common_root(
+            context=context,
+            path_src=docker_compose_git_repository,  # Probably because the root docker-compose is the one in the Git repo
+            path_dst=pathlib.Path(host),
+            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+        )
+
+        _volume_relative_db.append(
+            f"{volume_dir_host_rel_path.as_posix()}:{container}",
+        )
+
+    # /home/michael/git/repos/OpenStudioLandscapes/.landscapes/2025-07-13-18-26-40-db99ad3811304b75836a8c97a2987c12/OpenCue__OpenCue/OpenCue__DOCKER_COMPOSE/docker_compose/docker-compose.yml
+    # /home/michael/git/repos/OpenStudioLandscapes/.landscapes/2025-07-13-18-26-40-db99ad3811304b75836a8c97a2987c12/OpenCue__OpenCue/OpenCue__compose/docker-compose.override.yml
 
     service_name_flyway = "flyway"
     # Todo
@@ -370,6 +432,27 @@ def compose(
         [f"ayon-{service_name_rqd}", env.get("LANDSCAPE", "default")]
     )
     # host_name_rqd = ".".join([service_name_rqd, env["ROOT_DOMAIN"]])
+    volumes_rqd = [
+        f"{prepare_volumes['logs']}:/tmp/rqd/logs:rw",
+        f"{prepare_volumes['shots']}:/tmp/rqd/shots:rw",
+    ]
+
+    _volume_relative_rqd = []
+
+    for v in volumes_rqd:
+
+        host, container = v.split(":", maxsplit=1)
+
+        volume_dir_host_rel_path = get_relative_path_via_common_root(
+            context=context,
+            path_src=docker_compose_git_repository,  # Probably because the root docker-compose is the one in the Git repo
+            path_dst=pathlib.Path(host),
+            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+        )
+
+        _volume_relative_rqd.append(
+            f"{volume_dir_host_rel_path.as_posix()}:{container}",
+        )
 
     docker_dict_override = {
         "networks": compose_networks.get("networks", []),
@@ -384,7 +467,7 @@ def compose(
                     "POSTGRES_USER": env.get('OPENCUE_DB_PGUSER'),
                 },
                 "volumes": [
-                    f"{opencue_db_dir_host.as_posix()}:/var/lib/postgresql/data:rw",
+                    *_volume_relative_db,
                 ],
                 **copy.deepcopy(network_dict),
                 **copy.deepcopy(ports_dict_db),
@@ -448,8 +531,7 @@ def compose(
                 },
                 "restart": "always",
                 "volumes": [
-                    f"{prepare_volumes['logs']}:/tmp/rqd/logs:rw",
-                    f"{prepare_volumes['shots']}:/tmp/rqd/shots:rw",
+                    *_volume_relative_rqd,
                 ],
                 **copy.deepcopy(network_dict),
                 **copy.deepcopy(ports_dict_rqd),
@@ -469,13 +551,7 @@ def compose(
 
     docker_dict = reduce(deep_merge, docker_chainmap.maps)
 
-    docker_compose_override = pathlib.Path(
-        env["DOT_LANDSCAPES"],
-        env.get("LANDSCAPE", "default"),
-        f"{ASSET_HEADER['group_name']}__{'__'.join(ASSET_HEADER['key_prefix'])}",
-        "__".join(context.asset_key.path),
-        "docker-compose.override.yml",
-    )
+    docker_compose_override = pathlib.Path(env["DOCKER_COMPOSE_OVERRIDE"])
 
     docker_compose_override.parent.mkdir(parents=True, exist_ok=True)
 
@@ -498,10 +574,10 @@ def compose(
     dot_landscapes = pathlib.Path(env["DOT_LANDSCAPES"])
 
     # Todo:
-    #  - [ ] find a better way to implement relpath with `from` and `via`
-    #  - [ ] externalize
+    #  - [x] find a better way to implement relpath with `from` and `via`
+    #  - [x] externalize
     for path in [
-        parent.as_posix(),
+        docker_compose_git_repository.as_posix(),
         docker_compose_override.as_posix(),
     ]:
         rel_path = get_relative_path_via_common_root(
