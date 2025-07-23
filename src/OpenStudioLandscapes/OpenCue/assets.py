@@ -3,7 +3,7 @@ import json
 import pathlib
 from collections import ChainMap
 from functools import reduce
-from typing import Generator
+from typing import Generator, Any
 
 import git
 import yaml
@@ -611,5 +611,50 @@ def compose(
             ),
             "path_docker_yaml_override": MetadataValue.path(docker_compose_override),
             # Todo: "cmd_docker_run": MetadataValue.path(cmd_list_to_str(cmd_docker_run)),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
+    },
+)
+def cmd_extend(
+        context: AssetExecutionContext,
+) -> Generator[Output[list[Any]] | AssetMaterialization | Any, Any, None]:
+
+    ret = []
+
+    yield Output(ret)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(ret),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
+    },
+)
+def cmd_append(
+        context: AssetExecutionContext,
+) -> Generator[Output[dict[str, list[Any]]] | AssetMaterialization | Any, Any, None]:
+
+    ret = {
+        "cmd": [],
+        "exclude_from_quote": []
+    }
+
+    yield Output(ret)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(ret),
         },
     )
