@@ -52,6 +52,7 @@ FEATURE_CONFIGS = {
             f"{GROUP}__{'__'.join(KEY)}",
             "data",
             "opencue-db",
+            "postgresql",
         )
         .expanduser()
         .as_posix(),
@@ -82,6 +83,11 @@ FEATURE_CONFIGS = {
             description="",
         ),
         "DOCKER_COMPOSE": AssetOut(
+            **ASSET_HEADER,
+            dagster_type=pathlib.Path,
+            description="",
+        ),
+        "DOCKER_COMPOSE_OVERRIDE": AssetOut(
             **ASSET_HEADER,
             dagster_type=pathlib.Path,
             description="",
@@ -143,5 +149,28 @@ def constants_multi_asset(
             "__".join(
                 context.asset_key_for_output("DOCKER_COMPOSE").path
             ): MetadataValue.path(docker_compose),
+        },
+    )
+
+    docker_compose_override = pathlib.Path(
+        "{DOT_LANDSCAPES}",
+        "{LANDSCAPE}",
+        f"{ASSET_HEADER['group_name']}__{'_'.join(ASSET_HEADER['key_prefix'])}",
+        "__".join(context.asset_key_for_output("DOCKER_COMPOSE").path),
+        "docker_compose_override",
+        "docker-compose.override.yml",
+    )
+
+    yield Output(
+        output_name="DOCKER_COMPOSE_OVERRIDE",
+        value=docker_compose_override,
+    )
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key_for_output("DOCKER_COMPOSE_OVERRIDE"),
+        metadata={
+            "__".join(
+                context.asset_key_for_output("DOCKER_COMPOSE_OVERRIDE").path
+            ): MetadataValue.path(docker_compose_override),
         },
     )

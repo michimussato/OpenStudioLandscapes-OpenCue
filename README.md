@@ -185,20 +185,20 @@ The following variables are being declared in `OpenStudioLandscapes.OpenCue.cons
 
 #### Feature Config: default
 
-| Variable                                 | Type   | Value                                                           |
-| :--------------------------------------- | :----- | :-------------------------------------------------------------- |
-| `DOCKER_USE_CACHE`                       | `bool` | `False`                                                         |
-| `OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST`      | `str`  | `8443`                                                          |
-| `OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER` | `str`  | `8443`                                                          |
-| `OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST`      | `str`  | `8444`                                                          |
-| `OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER` | `str`  | `8444`                                                          |
-| `OPENCUE_DB_INSTALL_DESTINATION`         | `str`  | `{DOT_LANDSCAPES}/{LANDSCAPE}/OpenCue__OpenCue/data/opencue-db` |
-| `OPENCUE_DB_PORT_HOST`                   | `str`  | `5342`                                                          |
-| `OPENCUE_DB_PORT_CONTAINER`              | `str`  | `5432`                                                          |
-| `OPENCUE_DB_PGHOST`                      | `str`  | `opencue-db`                                                    |
-| `OPENCUE_DB_PGDATABASE`                  | `str`  | `cuebot`                                                        |
-| `OPENCUE_DB_PGPASSWORD`                  | `str`  | `cuebot_password`                                               |
-| `OPENCUE_DB_PGUSER`                      | `str`  | `cuebot`                                                        |
+| Variable                                 | Type   | Value                                                                      |
+| :--------------------------------------- | :----- | :------------------------------------------------------------------------- |
+| `DOCKER_USE_CACHE`                       | `bool` | `False`                                                                    |
+| `OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST`      | `str`  | `8443`                                                                     |
+| `OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER` | `str`  | `8443`                                                                     |
+| `OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST`      | `str`  | `8444`                                                                     |
+| `OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER` | `str`  | `8444`                                                                     |
+| `OPENCUE_DB_INSTALL_DESTINATION`         | `str`  | `{DOT_LANDSCAPES}/{LANDSCAPE}/OpenCue__OpenCue/data/opencue-db/postgresql` |
+| `OPENCUE_DB_PORT_HOST`                   | `str`  | `5342`                                                                     |
+| `OPENCUE_DB_PORT_CONTAINER`              | `str`  | `5432`                                                                     |
+| `OPENCUE_DB_PGHOST`                      | `str`  | `opencue-db`                                                               |
+| `OPENCUE_DB_PGDATABASE`                  | `str`  | `cuebot`                                                                   |
+| `OPENCUE_DB_PGPASSWORD`                  | `str`  | `cuebot_password`                                                          |
+| `OPENCUE_DB_PGUSER`                      | `str`  | `cuebot`                                                                   |
 
 # Community
 
