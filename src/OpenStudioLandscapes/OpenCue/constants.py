@@ -5,16 +5,16 @@ __all__ = [
 ]
 
 import pathlib
-from typing import Generator, Any
+from typing import Any, Generator
 
 from dagster import (
     AssetExecutionContext,
     AssetMaterialization,
+    AssetOut,
     MetadataValue,
     Output,
-    multi_asset,
-    AssetOut,
     get_dagster_logger,
+    multi_asset,
 )
 
 LOGGER = get_dagster_logger(__name__)
@@ -97,8 +97,14 @@ FEATURE_CONFIGS = {
 def constants_multi_asset(
     context: AssetExecutionContext,
 ) -> Generator[
-    Output[dict[OpenStudioLandscapesConfig, dict[str, bool | str]]] | AssetMaterialization | Output[Any] | Output[
-        pathlib.Path] | Any, None, None]:
+    Output[dict[OpenStudioLandscapesConfig, dict[str, bool | str]]]
+    | AssetMaterialization
+    | Output[Any]
+    | Output[pathlib.Path]
+    | Any,
+    None,
+    None,
+]:
     """ """
 
     yield Output(
@@ -123,9 +129,9 @@ def constants_multi_asset(
     yield AssetMaterialization(
         asset_key=context.asset_key_for_output("NAME"),
         metadata={
-            "__".join(
-                context.asset_key_for_output("NAME").path
-            ): MetadataValue.path(__name__),
+            "__".join(context.asset_key_for_output("NAME").path): MetadataValue.path(
+                __name__
+            ),
         },
     )
 
