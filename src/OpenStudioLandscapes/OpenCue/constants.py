@@ -38,6 +38,12 @@ ASSET_HEADER = {
 FEATURE_CONFIGS = {
     OpenStudioLandscapesConfig.DEFAULT: {
         "DOCKER_USE_CACHE": DOCKER_USE_CACHE,
+        "HOSTNAME_DB": "opencue-db",
+        "HOSTNAME_FLYWAY": "opencue-flyway",
+        "HOSTNAME_CUEBOT": "opencue-cuebot",
+        "HOSTNAME_RQD": "opencue-rqd",
+        "TELEPORT_ENTRY_POINT_HOST": "{{HOSTNAME}}",  # Either a hardcoded str or a ref to a Variable (with double {{ }}!)
+        "TELEPORT_ENTRY_POINT_PORT": "{{DAGSTER_DEV_PORT_HOST}}",  # Either a hardcoded str or a ref to a Variable (with double {{ }}!)
         # cuebot
         "OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST": "8443",
         "OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER": "8443",

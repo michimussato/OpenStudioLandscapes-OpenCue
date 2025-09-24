@@ -19,7 +19,8 @@ from dagster import (
 from docker_compose_graph.utils import *
 from docker_compose_graph.yaml_tags.overrides import *
 from git.exc import GitCommandError
-from OpenStudioLandscapes.engine.common_assets.compose import get_compose
+# local implementation of "compose":
+# from OpenStudioLandscapes.engine.common_assets.compose import get_compose
 from OpenStudioLandscapes.engine.common_assets.constants import get_constants
 from OpenStudioLandscapes.engine.common_assets.docker_compose_graph import (
     get_docker_compose_graph,
@@ -382,12 +383,13 @@ def compose(
     opencue_db_dir_host.mkdir(parents=True, exist_ok=True)
     context.log.info(f"Directory {opencue_db_dir_host.as_posix()} created.")
 
+    container_prefix = "opencue"
+
     service_name_db = "db"
-    # Todo
     container_name_db = "--".join(
-        [f"ayon-{service_name_db}", env.get("LANDSCAPE", "default")]
+        [f"{container_prefix}-{service_name_db}", env.get("LANDSCAPE", "default")]
     )
-    # host_name_db = ".".join([service_name_db, env["ROOT_DOMAIN"]])
+    host_name_db = ".".join([env["HOSTNAME_DB"] or f"{container_prefix}-{service_name_db}", env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"]])
     volumes_db = [
         f"{opencue_db_dir_host.as_posix()}:/var/lib/postgresql/data:rw",
     ]
@@ -410,25 +412,22 @@ def compose(
         )
 
     service_name_flyway = "flyway"
-    # Todo
     container_name_flyway = "--".join(
-        [f"ayon-{service_name_flyway}", env.get("LANDSCAPE", "default")]
+        [f"{container_prefix}-{service_name_flyway}", env.get("LANDSCAPE", "default")]
     )
-    # host_name_flyway = ".".join([service_name_flyway, env["ROOT_DOMAIN"]])
+    host_name_flyway = ".".join([env["HOSTNAME_FLYWAY"] or service_name_flyway, env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"]])
 
     service_name_cuebot = "cuebot"
-    # Todo
     container_name_cuebot = "--".join(
-        [f"ayon-{service_name_cuebot}", env.get("LANDSCAPE", "default")]
+        [f"{container_prefix}-{service_name_cuebot}", env.get("LANDSCAPE", "default")]
     )
-    # host_name_cubot = ".".join([service_name_cuebot, env["ROOT_DOMAIN"]])
+    host_name_cuebot = ".".join([env["HOSTNAME_CUEBOT"] or service_name_cuebot, env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"]])
 
     service_name_rqd = "rqd"
-    # Todo
     container_name_rqd = "--".join(
-        [f"ayon-{service_name_rqd}", env.get("LANDSCAPE", "default")]
+        [f"{container_prefix}-{service_name_rqd}", env.get("LANDSCAPE", "default")]
     )
-    # host_name_rqd = ".".join([service_name_rqd, env["ROOT_DOMAIN"]])
+    host_name_rqd = ".".join([env["HOSTNAME_RQD"] or service_name_rqd, env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"]])
     volumes_rqd = [
         f"{prepare_volumes['logs']}:/tmp/rqd/logs:rw",
         f"{prepare_volumes['shots']}:/tmp/rqd/shots:rw",
@@ -456,8 +455,8 @@ def compose(
         "services": {
             service_name_db: {
                 "container_name": container_name_db,
-                "hostname": "opencue-db",
-                "domainname": env.get("ROOT_DOMAIN"),
+                "hostname": host_name_db,
+                "domainname": env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
                 "environment": {
                     "POSTGRES_DB": env.get("OPENCUE_DB_PGDATABASE"),
                     "POSTGRES_PASSWORD": env.get("OPENCUE_DB_PGPASSWORD"),
@@ -471,8 +470,8 @@ def compose(
             },
             service_name_flyway: {
                 "container_name": container_name_flyway,
-                "hostname": "opencue-flyway",
-                "domainname": env.get("ROOT_DOMAIN"),
+                "hostname": host_name_flyway,
+                "domainname": env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
                 "environment": {
                     "PGHOST": env.get("OPENCUE_DB_PGHOST"),
                     "PGDATABASE": env.get("OPENCUE_DB_PGDATABASE"),
@@ -488,8 +487,8 @@ def compose(
             },
             service_name_cuebot: {
                 "container_name": container_name_cuebot,
-                "hostname": "opencue-cuebot",
-                "domainname": env.get("ROOT_DOMAIN"),
+                "hostname": host_name_cuebot,
+                "domainname": env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
                 # This might not be very helpful as a health check
                 # but a health check seems mandatory for rqd to be
                 # dependent on this service
@@ -520,11 +519,13 @@ def compose(
             },
             service_name_rqd: {
                 "container_name": container_name_rqd,
-                "hostname": "opencue-rqd",
-                "domainname": env.get("ROOT_DOMAIN"),
+                "hostname": host_name_rqd,
+                "domainname": env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
                 "environment": {
                     "PYTHONUNBUFFERED": "1",
-                    "CUEBOT_HOSTNAME": "opencue-cuebot",
+                    # Todo:
+                    #  - [ ] use fqdn instead of just hostname?
+                    "CUEBOT_HOSTNAME": host_name_cuebot,
                 },
                 "restart": "always",
                 "volumes": [
