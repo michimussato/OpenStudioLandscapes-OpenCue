@@ -20,7 +20,7 @@ from dagster import (
 LOGGER = get_dagster_logger(__name__)
 
 from OpenStudioLandscapes.engine.constants import DOCKER_USE_CACHE_GLOBAL
-from OpenStudioLandscapes.engine.enums import OpenStudioLandscapesConfig
+from OpenStudioLandscapes.engine.enums import OpenStudioLandscapesConfig, FeatureVolumeType
 
 DOCKER_USE_CACHE = DOCKER_USE_CACHE_GLOBAL or False
 
@@ -52,16 +52,28 @@ FEATURE_CONFIGS = {
         "OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER": "8444",
         # db
         # Inside Landscape:
-        "OPENCUE_DB_INSTALL_DESTINATION": pathlib.Path(
-            "{DOT_LANDSCAPES}",
-            "{LANDSCAPE}",
-            f"{GROUP}__{'__'.join(KEY)}",
-            "data",
-            "opencue-db",
-            "postgresql",
-        )
-        .expanduser()
-        .as_posix(),
+        "OPENCUE_DB_INSTALL_DESTINATION": {
+            FeatureVolumeType.CONTAINED: pathlib.Path(
+                "{DOT_LANDSCAPES}",
+                "{LANDSCAPE}",
+                f"{GROUP}__{'__'.join(KEY)}",
+                "data",
+                "opencue-db",
+                "postgresql",
+            )
+            .expanduser()
+            .as_posix(),
+            FeatureVolumeType.SHARED: pathlib.Path(
+                "{DOT_LANDSCAPES}",
+                "{DOT_SHARED_VOLUMES}",
+                f"{GROUP}__{'__'.join(KEY)}",
+                "data",
+                "opencue-db",
+                "postgresql",
+            )
+            .expanduser()
+            .as_posix(),
+        }[FeatureVolumeType.CONTAINED],
         "OPENCUE_DB_PORT_HOST": "5342",
         "OPENCUE_DB_PORT_CONTAINER": "5432",
         "OPENCUE_DB_PGHOST": "opencue-db",
