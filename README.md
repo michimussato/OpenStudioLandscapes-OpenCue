@@ -41,31 +41,25 @@ You feel like writing your own Feature? Go and check out the [OpenStudioLandscap
 Clone this repository into `OpenStudioLandscapes/.features`:
 
 ```shell
-
 # cd .features
 git clone https://github.com/michimussato/OpenStudioLandscapes-OpenCue.git
-
 ```
 
 Create `venv`:
 
 ```shell
-
 # cd .features/OpenStudioLandscapes-OpenCue
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip setuptools
-
 ```
 
 Configure `venv`:
 
 ```shell
-
 # cd .features/OpenStudioLandscapes-OpenCue
 pip install -e "../../[dev]"
 pip install -e ".[dev]"
-
 ```
 
 For more info see [VCS Support of pip](https://pip.pypa.io/en/stable/topics/vcs-support/).
@@ -75,7 +69,6 @@ For more info see [VCS Support of pip](https://pip.pypa.io/en/stable/topics/vcs-
 Add the following code to `OpenStudioLandscapes.engine.features.FEATURES`:
 
 ```python
-
 FEATURES.update(
     "OpenStudioLandscapes-OpenCue": {
         "enabled": True|False,
@@ -90,7 +83,6 @@ FEATURES.update(
         "feature_config": OpenStudioLandscapesConfig.DEFAULT,
     }
 )
-
 ```
 
 ## Testing
@@ -101,9 +93,7 @@ FEATURES.update(
 - https://pre-commit.com/hooks.html
 
 ```shell
-
 pre-commit install
-
 ```
 
 ### nox
@@ -111,33 +101,25 @@ pre-commit install
 #### Generate Report
 
 ```shell
-
 nox --no-error-on-missing-interpreters --report .nox/nox-report.json
-
 ```
 
 #### Re-Generate this README
 
 ```shell
-
 nox -v --add-timestamp --session readme
-
 ```
 
 #### Generate Sphinx Documentation
 
 ```shell
-
 nox -v --add-timestamp --session docs
-
 ```
 
 #### pylint
 
 ```shell
-
 nox -v --add-timestamp --session lint
-
 ```
 
 ##### pylint: disable=redefined-outer-name
@@ -149,9 +131,7 @@ nox -v --add-timestamp --session lint
 Acronym for Software Bill of Materials
 
 ```shell
-
 nox -v --add-timestamp --session sbom
-
 ```
 
 We create the following SBOMs:
