@@ -354,26 +354,26 @@ def compose(
         ports_dict_rqd = {
             "ports": OverrideArray(
                 [
-                    f"{env.get('OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST')}:{env.get('OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER')}",
+                    f"{env['OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST']}:{env['OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER']}",
                 ]
             ),
         }
         ports_dict_cuebot = {
             "ports": OverrideArray(
                 [
-                    f"{env.get('OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST')}:{env.get('OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER')}",
+                    f"{env['OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST']}:{env['OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER']}",
                 ]
             ),
         }
         ports_dict_db = {
             "ports": OverrideArray(
                 [
-                    f"{env.get('OPENCUE_DB_PORT_HOST')}:{env.get('OPENCUE_DB_PORT_CONTAINER')}",
+                    f"{env['OPENCUE_DB_PORT_HOST']}:{env['OPENCUE_DB_PORT_CONTAINER']}",
                 ]
             ),
         }
     elif "network_mode" in compose_networks:
-        network_dict = {"network_mode": compose_networks.get("network_mode")}
+        network_dict = {"network_mode": compose_networks["network_mode"]}
 
     docker_compose_git_repository = (
         pathlib.Path(clone_repository["repository_dir_full"]) / "docker-compose.yml"
@@ -477,11 +477,11 @@ def compose(
             service_name_db: {
                 "container_name": container_name_db,
                 "hostname": host_name_db,
-                "domainname": env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
+                "domainname": env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
                 "environment": {
-                    "POSTGRES_DB": env.get("OPENCUE_DB_PGDATABASE"),
-                    "POSTGRES_PASSWORD": env.get("OPENCUE_DB_PGPASSWORD"),
-                    "POSTGRES_USER": env.get("OPENCUE_DB_PGUSER"),
+                    "POSTGRES_DB": env["OPENCUE_DB_PGDATABASE"],
+                    "POSTGRES_PASSWORD": env["OPENCUE_DB_PGPASSWORD"],
+                    "POSTGRES_USER": env["OPENCUE_DB_PGUSER"],
                 },
                 "volumes": [
                     *_volume_relative_db,
@@ -492,13 +492,13 @@ def compose(
             service_name_flyway: {
                 "container_name": container_name_flyway,
                 "hostname": host_name_flyway,
-                "domainname": env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
+                "domainname": env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
                 "environment": {
-                    "PGHOST": env.get("OPENCUE_DB_PGHOST"),
-                    "PGDATABASE": env.get("OPENCUE_DB_PGDATABASE"),
-                    "PGPASSWORD": env.get("OPENCUE_DB_PGPASSWORD"),
-                    "PGUSER": env.get("OPENCUE_DB_PGUSER"),
-                    "PGPORT": env.get("OPENCUE_DB_PORT_CONTAINER"),
+                    "PGHOST": env["OPENCUE_DB_PGHOST"],
+                    "PGDATABASE": env["OPENCUE_DB_PGDATABASE"],
+                    "PGPASSWORD": env["OPENCUE_DB_PGPASSWORD"],
+                    "PGUSER": env["OPENCUE_DB_PGUSER"],
+                    "PGPORT": env["OPENCUE_DB_PORT_CONTAINER"],
                 },
                 **copy.deepcopy(network_dict),
                 # "networks": [
@@ -509,7 +509,7 @@ def compose(
             service_name_cuebot: {
                 "container_name": container_name_cuebot,
                 "hostname": host_name_cuebot,
-                "domainname": env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
+                "domainname": env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
                 # This might not be very helpful as a health check
                 # but a health check seems mandatory for rqd to be
                 # dependent on this service
@@ -541,7 +541,7 @@ def compose(
             service_name_rqd: {
                 "container_name": container_name_rqd,
                 "hostname": host_name_rqd,
-                "domainname": env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
+                "domainname": env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
                 "environment": {
                     "PYTHONUNBUFFERED": "1",
                     # Todo:
