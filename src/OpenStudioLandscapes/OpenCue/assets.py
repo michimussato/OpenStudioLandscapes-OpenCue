@@ -393,7 +393,17 @@ def compose(
     host_name_db = ".".join(
         [
             env["HOSTNAME_DB"] or f"{container_prefix}-{service_name_db}",
-            env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+            # Todo
+            #  - [ ] For some reason, if the db hostname is suffixed with
+            #        the domain name, flyway can't reach it.
+            #        Hence, comment this out here.
+            #  - [ ] Maybe try to understand the differences in Docker between
+            #        - hostname
+            #        - domain
+            #        - subdomain.domain
+            #        - hostname.subdomain.domain
+            #        etc.
+            # env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
         ]
     )
     volumes_db = [
@@ -558,6 +568,9 @@ def compose(
         },
     }
 
+    if env["OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE"]:
+        docker_dict_override["services"][service_name_cuebot]["image"] = env["OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE"]
+
     if "networks" in compose_networks:
         network_dict = copy.deepcopy(compose_networks)
     else:
@@ -573,6 +586,12 @@ def compose(
     docker_compose_override = pathlib.Path(env["DOCKER_COMPOSE_OVERRIDE"])
 
     docker_compose_override.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(docker_compose_git_repository, "r") as fr:
+        # Just load is as a str to be able to use it as a MetadataValue
+        # (also shows comments of the original yml which is insightful)
+        # No post processing for now
+        docker_yaml_repository: str = fr.read()
 
     docker_yaml_override: str = yaml.dump(docker_dict)
 
@@ -628,6 +647,9 @@ def compose(
         asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(docker_dict_include),
+            "docker_yaml_repository": MetadataValue.md(
+                f"```yaml\n{docker_yaml_repository}\n```"
+            ),
             "docker_yaml_override": MetadataValue.md(
                 f"```yaml\n{docker_yaml_override}\n```"
             ),
