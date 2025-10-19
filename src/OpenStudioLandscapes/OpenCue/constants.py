@@ -48,7 +48,7 @@ FEATURE_CONFIGS = {
         "DOCKER_USE_CACHE": DOCKER_USE_CACHE,
         # Todo:
         #  - [ ] Which one is the main HOSTNAME?
-        "HOSTNAME": "{{HOSTNAME_WEB}}",  # This is assumed for now (for teleport service). CueWeb is not implemented in this Feature yet.)
+        "HOSTNAME": "opencue-web",  # Same as HOSTNAME_WEB. This is assumed for now (for teleport service). CueWeb is not implemented in this Feature yet.)
         "OPENCUE_WEB_PORT_CONTAINER": "3000",
         "OPENCUE_WEB_PORT_HOST": "1234",
         "HOSTNAME_WEB": "opencue-web",
