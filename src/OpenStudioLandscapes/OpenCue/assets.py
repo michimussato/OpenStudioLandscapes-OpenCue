@@ -569,7 +569,9 @@ def compose(
     }
 
     if env["OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE"]:
-        docker_dict_override["services"][service_name_cuebot]["image"] = env["OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE"]
+        docker_dict_override["services"][service_name_cuebot]["image"] = env[
+            "OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE"
+        ]
 
     if "networks" in compose_networks:
         network_dict = copy.deepcopy(compose_networks)
