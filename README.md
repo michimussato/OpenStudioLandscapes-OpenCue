@@ -164,26 +164,32 @@ The following variables are being declared in `OpenStudioLandscapes.OpenCue.cons
 
 #### Feature Config: default
 
-| Variable                                 | Type   | Value                                                                      |
-| :--------------------------------------- | :----- | :------------------------------------------------------------------------- |
-| `DOCKER_USE_CACHE`                       | `bool` | `False`                                                                    |
-| `HOSTNAME_DB`                            | `str`  | `opencue-db`                                                               |
-| `HOSTNAME_FLYWAY`                        | `str`  | `opencue-flyway`                                                           |
-| `HOSTNAME_CUEBOT`                        | `str`  | `opencue-cuebot`                                                           |
-| `HOSTNAME_RQD`                           | `str`  | `opencue-rqd`                                                              |
-| `TELEPORT_ENTRY_POINT_HOST`              | `str`  | `{{HOSTNAME}}`                                                             |
-| `TELEPORT_ENTRY_POINT_PORT`              | `str`  | `{{DAGSTER_DEV_PORT_HOST}}`                                                |
-| `OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST`      | `str`  | `8443`                                                                     |
-| `OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER` | `str`  | `8443`                                                                     |
-| `OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST`      | `str`  | `8444`                                                                     |
-| `OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER` | `str`  | `8444`                                                                     |
-| `OPENCUE_DB_INSTALL_DESTINATION`         | `str`  | `{DOT_LANDSCAPES}/{LANDSCAPE}/OpenCue__OpenCue/data/opencue-db/postgresql` |
-| `OPENCUE_DB_PORT_HOST`                   | `str`  | `5342`                                                                     |
-| `OPENCUE_DB_PORT_CONTAINER`              | `str`  | `5432`                                                                     |
-| `OPENCUE_DB_PGHOST`                      | `str`  | `opencue-db`                                                               |
-| `OPENCUE_DB_PGDATABASE`                  | `str`  | `cuebot`                                                                   |
-| `OPENCUE_DB_PGPASSWORD`                  | `str`  | `cuebot_password`                                                          |
-| `OPENCUE_DB_PGUSER`                      | `str`  | `cuebot`                                                                   |
+| Variable                                   | Type   | Value                                                                      |
+| :----------------------------------------- | :----- | :------------------------------------------------------------------------- |
+| `DOCKER_USE_CACHE`                         | `bool` | `False`                                                                    |
+| `HOSTNAME`                                 | `str`  | `opencue-web`                                                              |
+| `OPENCUE_WEB_PORT_CONTAINER`               | `str`  | `3000`                                                                     |
+| `OPENCUE_WEB_PORT_HOST`                    | `str`  | `1234`                                                                     |
+| `HOSTNAME_WEB`                             | `str`  | `opencue-web`                                                              |
+| `HOSTNAME_DB`                              | `str`  | `opencue-db`                                                               |
+| `HOSTNAME_FLYWAY`                          | `str`  | `opencue-flyway`                                                           |
+| `HOSTNAME_CUEBOT`                          | `str`  | `opencue-cuebot`                                                           |
+| `HOSTNAME_RQD`                             | `str`  | `opencue-rqd`                                                              |
+| `TELEPORT_ENTRY_POINT_HOST`                | `str`  | `{{HOSTNAME}}`                                                             |
+| `TELEPORT_ENTRY_POINT_PORT`                | `str`  | `{{OPENCUE_WEB_PORT_HOST}}`                                                |
+| `OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE` | `bool` | `True`                                                                     |
+| `OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE`     | `str`  | `docker.io/opencue/cuebot`                                                 |
+| `OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST`        | `str`  | `8443`                                                                     |
+| `OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER`   | `str`  | `8443`                                                                     |
+| `OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST`        | `str`  | `8444`                                                                     |
+| `OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER`   | `str`  | `8444`                                                                     |
+| `OPENCUE_DB_INSTALL_DESTINATION`           | `str`  | `{DOT_LANDSCAPES}/{LANDSCAPE}/OpenCue__OpenCue/data/opencue-db/postgresql` |
+| `OPENCUE_DB_PORT_HOST`                     | `str`  | `5342`                                                                     |
+| `OPENCUE_DB_PORT_CONTAINER`                | `str`  | `5432`                                                                     |
+| `OPENCUE_DB_PGHOST`                        | `str`  | `opencue-db`                                                               |
+| `OPENCUE_DB_PGDATABASE`                    | `str`  | `cuebot`                                                                   |
+| `OPENCUE_DB_PGPASSWORD`                    | `str`  | `cuebot_password`                                                          |
+| `OPENCUE_DB_PGUSER`                        | `str`  | `cuebot`                                                                   |
 
 # Community
 
