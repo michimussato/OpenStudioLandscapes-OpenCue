@@ -94,9 +94,13 @@ code_location_name = "OpenStudioLandscapes-OpenCue"
 module_name = "OpenStudioLandscapes.OpenCue.definitions"
 
 [tool.setuptools]
+include-package-data = true
 packages = [
     "OpenStudioLandscapes.OpenCue",
 ]
 platforms = [
     "Linux",
 ]
+
+[tool.setuptools.package-dir]
+"" = "src"
