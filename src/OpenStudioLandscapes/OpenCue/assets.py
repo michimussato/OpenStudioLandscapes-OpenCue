@@ -265,9 +265,9 @@ def compose_networks(
     Output[dict[str, dict[str, dict[str, str]]]] | AssetMaterialization, None, None
 ]:
 
-    compose_network_mode = ComposeNetworkMode.DEFAULT
+    compose_network_mode = DockerComposePolicies.NETWORK_MODE.DEFAULT
 
-    if compose_network_mode == ComposeNetworkMode.DEFAULT:
+    if compose_network_mode is DockerComposePolicies.NETWORK_MODE.DEFAULT:
         docker_dict = {
             "networks": {
                 "opencue": {
@@ -558,7 +558,7 @@ def compose(
                     #  - [ ] use fqdn instead of just hostname?
                     "CUEBOT_HOSTNAME": host_name_cuebot,
                 },
-                "restart": "always",
+                "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
                 "volumes": [
                     *_volume_relative_rqd,
                 ],
