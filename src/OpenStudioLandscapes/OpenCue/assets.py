@@ -387,12 +387,18 @@ def compose(
     container_prefix = "opencue"
 
     service_name_db = "db"
-    container_name_db = "--".join(
-        [f"{container_prefix}-{service_name_db}", env.get("LANDSCAPE", "default")]
+    container_name_db, _ = get_docker_compose_names(
+        context=context,
+        service_name=f"{container_prefix}-{service_name_db}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
     )
+    # container_name_db = "--".join(
+    #     [f"{container_prefix}-{service_name_db}", env.get("LANDSCAPE", "default")]
+    # )
     host_name_db = ".".join(
         [
-            env["HOSTNAME_DB"] or f"{container_prefix}-{service_name_db}",
+            f"{container_prefix}-{service_name_db}",
             # Todo
             #  - [ ] For some reason, if the db hostname is suffixed with
             #        the domain name, flyway can't reach it.
@@ -428,37 +434,55 @@ def compose(
         )
 
     service_name_flyway = "flyway"
-    container_name_flyway = "--".join(
-        [f"{container_prefix}-{service_name_flyway}", env.get("LANDSCAPE", "default")]
+    container_name_flyway, host_name_flyway = get_docker_compose_names(
+        context=context,
+        service_name=f"{container_prefix}-{service_name_flyway}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
     )
-    host_name_flyway = ".".join(
-        [
-            env["HOSTNAME_FLYWAY"] or service_name_flyway,
-            env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
-        ]
-    )
+    # container_name_flyway = "--".join(
+    #     [f"{container_prefix}-{service_name_flyway}", env.get("LANDSCAPE", "default")]
+    # )
+    # host_name_flyway = ".".join(
+    #     [
+    #         service_name_flyway,
+    #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+    #     ]
+    # )
 
     service_name_cuebot = "cuebot"
-    container_name_cuebot = "--".join(
-        [f"{container_prefix}-{service_name_cuebot}", env.get("LANDSCAPE", "default")]
+    container_name_cuebot, host_name_cuebot = get_docker_compose_names(
+        context=context,
+        service_name=f"{container_prefix}-{service_name_cuebot}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
     )
-    host_name_cuebot = ".".join(
-        [
-            env["HOSTNAME_CUEBOT"] or service_name_cuebot,
-            env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
-        ]
-    )
+    # container_name_cuebot = "--".join(
+    #     [f"{container_prefix}-{service_name_cuebot}", env.get("LANDSCAPE", "default")]
+    # )
+    # host_name_cuebot = ".".join(
+    #     [
+    #         service_name_cuebot,
+    #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+    #     ]
+    # )
 
     service_name_rqd = "rqd"
-    container_name_rqd = "--".join(
-        [f"{container_prefix}-{service_name_rqd}", env.get("LANDSCAPE", "default")]
+    container_name_rqd, host_name_rqd = get_docker_compose_names(
+        context=context,
+        service_name=f"{container_prefix}-{service_name_rqd}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=env.get("OPENSTUDIOLANDSCAPES__DOMAIN_LAN"),
     )
-    host_name_rqd = ".".join(
-        [
-            env["HOSTNAME_RQD"] or service_name_rqd,
-            env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
-        ]
-    )
+    # container_name_rqd = "--".join(
+    #     [f"{container_prefix}-{service_name_rqd}", env.get("LANDSCAPE", "default")]
+    # )
+    # host_name_rqd = ".".join(
+    #     [
+    #         service_name_rqd,
+    #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+    #     ]
+    # )
     volumes_rqd = [
         f"{prepare_volumes['logs']}:/tmp/rqd/logs:rw",
         f"{prepare_volumes['shots']}:/tmp/rqd/shots:rw",
