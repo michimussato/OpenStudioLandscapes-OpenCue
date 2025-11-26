@@ -167,16 +167,8 @@ The following variables are being declared in `OpenStudioLandscapes.OpenCue.cons
 | Variable                                   | Type   | Value                                                                      |
 | :----------------------------------------- | :----- | :------------------------------------------------------------------------- |
 | `DOCKER_USE_CACHE`                         | `bool` | `False`                                                                    |
-| `HOSTNAME`                                 | `str`  | `opencue-web`                                                              |
 | `OPENCUE_WEB_PORT_CONTAINER`               | `str`  | `3000`                                                                     |
 | `OPENCUE_WEB_PORT_HOST`                    | `str`  | `1234`                                                                     |
-| `HOSTNAME_WEB`                             | `str`  | `opencue-web`                                                              |
-| `HOSTNAME_DB`                              | `str`  | `opencue-db`                                                               |
-| `HOSTNAME_FLYWAY`                          | `str`  | `opencue-flyway`                                                           |
-| `HOSTNAME_CUEBOT`                          | `str`  | `opencue-cuebot`                                                           |
-| `HOSTNAME_RQD`                             | `str`  | `opencue-rqd`                                                              |
-| `TELEPORT_ENTRY_POINT_HOST`                | `str`  | `{{HOSTNAME}}`                                                             |
-| `TELEPORT_ENTRY_POINT_PORT`                | `str`  | `{{OPENCUE_WEB_PORT_HOST}}`                                                |
 | `OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE` | `bool` | `True`                                                                     |
 | `OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE`     | `str`  | `docker.io/opencue/cuebot`                                                 |
 | `OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST`        | `str`  | `8443`                                                                     |
