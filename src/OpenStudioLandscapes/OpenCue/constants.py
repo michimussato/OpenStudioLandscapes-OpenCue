@@ -48,16 +48,14 @@ FEATURE_CONFIGS = {
         "DOCKER_USE_CACHE": DOCKER_USE_CACHE,
         # Todo:
         #  - [ ] Which one is the main HOSTNAME?
-        "HOSTNAME": "opencue-web",  # Same as HOSTNAME_WEB. This is assumed for now (for teleport service). CueWeb is not implemented in this Feature yet.)
+        # "HOSTNAME": "opencue-web",  # Same as HOSTNAME_WEB. This is assumed for now (for teleport service). CueWeb is not implemented in this Feature yet.)
         "OPENCUE_WEB_PORT_CONTAINER": "3000",
         "OPENCUE_WEB_PORT_HOST": "1234",
-        "HOSTNAME_WEB": "opencue-web",
-        "HOSTNAME_DB": "opencue-db",
-        "HOSTNAME_FLYWAY": "opencue-flyway",
-        "HOSTNAME_CUEBOT": "opencue-cuebot",
-        "HOSTNAME_RQD": "opencue-rqd",
-        "TELEPORT_ENTRY_POINT_HOST": "{{HOSTNAME}}",  # Either a hardcoded str or a ref to a Variable (with double {{ }}!)
-        "TELEPORT_ENTRY_POINT_PORT": "{{OPENCUE_WEB_PORT_HOST}}",  # Either a hardcoded str or a ref to a Variable (with double {{ }}!)
+        # "HOSTNAME_WEB": "opencue-web",
+        # "HOSTNAME_DB": "opencue-db",
+        # "HOSTNAME_FLYWAY": "opencue-flyway",
+        # "HOSTNAME_CUEBOT": "opencue-cuebot",
+        # "HOSTNAME_RQD": "opencue-rqd",
         # cuebot
         "OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE": True,  # See https://github.com/AcademySoftwareFoundation/OpenCue/blob/55a90b3ee3f5470866f45b504a5a552b9d93ef5a/docker-compose.yml#L34
         "OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE": "docker.io/opencue/cuebot",
