@@ -3,7 +3,7 @@ import json
 import pathlib
 from collections import ChainMap
 from functools import reduce
-from typing import Any, Generator
+from typing import Any, Generator, Dict, List
 
 import git
 import yaml
@@ -86,9 +86,9 @@ docker_compose_graph = get_docker_compose_graph(
 feature_out = get_feature_out(
     ASSET_HEADER=ASSET_HEADER,
     feature_out_ins={
-        "env": dict,
-        "compose": dict,
-        "group_in": dict,
+        "env": Dict,
+        "compose": Dict,
+        "group_in": Dict,
     },
 )
 
@@ -103,7 +103,7 @@ docker_config_json = get_docker_config_json(
 )
 def repository_opencue(
     context: AssetExecutionContext,
-) -> Generator[Output[dict[str, str | None]] | AssetMaterialization, None, None]:
+) -> Generator[Output[Dict[str, str | None]] | AssetMaterialization, None, None]:
     repository_dict = {
         "branch": "master",
         "repository_dir": "OpenCue",
@@ -134,9 +134,9 @@ def repository_opencue(
 )
 def env_override(
     context: AssetExecutionContext,
-    env: dict,  # pylint: disable=redefined-outer-name
+    env: Dict,  # pylint: disable=redefined-outer-name
     DOCKER_COMPOSE_OVERRIDE: pathlib.Path,  # pylint: disable=redefined-outer-name
-) -> Generator[Output[dict[str, str | None]] | AssetMaterialization, None, None]:
+) -> Generator[Output[Dict[str, str | None]] | AssetMaterialization, None, None]:
     """Instead of changing the OpenStudioLandscapes.engine.base.ops.op_env operator,
     I thought it would be easier to just feed in the additional DOCKER_COMPOSE_OVERRIDE
     path into the env and go from there."""
@@ -175,9 +175,9 @@ def env_override(
 )
 def clone_repository(
     context: AssetExecutionContext,
-    env: dict,
-    repository_opencue: dict[str, str | None],
-) -> Generator[Output[dict[str, str]] | AssetMaterialization, None, None]:
+    env: Dict,
+    repository_opencue: Dict[str, str | None],
+) -> Generator[Output[Dict[str, str]] | AssetMaterialization, None, None]:
 
     repo_dir = pathlib.Path(
         env["DOT_LANDSCAPES"],
@@ -225,9 +225,9 @@ def clone_repository(
 )
 def prepare_volumes(
     context: AssetExecutionContext,
-    env: dict,  # pylint: disable=redefined-outer-name
-    # script_prepare_db: dict[str, str],  # pylint: disable=redefined-outer-name
-) -> Generator[Output[dict] | AssetMaterialization, None, None]:
+    env: Dict,  # pylint: disable=redefined-outer-name
+    # script_prepare_db: Dict[str, str],  # pylint: disable=redefined-outer-name
+) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
     """https://www.opencue.io/docs/quick-starts/quick-start-linux/#deploying-the-opencue-sandbox-environment"""
 
     local_volumes_root = pathlib.Path(
@@ -267,9 +267,9 @@ def prepare_volumes(
 )
 def compose_networks(
     context: AssetExecutionContext,
-    env: dict,  # pylint: disable=redefined-outer-name
+    env: Dict,  # pylint: disable=redefined-outer-name
 ) -> Generator[
-    Output[dict[str, dict[str, dict[str, str]]]] | AssetMaterialization, None, None
+    Output[Dict[str, Dict[str, Dict[str, str]]]] | AssetMaterialization, None, None
 ]:
 
     compose_network_mode = DockerComposePolicies.NETWORK_MODE.BRIDGE
@@ -318,14 +318,14 @@ def compose_networks(
 )
 def compose(
     context: AssetExecutionContext,
-    env: dict,  # pylint: disable=redefined-outer-name
-    compose_networks: dict,  # pylint: disable=redefined-outer-name
-    clone_repository: dict,  # pylint: disable=redefined-outer-name
+    env: Dict,  # pylint: disable=redefined-outer-name
+    compose_networks: Dict,  # pylint: disable=redefined-outer-name
+    clone_repository: Dict,  # pylint: disable=redefined-outer-name
     # Todo:
     #  - [ ] remove unused?
-    prepare_volumes: dict,  # pylint: disable=redefined-outer-name
+    prepare_volumes: Dict,  # pylint: disable=redefined-outer-name
 ) -> Generator[
-    Output[dict[str, list[dict[str, list[str]]]]] | AssetMaterialization, None, None
+    Output[Dict[str, List[Dict[str, List[str]]]]] | AssetMaterialization, None, None
 ]:
     """
     Source: https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml
@@ -690,7 +690,7 @@ def compose(
 )
 def cmd_extend(
     context: AssetExecutionContext,
-) -> Generator[Output[list[Any]] | AssetMaterialization | Any, Any, None]:
+) -> Generator[Output[List[Any]] | AssetMaterialization | Any, Any, None]:
 
     ret = []
 
@@ -710,7 +710,7 @@ def cmd_extend(
 )
 def cmd_append(
     context: AssetExecutionContext,
-) -> Generator[Output[dict[str, list[Any]]] | AssetMaterialization | Any, Any, None]:
+) -> Generator[Output[Dict[str, List[Any]]] | AssetMaterialization | Any, Any, None]:
 
     ret = {"cmd": [], "exclude_from_quote": []}
 
