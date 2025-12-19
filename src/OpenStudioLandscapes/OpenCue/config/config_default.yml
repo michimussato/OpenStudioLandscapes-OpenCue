@@ -1,0 +1,35 @@
+# Base Information
+group_name: "OpenStudioLandscapes_OpenCue"
+key_prefixes:
+  - "OpenStudioLandscapes_OpenCue"
+
+#compose_scope: "default"
+
+#enabled: true
+
+#repository_url: "https://github.com/AcademySoftwareFoundation/OpenCue.git",
+#repository_branch: "master"
+#repository_subdir: "OpenCue"
+#docker_compose_yml: "docker-compose.yml"
+#docker_compose_override: "{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/docker_compose/docker-compose.override.yml"
+#OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: true
+#OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: "docker.io/opencue/cuebot"
+
+# CueBot
+#OPENCUE_WEB_PORT_CONTAINER: 3000
+#OPENCUE_WEB_PORT_HOST: 1234
+#OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST: 8443
+#OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER: 8443
+
+# RQD
+#OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST: 8444
+#OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER: 8444
+
+# DB
+#OPENCUE_DB_INSTALL_DESTINATION: "{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/data/opencue_db/postgresql"
+#OPENCUE_DB_PORT_HOST: 5342
+#OPENCUE_DB_PORT_CONTAINER: 5432
+#OPENCUE_DB_PGHOST: "opencue-db"
+#OPENCUE_DB_PGDATABASE: "cuebot"
+#OPENCUE_DB_PGPASSWORD: "cuebot_password"
+#OPENCUE_DB_PGUSER: "cuebot"
