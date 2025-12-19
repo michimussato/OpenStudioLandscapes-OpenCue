@@ -4,7 +4,8 @@ import pathlib
 from dagster import get_dagster_logger
 from pydantic import (
     Field,
-    PositiveInt, HttpUrl,
+    HttpUrl,
+    PositiveInt,
 )
 
 LOGGER = get_dagster_logger(__name__)
@@ -26,7 +27,6 @@ class Config(FeatureBaseModel):
 
     definitions: str = "OpenStudioLandscapes.OpenCue.definitions"
 
-
     repository_url: HttpUrl = Field(
         default="https://github.com/AcademySoftwareFoundation/OpenCue.git",
     )
@@ -34,7 +34,7 @@ class Config(FeatureBaseModel):
         default=Branches.master,
         description="The branch of the OpenCue repository.",
         frozen=True,
-        examples=[i.name for i in Branches]
+        examples=[i.name for i in Branches],
     )
     repository_subdir: str = Field(
         default="OpenCue",
@@ -96,7 +96,9 @@ class Config(FeatureBaseModel):
 
     OPENCUE_DB_INSTALL_DESTINATION: pathlib.Path = Field(
         # description="The host side LikeC4 datastore destination.",
-        default=pathlib.Path("{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/data/opencue_db/postgresql"),
+        default=pathlib.Path(
+            "{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/data/opencue_db/postgresql"
+        ),
     )
 
     OPENCUE_DB_PORT_HOST: PositiveInt = Field(

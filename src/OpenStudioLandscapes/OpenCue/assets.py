@@ -3,7 +3,7 @@ import enum
 import pathlib
 from collections import ChainMap
 from functools import reduce
-from typing import Generator, Dict, List, Union
+from typing import Dict, Generator, List, Union
 
 import git
 import yaml
@@ -12,23 +12,29 @@ from dagster import (
     AssetIn,
     AssetKey,
     AssetMaterialization,
+    AssetsDefinition,
     MetadataValue,
     Output,
-    asset, AssetsDefinition,
+    asset,
 )
-
-from OpenStudioLandscapes.engine.common_assets.compose import get_compose
-from OpenStudioLandscapes.engine.config.models import ConfigEngine
 from docker_compose_graph.utils import *
 from docker_compose_graph.yaml_tags.overrides import *
 from git.exc import GitCommandError
-
+from OpenStudioLandscapes.engine.common_assets.compose import get_compose
+from OpenStudioLandscapes.engine.common_assets.compose_scope import (
+    get_compose_scope_group__cmd,
+)
 from OpenStudioLandscapes.engine.common_assets.docker_compose_graph import (
     get_docker_compose_graph,
 )
+from OpenStudioLandscapes.engine.common_assets.feature import get_feature__CONFIG
 from OpenStudioLandscapes.engine.common_assets.feature_out import get_feature_out_v2
-from OpenStudioLandscapes.engine.common_assets.group_in import get_feature_in, get_feature_in_parent
+from OpenStudioLandscapes.engine.common_assets.group_in import (
+    get_feature_in,
+    get_feature_in_parent,
+)
 from OpenStudioLandscapes.engine.common_assets.group_out import get_group_out
+from OpenStudioLandscapes.engine.config.models import ConfigEngine
 from OpenStudioLandscapes.engine.constants import *
 from OpenStudioLandscapes.engine.enums import *
 from OpenStudioLandscapes.engine.utils import *
@@ -37,14 +43,6 @@ from OpenStudioLandscapes.engine.utils.docker.compose_dicts import *
 from OpenStudioLandscapes.OpenCue import dist
 from OpenStudioLandscapes.OpenCue.config.models import CONFIG_STR, Config
 from OpenStudioLandscapes.OpenCue.constants import *
-
-from OpenStudioLandscapes.engine.common_assets.compose_scope import (
-get_compose_scope_group__cmd,
-)
-
-from OpenStudioLandscapes.engine.common_assets.feature import (
-get_feature__CONFIG
-)
 
 # https://github.com/yaml/pyyaml/issues/722#issuecomment-1969292770
 yaml.SafeDumper.add_multi_representer(
@@ -313,7 +311,9 @@ def compose(
     elif "network_mode" in compose_networks:
         network_dict = {"network_mode": compose_networks["network_mode"]}
 
-    docker_compose_git_repository = pathlib.Path(clone_repository.joinpath("docker-compose.yml"))
+    docker_compose_git_repository = pathlib.Path(
+        clone_repository.joinpath("docker-compose.yml")
+    )
 
     opencue_db_dir_host = CONFIG.OPENCUE_DB_INSTALL_DESTINATION_expanded
 
@@ -529,7 +529,9 @@ def compose(
     }
 
     if CONFIG.OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
-        docker_dict_override["services"][service_name_cuebot]["image"] = CONFIG.OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE
+        docker_dict_override["services"][service_name_cuebot][
+            "image"
+        ] = CONFIG.OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE
 
     if "networks" in compose_networks:
         network_dict = copy.deepcopy(compose_networks)
