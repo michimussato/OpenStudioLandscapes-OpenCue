@@ -410,6 +410,16 @@ def build_docker_image_cueweb(
         ## Security Options
         
         [https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#configuration-options]()
+        
+        ## Known Issues
+        
+        ### `ENV JWT_SECRET=default-secret-key`
+        
+        ```shell
+        SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "JWT_SECRET") (line 61)
+        ```
+        
+        https://docs.docker.com/reference/build-checks/secrets-used-in-arg-or-env/
         """
     )
 )
