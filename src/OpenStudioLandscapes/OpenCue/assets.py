@@ -526,6 +526,14 @@ def compose_override(
         },
     }
 
+    # if not CONFIG.deploy_rqd_on_cuebot_host:
+    #
+    #     docker_dict_override["services"][service_name_rqd] = {
+    #         "profiles": [
+    #             "donotstart"
+    #         ]
+    #     }
+
     if CONFIG.OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
         docker_dict_override["services"][service_name_cuebot][
             "image"
@@ -700,7 +708,7 @@ def compose_rest_gateway(
 
     container_prefix = "opencue"
 
-    service_name_rqd = "rqd"
+    # service_name_rqd = "rqd"
     # container_name_rqd, host_name_rqd = get_docker_compose_names(
     #     context=context,
     #     service_name=f"{container_prefix}-{service_name_rqd}",
@@ -760,7 +768,7 @@ def compose_rest_gateway(
                     service_name_db: {
                         "condition": "service_started",
                     },
-                    service_name_rqd: {
+                    service_name_cuebot: {
                         "condition": "service_started",
                     },
                 },

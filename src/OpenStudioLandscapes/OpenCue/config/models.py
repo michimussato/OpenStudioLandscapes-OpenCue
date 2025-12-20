@@ -60,6 +60,21 @@ class Config(FeatureBaseModel):
         default="docker.io/opencue/cuebot",
     )
 
+    # this doesn't seem to work with an override:
+    # removing a service from an existing docker-compose
+    # file. Maybe we read the original and generate
+    # a new one based on those settings. This way,
+    # we could remove a service arbitrarily.
+    #
+    # Looks like it IS possible:
+    # - https://stackoverflow.com/a/78609241/2207196
+    # - https://docs.docker.com/reference/compose-file/merge/#reset-value
+    deploy_rqd_on_cuebot_host: bool = Field(
+        # Optional but set to True for
+        # most basic AND functional use?
+        default=False,
+    )
+
     # OPENCUE_SCHEDULER_DOCKER_IMAGE: str = Field(
     #     default="docker.io/opencue/scheduler",
     # )

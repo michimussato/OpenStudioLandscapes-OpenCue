@@ -3,6 +3,60 @@ import textwrap
 import snakemd
 
 
+"""
+[CueGUI](https://docs.opencue.io/docs/getting-started/installing-cuegui/)
+
+```
+# https://docs.opencue.io/docs/getting-started/installing-cuegui/#option-1-installing-from-pypi
+python3.11 -m .venv
+source .venv/bin/activate
+pip install --upgrade pip
+
+pip install opencue-cuegui
+# cuebot:CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST
+# localhost:8443
+# CUEBOT_HOSTS=localhost:8443 cuegui
+CUEBOT_HOSTS=$CUEBOT_HOSTNAME_OR_IP cuegui
+```
+
+[CueSubmit](https://docs.opencue.io/docs/getting-started/installing-cuesubmit/)
+
+```
+# https://docs.opencue.io/docs/getting-started/installing-cuegui/#option-1-installing-from-pypi
+python3.11 -m .venv
+source .venv/bin/activate
+pip install --upgrade pip
+
+pip install opencue-cuesubmit
+# cuebot:CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST
+# localhost:8443
+# CUEBOT_HOSTS=localhost:8443 cuesubmit
+CUEBOT_HOSTS=$CUEBOT_HOSTNAME_OR_IP cuesubmit
+```
+
+[RQD](https://docs.opencue.io/docs/getting-started/deploying-rqd/)
+- [Docker](https://docs.opencue.io/docs/getting-started/deploying-rqd/#option-1-downloading-and-running-rqd-from-dockerhub)
+- [Pypi](https://docs.opencue.io/docs/getting-started/deploying-rqd/#option-3-installing-from-pypi)
+
+```
+# https://docs.opencue.io/docs/getting-started/installing-cuegui/#option-1-installing-from-pypi
+python3.11 -m .venv
+source .venv/bin/activate
+pip install --upgrade pip
+
+pip install opencue-rqd
+# cuebot:CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST
+# localhost:8443
+# CUEBOT_HOSTNAME=localhost rqd
+CUEBOT_HOSTNAME=CUEBOT_HOSTNAME rqd
+```
+"""
+
+
+# Todo:
+#  - [ ] RQD is actually the worker. Break it out to separate compose scope.
+
+
 def readme_feature(
     doc: snakemd.Document,
     main_header: str,
