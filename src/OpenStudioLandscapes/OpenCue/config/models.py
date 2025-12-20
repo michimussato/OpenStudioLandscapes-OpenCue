@@ -95,10 +95,13 @@ class Config(FeatureBaseModel):
     )
 
     OPENCUE_CUEWEB_JWT_SECRET: str = Field(
-        # Create secure JWT
+        # Create secure JWT_SECRET
         # https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#step-2-deploy-rest-gateway-separately
         # export JWT_SECRET=$(openssl rand -base64 32)
-        default=os.environ.get("OPENSTUDIOLANDSCAPES_OPENCUE__OPENCUE_CUEWEB_JWT_SECRET", "your-jwt-secret"),
+        # Todo
+        #  - [ ] set this dynamically after issue is fixed:
+        #        - https://github.com/AcademySoftwareFoundation/OpenCue/issues/2127
+        default="default-secret-key",
     )
 
     # REST Gateway
