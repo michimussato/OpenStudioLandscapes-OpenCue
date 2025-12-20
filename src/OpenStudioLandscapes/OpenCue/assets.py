@@ -5,8 +5,8 @@ import pathlib
 import shutil
 import subprocess
 import textwrap
-from collections import ChainMap
-from functools import reduce
+# from collections import ChainMap
+# from functools import reduce
 from typing import Dict, Generator, List, Union
 
 import git
@@ -22,9 +22,9 @@ from dagster import (
     asset,
 )
 
-from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
-from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
-from docker_compose_graph.utils import *
+# from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
+# from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
+# from docker_compose_graph.utils import *
 from docker_compose_graph.yaml_tags.overrides import *
 from git.exc import GitCommandError
 from OpenStudioLandscapes.engine.common_assets.compose import get_compose
@@ -526,13 +526,10 @@ def compose_override(
         },
     }
 
-    # if not CONFIG.deploy_rqd_on_cuebot_host:
-    #
-    #     docker_dict_override["services"][service_name_rqd] = {
-    #         "profiles": [
-    #             "donotstart"
-    #         ]
-    #     }
+    if not CONFIG.deploy_rqd_on_cuebot_host:
+        context.log.info(docker_dict_override["services"])
+        docker_dict_override["services"][service_name_rqd] = ResetNull(docker_dict_override["services"][service_name_rqd])
+        context.log.info(docker_dict_override["services"])
 
     if CONFIG.OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
         docker_dict_override["services"][service_name_cuebot][
