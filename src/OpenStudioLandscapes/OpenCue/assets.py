@@ -1,6 +1,7 @@
 import copy
 import enum
 import pathlib
+import textwrap
 from collections import ChainMap
 from functools import reduce
 from typing import Dict, Generator, List, Union
@@ -17,6 +18,9 @@ from dagster import (
     Output,
     asset,
 )
+
+from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
+from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
 from docker_compose_graph.utils import *
 from docker_compose_graph.yaml_tags.overrides import *
 from git.exc import GitCommandError
@@ -34,7 +38,7 @@ from OpenStudioLandscapes.engine.common_assets.group_in import (
     get_feature_in_parent,
 )
 from OpenStudioLandscapes.engine.common_assets.group_out import get_group_out
-from OpenStudioLandscapes.engine.config.models import ConfigEngine
+from OpenStudioLandscapes.engine.config.models import ConfigEngine, DockerConfigModel
 from OpenStudioLandscapes.engine.constants import *
 from OpenStudioLandscapes.engine.enums import *
 from OpenStudioLandscapes.engine.utils import *
@@ -188,6 +192,299 @@ def prepare_volumes(
     )
 
 
+# @asset(
+#     **ASSET_HEADER,
+#     ins={
+#         "CONFIG": AssetIn(
+#             AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+#         ),
+#     },
+#     description=textwrap.dedent(
+#         """
+#         [Official Resource](https://docs.opencue.io/docs/getting-started/deploying-scheduler/#2-create-a-configuration-file)
+#
+#         [Configuration Reference](https://docs.opencue.io/docs/getting-started/deploying-scheduler/#configuration-reference)
+#         """
+#     )
+# )
+# def scheduler_yaml(
+#     context: AssetExecutionContext,
+#     CONFIG: Config,  # pylint: disable=redefined-outer-name
+# ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
+#
+#     env: dict = CONFIG.env
+#
+#     # https://docs.opencue.io/docs/getting-started/deploying-scheduler/#2-create-a-configuration-file
+#     scheduler: Dict = {
+#         "logging": {
+#             "level": "info,sqlx=warn",
+#         },
+#         "database": {
+#             "pool_size": 20,
+#             "db_host": CONFIG.OPENCUE_DB_PGHOST,
+#             "db_name": CONFIG.OPENCUE_DB_PGDATABASE,
+#             "db_user": CONFIG.OPENCUE_DB_PGUSER,
+#             "db_pass": CONFIG.OPENCUE_DB_PGPASSWORD,
+#             "db_port": CONFIG.OPENCUE_DB_PORT_CONTAINER,
+#         },
+#         "rqd": {
+#             "grpc_port": CONFIG.OPENCUE_SCHEDULER_GRPC_PORT_CONTAINER,
+#             "dry_run_mode": False,  # Set to true for testing without actual dispatch
+#         },
+#         "queue": {
+#             "monitor_interval": "5s",
+#             "worker_threads": 4,
+#             "dispatch_frames_per_layer_limit": 20,
+#             "manual_tags_chunk_size": 100,
+#             "hostname_tags_chunk_size": 300,
+#         },
+#         "scheduler": {
+#             "alloc_tags": [
+#                 {
+#                     "show": "myshow",
+#                     "tag": "general",
+#                 },
+#                 {
+#                     "show": "anothershow",
+#                     "tag": "priority",
+#                 },
+#             ],
+#             "manual_tags": [
+#                 "urgent",
+#                 "desktop",
+#             ],
+#         },
+#     }
+#
+#     scheduler_yaml_file = pathlib.Path(
+#         env["DOT_LANDSCAPES"],
+#         env.get("LANDSCAPE", "default"),
+#         f"{dist.name}",
+#         "__".join(context.asset_key.path),
+#         "scheduler",
+#         "scheduler.yaml",
+#     )
+#
+#     scheduler_yaml_file.parent.mkdir(parents=True, exist_ok=True)
+#
+#     scheduler_yaml_str = yaml.safe_dump(scheduler)
+#
+#     scheduler_yaml_file.write_text(scheduler_yaml_str)
+#
+#     yield Output(scheduler_yaml_file)
+#
+#     yield AssetMaterialization(
+#         asset_key=context.asset_key,
+#         metadata={
+#             "__".join(context.asset_key.path): MetadataValue.path(scheduler_yaml_file),
+#             "scheduler_yaml_str": MetadataValue.md(f"```yaml\n{scheduler_yaml_str}\n```"),
+#         },
+#     )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
+        "feature_in": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
+        ),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+        ),
+        "clone_repository": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        ),
+    },
+    retry_policy=build_docker_image_retry_policy,
+    description=textwrap.dedent(
+        """
+        # Deploying CueWeb
+        
+        [https://docs.opencue.io/docs/getting-started/deploying-cueweb/#deploying-cueweb]()
+        
+        ## Authentication Setup
+        
+        [https://docs.opencue.io/docs/getting-started/deploying-cueweb/#authentication-setup]()
+        """
+    )
+)
+def build_docker_image_cueweb(
+    context: AssetExecutionContext,
+    feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
+    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
+    """ """
+
+    env: Dict = CONFIG.env
+
+    docker_config_json: pathlib.Path = (
+        feature_in.openstudiolandscapes_base.docker_config_json
+    )
+
+    config_engine: ConfigEngine = CONFIG.config_engine
+
+    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
+
+    docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
+
+    docker_file: pathlib.Path = clone_repository.joinpath(
+        "cueweb",
+        "Dockerfile",
+    )
+
+    #################################################
+
+    (
+        image_name,
+        image_prefixes,
+        tags,
+        build_base_parent_image_prefix,
+        build_base_parent_image_name,
+        build_base_parent_image_tags,
+    ) = get_image_metadata(
+        context=context,
+        docker_image=docker_image,
+        docker_config=docker_config,
+        env=env,
+    )
+
+    #################################################
+
+    with open(docker_file, "r") as fr:
+        docker_file_content = fr.read()
+
+    #################################################
+
+    image_data, logs = create_image(
+        context=context,
+        image_name=image_name,
+        image_prefixes=image_prefixes,
+        tags=tags,
+        docker_image=docker_image,
+        docker_config=docker_config,
+        docker_config_json=docker_config_json,
+        docker_file=docker_file,
+    )
+
+    yield Output(image_data)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(image_data),
+            "docker_file": MetadataValue.md(f"```yaml\n{docker_file_content}\n```"),
+            "logs": MetadataValue.json(logs),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
+        "feature_in": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
+        ),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+        ),
+        "clone_repository": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        ),
+    },
+    retry_policy=build_docker_image_retry_policy,
+    description=textwrap.dedent(
+        """
+        # Deploying OpenCue REST Gateway
+        
+        [https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#deploying-opencue-rest-gateway]()
+        
+        ## Quick Start with Docker
+        
+        [https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#quick-start-with-docker-recommended]()
+        
+        ## Docker Compose Configuration
+        
+        [https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#docker-compose-configuration-separate-file]()
+        
+        ## Security Options
+        
+        [https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#configuration-options]()
+        """
+    )
+)
+def build_docker_image_rest_gateway(
+    context: AssetExecutionContext,
+    feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
+    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
+    """ """
+
+    env: Dict = CONFIG.env
+
+    docker_config_json: pathlib.Path = (
+        feature_in.openstudiolandscapes_base.docker_config_json
+    )
+
+    config_engine: ConfigEngine = CONFIG.config_engine
+
+    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
+
+    docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
+
+    docker_file: pathlib.Path = clone_repository.joinpath(
+        "rest_gateway",
+        "Dockerfile",
+    )
+
+    #################################################
+
+    (
+        image_name,
+        image_prefixes,
+        tags,
+        build_base_parent_image_prefix,
+        build_base_parent_image_name,
+        build_base_parent_image_tags,
+    ) = get_image_metadata(
+        context=context,
+        docker_image=docker_image,
+        docker_config=docker_config,
+        env=env,
+    )
+
+    #################################################
+
+    with open(docker_file, "r") as fr:
+        docker_file_content = fr.read()
+
+    #################################################
+
+    image_data, logs = create_image(
+        context=context,
+        image_name=image_name,
+        image_prefixes=image_prefixes,
+        tags=tags,
+        docker_image=docker_image,
+        docker_config=docker_config,
+        docker_config_json=docker_config_json,
+        docker_file=docker_file,
+        build_context=clone_repository,
+    )
+
+    yield Output(image_data)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(image_data),
+            "docker_file": MetadataValue.md(f"```yaml\n{docker_file_content}\n```"),
+            "logs": MetadataValue.json(logs),
+        },
+    )
+
+
 @asset(
     **ASSET_HEADER,
     ins={
@@ -244,6 +541,15 @@ def compose_networks(
         "prepare_volumes": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "prepare_volumes"]),
         ),
+        "build_docker_image_cueweb": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image_cueweb"]),
+        ),
+        "build_docker_image_rest_gateway": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image_rest_gateway"]),
+        ),
+        # "scheduler_yaml": AssetIn(
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "scheduler_yaml"]),
+        # ),
     },
 )
 def compose(
@@ -251,9 +557,10 @@ def compose(
     CONFIG: Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
-    # Todo:
-    #  - [ ] remove unused?
     prepare_volumes: Dict,  # pylint: disable=redefined-outer-name
+    build_docker_image_cueweb: Dict,  # pylint: disable=redefined-outer-name
+    build_docker_image_rest_gateway: Dict,  # pylint: disable=redefined-outer-name
+    # scheduler_yaml: pathlib.Path,  # pylint: disable=redefined-outer-name
 ) -> Generator[
     Output[Dict[str, List[Dict[str, List[str]]]]] | AssetMaterialization, None, None
 ]:
@@ -283,6 +590,9 @@ def compose(
     ports_dict_rqd = {}
     ports_dict_cuebot = {}
     ports_dict_db = {}
+    # ports_dict_scheduler = {}
+    ports_dict_cueweb = {}
+    ports_dict_rest_gateway = {}
 
     if "networks" in compose_networks:
         network_dict = {"networks": list(compose_networks.get("networks", {}).keys())}
@@ -305,6 +615,27 @@ def compose(
             "ports": OverrideArray(
                 [
                     f"{CONFIG.OPENCUE_DB_PORT_HOST}:{CONFIG.OPENCUE_DB_PORT_CONTAINER}",
+                ]
+            ),
+        }
+        # ports_dict_scheduler = {
+        #     "ports": OverrideArray(
+        #         [
+        #             f"{CONFIG.OPENCUE_SCHEDULER_PORT_HOST}:{CONFIG.OPENCUE_SCHEDULER_PORT_CONTAINER}",
+        #         ]
+        #     ),
+        # }
+        ports_dict_cueweb = {
+            "ports": OverrideArray(
+                [
+                    f"{CONFIG.OPENCUE_CUEWEB_PORT_HOST}:{CONFIG.OPENCUE_CUEWEB_PORT_CONTAINER}",
+                ]
+            ),
+        }
+        ports_dict_rest_gateway = {
+            "ports": OverrideArray(
+                [
+                    f"{CONFIG.OPENCUE_REST_GATEWAY_PORT_HOST}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
                 ]
             ),
         }
@@ -424,6 +755,66 @@ def compose(
         f"{prepare_volumes['shots']}:/tmp/rqd/shots:rw",
     ]
 
+    # service_name_scheduler = "scheduler"
+    # container_name_scheduler, host_name_scheduler = get_docker_compose_names(
+    #     context=context,
+    #     service_name=f"{container_prefix}-{service_name_scheduler}",
+    #     landscape_id=env.get("LANDSCAPE", "default"),
+    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    # )
+    # # container_name_rqd = "--".join(
+    # #     [f"{container_prefix}-{service_name_rqd}", env.get("LANDSCAPE", "default")]
+    # # )
+    # # host_name_rqd = ".".join(
+    # #     [
+    # #         service_name_rqd,
+    # #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+    # #     ]
+    # # )
+    # volumes_scheduler = [
+    #     f"{scheduler_yaml.as_posix()}:/etc/cue-scheduler/scheduler.yaml:ro",
+    # ]
+
+    service_name_cueweb = "cueweb"
+    container_name_cueweb, host_name_cueweb = get_docker_compose_names(
+        context=context,
+        service_name=f"{container_prefix}-{service_name_cueweb}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+    # container_name_rqd = "--".join(
+    #     [f"{container_prefix}-{service_name_rqd}", env.get("LANDSCAPE", "default")]
+    # )
+    # host_name_rqd = ".".join(
+    #     [
+    #         service_name_rqd,
+    #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+    #     ]
+    # )
+    volumes_cueweb = [
+        # f"{scheduler_yaml.as_posix()}:/etc/cue-scheduler/scheduler.yaml:ro",
+    ]
+
+    service_name_rest_gateway = "opencue-rest-gateway"
+    container_name_rest_gateway, host_name_rest_gateway = get_docker_compose_names(
+        context=context,
+        service_name=f"{container_prefix}-{service_name_rest_gateway}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+    # container_name_rqd = "--".join(
+    #     [f"{container_prefix}-{service_name_rqd}", env.get("LANDSCAPE", "default")]
+    # )
+    # host_name_rqd = ".".join(
+    #     [
+    #         service_name_rqd,
+    #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+    #     ]
+    # )
+    volumes_rest_gateway = [
+        # f"{scheduler_yaml.as_posix()}:/etc/cue-scheduler/scheduler.yaml:ro",
+    ]
+
     _volume_relative_rqd = []
 
     for v in volumes_rqd:
@@ -438,6 +829,57 @@ def compose(
         )
 
         _volume_relative_rqd.append(
+            f"{volume_dir_host_rel_path.as_posix()}:{container}",
+        )
+
+    # _volume_relative_scheduler = []
+    #
+    # for v in volumes_scheduler:
+    #
+    #     host, container = v.split(":", maxsplit=1)
+    #
+    #     volume_dir_host_rel_path = get_relative_path_via_common_root(
+    #         context=context,
+    #         path_src=docker_compose_git_repository,  # Probably because the root docker-compose is the one in the Git repo
+    #         path_dst=pathlib.Path(host),
+    #         path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+    #     )
+    #
+    #     _volume_relative_scheduler.append(
+    #         f"{volume_dir_host_rel_path.as_posix()}:{container}",
+    #     )
+
+    _volume_relative_cueweb = []
+
+    for v in volumes_cueweb:
+
+        host, container = v.split(":", maxsplit=1)
+
+        volume_dir_host_rel_path = get_relative_path_via_common_root(
+            context=context,
+            path_src=docker_compose_git_repository,  # Probably because the root docker-compose is the one in the Git repo
+            path_dst=pathlib.Path(host),
+            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+        )
+
+        _volume_relative_cueweb.append(
+            f"{volume_dir_host_rel_path.as_posix()}:{container}",
+        )
+
+    _volume_relative_rest_gateway = []
+
+    for v in volumes_rest_gateway:
+
+        host, container = v.split(":", maxsplit=1)
+
+        volume_dir_host_rel_path = get_relative_path_via_common_root(
+            context=context,
+            path_src=docker_compose_git_repository,  # Probably because the root docker-compose is the one in the Git repo
+            path_dst=pathlib.Path(host),
+            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+        )
+
+        _volume_relative_rest_gateway.append(
             f"{volume_dir_host_rel_path.as_posix()}:{container}",
         )
 
@@ -525,6 +967,99 @@ def compose(
                 **copy.deepcopy(network_dict),
                 **copy.deepcopy(ports_dict_rqd),
             },
+            # service_name_scheduler: {
+            #     "container_name": container_name_scheduler,
+            #     "hostname": host_name_scheduler,
+            #     "domainname": config_engine.openstudiolandscapes__domain_lan,
+            #     # "environment": {
+            #     #     "PYTHONUNBUFFERED": "1",
+            #     #     # Todo:
+            #     #     #  - [ ] use fqdn instead of just hostname?
+            #     #     "CUEBOT_HOSTNAME": host_name_cuebot,
+            #     # },
+            #     "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
+            #     "volumes": [
+            #         *_volume_relative_scheduler,
+            #     ],
+            #     **copy.deepcopy(network_dict),
+            #     **copy.deepcopy(ports_dict_scheduler),
+            # },
+            service_name_cueweb: {
+                "container_name": container_name_cueweb,
+                "hostname": host_name_cueweb,
+                "image": "%s%s:%s"
+                % (
+                    build_docker_image_cueweb["image_prefixes"],
+                    build_docker_image_cueweb["image_name"],
+                    build_docker_image_cueweb["image_tags"][0],
+                ),
+                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "environment": {
+                    # https://docs.opencue.io/docs/getting-started/deploying-cueweb/#environment-configuration
+                    "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{host_name_rest_gateway}.{config_engine.openstudiolandscapes__domain_lan}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
+                    "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}.{config_engine.openstudiolandscapes__domain_lan}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
+                    "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
+                    "NEXT_TELEMETRY_DISABLED": 1,
+                },
+                "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
+                "volumes": [
+                    *_volume_relative_cueweb,
+                ],
+                "depends_on": {
+                    service_name_rest_gateway: {
+                        "condition": "service_started",
+                    },
+                },
+                "healthcheck": {
+                    "test": [
+                        "CMD",
+                        "curl",
+                        "-f",
+                        f"http://localhost:{CONFIG.OPENCUE_CUEWEB_PORT_CONTAINER}/api/health"
+                    ],
+                    "interval": "30s",
+                    "timeout": "10s",
+                    "retries": "3",
+                },
+                **copy.deepcopy(network_dict),
+                **copy.deepcopy(ports_dict_cueweb),
+            },
+            service_name_rest_gateway: {
+                "container_name": container_name_rest_gateway,
+                "hostname": host_name_rest_gateway,
+                "image": "%s%s:%s"
+                % (
+                    build_docker_image_rest_gateway["image_prefixes"],
+                    build_docker_image_rest_gateway["image_name"],
+                    build_docker_image_rest_gateway["image_tags"][0],
+                ),
+                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "environment": {
+                    # https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#configuration-options
+                    "CUEBOT_ENDPOINT": f"{host_name_cuebot}:{CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER}",
+                    "REST_PORT": CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER,
+                    "JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
+                    "LOG_LEVEL": "debug",
+                    "CORS_ALLOWED_ORIGINS": "*",
+                },
+                "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
+                "volumes": [
+                    *_volume_relative_cueweb,
+                ],
+                "healthcheck": {
+                    "test": [
+                        "CMD",
+                        "curl",
+                        "-f",
+                        f"http://localhost:{CONFIG.OPENCUE_CUEWEB_PORT_CONTAINER}/api/health"
+                    ],
+                    "interval": "30s",
+                    "timeout": "10s",
+                    "retries": "3",
+                },
+                **copy.deepcopy(network_dict),
+                **copy.deepcopy(ports_dict_rest_gateway),
+            },
         },
     }
 
@@ -532,6 +1067,9 @@ def compose(
         docker_dict_override["services"][service_name_cuebot][
             "image"
         ] = CONFIG.OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE
+        # docker_dict_override["services"][service_name_scheduler][
+        #     "image"
+        # ] = CONFIG.OPENCUE_SCHEDULER_DOCKER_IMAGE
 
     if "networks" in compose_networks:
         network_dict = copy.deepcopy(compose_networks)

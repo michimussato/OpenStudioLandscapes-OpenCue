@@ -59,15 +59,68 @@ class Config(FeatureBaseModel):
         default="docker.io/opencue/cuebot",
     )
 
-    # cuebot
+    # OPENCUE_SCHEDULER_DOCKER_IMAGE: str = Field(
+    #     default="docker.io/opencue/scheduler",
+    # )
+    #
+    # # scheduler
+    # # https://docs.opencue.io/docs/getting-started/deploying-scheduler/
+    #
+    # OPENCUE_SCHEDULER_PORT_HOST: PositiveInt = Field(
+    #     default=9090,
+    # )
+    #
+    # OPENCUE_SCHEDULER_PORT_CONTAINER: PositiveInt = Field(
+    #     default=9090,
+    # )
+    #
+    # OPENCUE_SCHEDULER_GRPC_PORT_HOST: PositiveInt = Field(
+    #     default=8444,
+    # )
+    #
+    # OPENCUE_SCHEDULER_GRPC_PORT_CONTAINER: PositiveInt = Field(
+    #     default=8444,
+    # )
 
-    OPENCUE_WEB_PORT_CONTAINER: PositiveInt = Field(
+    # cueweb
+    # https://docs.opencue.io/docs/getting-started/deploying-scheduler/
+
+    OPENCUE_CUEWEB_PORT_HOST: PositiveInt = Field(
+        default=3100,
+    )
+
+    OPENCUE_CUEWEB_PORT_CONTAINER: PositiveInt = Field(
         default=3000,
     )
+
+    OPENCUE_CUEWEB_JWT_SECRET: str = Field(
+        default="your-jwt-secret",
+    )
+
+    # REST Gateway
+    # https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/
+
+    OPENCUE_REST_GATEWAY_PORT_HOST: PositiveInt = Field(
+        default=8448,
+    )
+
+    OPENCUE_REST_GATEWAY_PORT_CONTAINER: PositiveInt = Field(
+        default=8448,
+    )
+
+    # OPENCUE_REST_GATEWAY_JWT_SECRET: str = Field(
+    #     default="your-jwt-secret",
+    # )
+
+    # cuebot
 
     OPENCUE_WEB_PORT_HOST: PositiveInt = Field(
         default=1234,
         frozen=False,
+    )
+
+    OPENCUE_WEB_PORT_CONTAINER: PositiveInt = Field(
+        default=3000,
     )
 
     OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST: PositiveInt = Field(
