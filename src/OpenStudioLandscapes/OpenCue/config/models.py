@@ -1,4 +1,5 @@
 import enum
+import os
 import pathlib
 
 from dagster import get_dagster_logger
@@ -94,7 +95,10 @@ class Config(FeatureBaseModel):
     )
 
     OPENCUE_CUEWEB_JWT_SECRET: str = Field(
-        default="your-jwt-secret",
+        # Create secure JWT
+        # https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#step-2-deploy-rest-gateway-separately
+        # export JWT_SECRET=$(openssl rand -base64 32)
+        default=os.environ.get("OPENSTUDIOLANDSCAPES_OPENCUE__OPENCUE_CUEWEB_JWT_SECRET", "your-jwt-secret"),
     )
 
     # REST Gateway

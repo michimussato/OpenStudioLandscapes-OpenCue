@@ -15,6 +15,7 @@ classifiers = [
     "Programming Language :: Python",
 ]
 dependencies = [
+    "PyJWT",
     "PyYAML",
     "dagster==1.9.11",
     "deprecation",

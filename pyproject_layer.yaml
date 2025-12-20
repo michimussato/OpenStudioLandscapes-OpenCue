@@ -1,4 +1,6 @@
 project:
+  dependencies:
+  - PyJWT
   description: OpenCue Feature for OpenStudioLandscapes
   name: OpenStudioLandscapes-OpenCue
   optional-dependencies:
