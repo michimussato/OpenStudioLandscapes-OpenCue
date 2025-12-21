@@ -52,8 +52,12 @@ class Config(FeatureBaseModel):
         frozen=True,
     )
 
+    OPENCUE_DEPLOY_RQD: bool = Field(
+        default=False,
+    )
+
     OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: bool = Field(
-        default=True,
+        default=False,
     )
 
     OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: str = Field(
@@ -196,13 +200,13 @@ class Config(FeatureBaseModel):
         frozen=False,
     )
 
-    OPENCUE_DB_PGPASSWORD: str = Field(
-        default="cuebot_password",
+    OPENCUE_DB_PGUSER: str = Field(
+        default="cuebot",
         frozen=False,
     )
 
-    OPENCUE_DB_PGUSER: str = Field(
-        default="cuebot",
+    OPENCUE_DB_PGPASSWORD: str = Field(
+        default="cuebot_password",
         frozen=False,
     )
 

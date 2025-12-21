@@ -21,11 +21,12 @@ from dagster import (
     Output,
     asset,
 )
+from gql.cli import description
 
 # from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
 # from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
 # from docker_compose_graph.utils import *
-from docker_compose_graph.yaml_tags.overrides import *
+# from docker_compose_graph.yaml_tags.overrides import *
 from git.exc import GitCommandError
 from OpenStudioLandscapes.engine.common_assets.compose import get_compose
 from OpenStudioLandscapes.engine.common_assets.compose_scope import (
@@ -234,12 +235,946 @@ def compose_networks(
     )
 
 
+# @asset(
+#     **ASSET_HEADER,
+#     ins={
+#         "CONFIG": AssetIn(
+#             AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+#         ),
+#         "compose_networks": AssetIn(
+#             AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+#         ),
+#         "clone_repository": AssetIn(
+#             AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+#         ),
+#         "prepare_volumes": AssetIn(
+#             AssetKey([*ASSET_HEADER["key_prefix"], "prepare_volumes"]),
+#         ),
+#     },
+#     description=textwrap.dedent(
+#         """
+#         OpenCue components that are shipped
+#         within a ready made
+#         [`docker-compose.yml`](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
+#         only need overrides on top it.
+#         - Cuebot
+#         - RQD
+#         - Database
+#         """
+#     )
+# )
+# def compose_override(
+#     context: AssetExecutionContext,
+#     CONFIG: Config,  # pylint: disable=redefined-outer-name
+#     compose_networks: Dict,  # pylint: disable=redefined-outer-name
+#     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+#     prepare_volumes: Dict,  # pylint: disable=redefined-outer-name
+# ) -> Generator[
+#     Output[Dict[str, List[Dict[str, List[str]]]]] | AssetMaterialization, None, None
+# ]:
+#
+#     env: Dict = CONFIG.env
+#
+#     config_engine: ConfigEngine = CONFIG.config_engine
+#
+#     network_dict = {}
+#     # ports_dict = {}
+#     ports_dict_rqd = {}
+#     ports_dict_cuebot = {}
+#     ports_dict_db = {}
+#
+#     if "networks" in compose_networks:
+#         network_dict = {"networks": list(compose_networks.get("networks", {}).keys())}
+#         # ports_dict = {"ports": []}
+#         ports_dict_rqd = {
+#             "ports": OverrideArray(
+#                 [
+#                     f"{CONFIG.OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST}:{CONFIG.OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER}",
+#                 ]
+#             ),
+#         }
+#         ports_dict_cuebot = {
+#             "ports": OverrideArray(
+#                 [
+#                     f"{CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST}:{CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER}",
+#                 ]
+#             ),
+#         }
+#         ports_dict_db = {
+#             "ports": OverrideArray(
+#                 [
+#                     f"{CONFIG.OPENCUE_DB_PORT_HOST}:{CONFIG.OPENCUE_DB_PORT_CONTAINER}",
+#                 ]
+#             ),
+#         }
+#     elif "network_mode" in compose_networks:
+#         network_dict = {"network_mode": compose_networks["network_mode"]}
+#
+#     docker_compose_git_repository = pathlib.Path(
+#         clone_repository.joinpath("docker-compose.yml")
+#     )
+#
+#     opencue_db_dir_host = CONFIG.OPENCUE_DB_INSTALL_DESTINATION_expanded
+#
+#     opencue_db_dir_host.mkdir(parents=True, exist_ok=True)
+#     context.log.info(f"Directory {opencue_db_dir_host.as_posix()} created.")
+#
+#     container_prefix = "opencue"
+#
+#     service_name_db = "db"
+#     container_name_db, _ = get_docker_compose_names(
+#         context=context,
+#         service_name=f"{container_prefix}-{service_name_db}",
+#         landscape_id=env.get("LANDSCAPE", "default"),
+#         domain_lan=config_engine.openstudiolandscapes__domain_lan,
+#     )
+#     # container_name_db = "--".join(
+#     #     [f"{container_prefix}-{service_name_db}", env.get("LANDSCAPE", "default")]
+#     # )
+#     host_name_db = ".".join(
+#         [
+#             f"{container_prefix}-{service_name_db}",
+#             # Todo
+#             #  - [ ] For some reason, if the db hostname is suffixed with
+#             #        the domain name, flyway can't reach it.
+#             #        Hence, comment this out here.
+#             #  - [ ] Maybe try to understand the differences in Docker between
+#             #        - hostname
+#             #        - domain
+#             #        - subdomain.domain
+#             #        - hostname.subdomain.domain
+#             #        etc.
+#             # env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+#         ]
+#     )
+#     volumes_db = [
+#         f"{opencue_db_dir_host.as_posix()}:/var/lib/postgresql/data:rw",
+#     ]
+#
+#     _volume_relative_db = []
+#
+#     for v in volumes_db:
+#
+#         host, container = v.split(":", maxsplit=1)
+#
+#         volume_dir_host_rel_path = get_relative_path_via_common_root(
+#             context=context,
+#             path_src=docker_compose_git_repository,  # Probably because the root docker-compose is the one in the Git repo
+#             path_dst=pathlib.Path(host),
+#             path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+#         )
+#
+#         _volume_relative_db.append(
+#             f"{volume_dir_host_rel_path.as_posix()}:{container}",
+#         )
+#
+#     service_name_flyway = "flyway"
+#     container_name_flyway, host_name_flyway = get_docker_compose_names(
+#         context=context,
+#         service_name=f"{container_prefix}-{service_name_flyway}",
+#         landscape_id=env.get("LANDSCAPE", "default"),
+#         domain_lan=config_engine.openstudiolandscapes__domain_lan,
+#     )
+#     # container_name_flyway = "--".join(
+#     #     [f"{container_prefix}-{service_name_flyway}", env.get("LANDSCAPE", "default")]
+#     # )
+#     # host_name_flyway = ".".join(
+#     #     [
+#     #         service_name_flyway,
+#     #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+#     #     ]
+#     # )
+#
+#     service_name_cuebot = "cuebot"
+#     container_name_cuebot, host_name_cuebot = get_docker_compose_names(
+#         context=context,
+#         service_name=f"{container_prefix}-{service_name_cuebot}",
+#         landscape_id=env.get("LANDSCAPE", "default"),
+#         domain_lan=config_engine.openstudiolandscapes__domain_lan,
+#     )
+#     # container_name_cuebot = "--".join(
+#     #     [f"{container_prefix}-{service_name_cuebot}", env.get("LANDSCAPE", "default")]
+#     # )
+#     # host_name_cuebot = ".".join(
+#     #     [
+#     #         service_name_cuebot,
+#     #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+#     #     ]
+#     # )
+#
+#     service_name_rqd = "rqd"
+#     container_name_rqd, host_name_rqd = get_docker_compose_names(
+#         context=context,
+#         service_name=f"{container_prefix}-{service_name_rqd}",
+#         landscape_id=env.get("LANDSCAPE", "default"),
+#         domain_lan=config_engine.openstudiolandscapes__domain_lan,
+#     )
+#     # container_name_rqd = "--".join(
+#     #     [f"{container_prefix}-{service_name_rqd}", env.get("LANDSCAPE", "default")]
+#     # )
+#     # host_name_rqd = ".".join(
+#     #     [
+#     #         service_name_rqd,
+#     #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+#     #     ]
+#     # )
+#     volumes_rqd = [
+#         f"{prepare_volumes['logs']}:/tmp/rqd/logs:rw",
+#         f"{prepare_volumes['shots']}:/tmp/rqd/shots:rw",
+#     ]
+#
+#     _volume_relative_rqd = []
+#
+#     for v in volumes_rqd:
+#
+#         host, container = v.split(":", maxsplit=1)
+#
+#         volume_dir_host_rel_path = get_relative_path_via_common_root(
+#             context=context,
+#             path_src=docker_compose_git_repository,  # Probably because the root docker-compose is the one in the Git repo
+#             path_dst=pathlib.Path(host),
+#             path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+#         )
+#
+#         _volume_relative_rqd.append(
+#             f"{volume_dir_host_rel_path.as_posix()}:{container}",
+#         )
+#
+#     docker_dict_override = {
+#         # "networks": compose_networks.get("networks", []),
+#         "services": {
+#             service_name_db: {
+#                 "container_name": container_name_db,
+#                 "hostname": host_name_db,
+#                 "domainname": config_engine.openstudiolandscapes__domain_lan,
+#                 "environment": {
+#                     "POSTGRES_DB": CONFIG.OPENCUE_DB_PGDATABASE,
+#                     "POSTGRES_PASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
+#                     "POSTGRES_USER": CONFIG.OPENCUE_DB_PGUSER,
+#                 },
+#                 "volumes": [
+#                     *_volume_relative_db,
+#                 ],
+#                 **copy.deepcopy(network_dict),
+#                 **copy.deepcopy(ports_dict_db),
+#             },
+#             service_name_flyway: {
+#                 "container_name": container_name_flyway,
+#                 "hostname": host_name_flyway,
+#                 "domainname": config_engine.openstudiolandscapes__domain_lan,
+#                 "environment": {
+#                     "PGHOST": CONFIG.OPENCUE_DB_PGHOST,
+#                     "PGDATABASE": CONFIG.OPENCUE_DB_PGDATABASE,
+#                     "PGPASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
+#                     "PGUSER": CONFIG.OPENCUE_DB_PGUSER,
+#                     "PGPORT": str(CONFIG.OPENCUE_DB_PORT_CONTAINER),
+#                 },
+#                 **copy.deepcopy(network_dict),
+#                 # "networks": [
+#                 #     "mongodb",
+#                 #     "repository",
+#                 # ],
+#             },
+#             service_name_cuebot: {
+#                 "container_name": container_name_cuebot,
+#                 "hostname": host_name_cuebot,
+#                 "domainname": config_engine.openstudiolandscapes__domain_lan,
+#                 # This might not be very helpful as a health check
+#                 # but a health check seems mandatory for rqd to be
+#                 # dependent on this service
+#                 "healthcheck": {
+#                     "test": [
+#                         "CMD",
+#                         "pidof",
+#                         "java",
+#                     ],
+#                     "interval": "10s",
+#                     "timeout": "2s",
+#                     "retries": "3",
+#                 },
+#                 "environment": {
+#                     "CUE_FRAME_LOG_DIR": "/tmp/rqd/logs",
+#                 },
+#                 # Todo:
+#                 #  - [ ] Need to find out whether `ports` Override
+#                 #  also overrides the exports in the source ayon-docker-compose.yml
+#                 #  "exports": OverrideArray([]),
+#                 # "ports": OverrideArray(
+#                 #     [
+#                 #         f"{env.get('AYON_PORT_HOST')}:{env.get('AYON_PORT_CONTAINER')}",
+#                 #     ]
+#                 # ),
+#                 **copy.deepcopy(network_dict),
+#                 **copy.deepcopy(ports_dict_cuebot),
+#             },
+#             service_name_rqd: {
+#                 "container_name": container_name_rqd,
+#                 "hostname": host_name_rqd,
+#                 "domainname": config_engine.openstudiolandscapes__domain_lan,
+#                 "environment": {
+#                     "PYTHONUNBUFFERED": "1",
+#                     # Todo:
+#                     #  - [ ] use fqdn instead of just hostname?
+#                     "CUEBOT_HOSTNAME": host_name_cuebot,
+#                 },
+#                 "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
+#                 "volumes": [
+#                     *_volume_relative_rqd,
+#                 ],
+#                 **copy.deepcopy(network_dict),
+#                 **copy.deepcopy(ports_dict_rqd),
+#             },
+#         },
+#     }
+#
+#     if not CONFIG.deploy_rqd_on_cuebot_host:
+#         docker_dict_override["services"][service_name_rqd] = ResetNull(docker_dict_override["services"][service_name_rqd])
+#         context.log.debug(f"{docker_dict_override['services'] = }")
+#
+#     if CONFIG.OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
+#         docker_dict_override["services"][service_name_cuebot][
+#             "image"
+#         ] = CONFIG.OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE
+#         # docker_dict_override["services"][service_name_scheduler][
+#         #     "image"
+#         # ] = CONFIG.OPENCUE_SCHEDULER_DOCKER_IMAGE
+#
+#     if "networks" in compose_networks:
+#         network_dict = copy.deepcopy(compose_networks)
+#     else:
+#         network_dict = {}
+#
+#     docker_compose_override = CONFIG.docker_compose_override_expanded
+#
+#     docker_compose_override.parent.mkdir(parents=True, exist_ok=True)
+#
+#     with open(docker_compose_git_repository, "r") as fr:
+#         # Just load is as a str to be able to use it as a MetadataValue
+#         # (also shows comments of the original yml which is insightful)
+#         # No post processing for now
+#         docker_yaml_repository: str = fr.read()
+#
+#     docker_yaml_override: str = yaml.dump(docker_dict_override)
+#
+#     with open(docker_compose_override, "w") as fw:
+#         fw.write(docker_yaml_override)
+#
+#     # Write compose override to disk here to be able to reference
+#     # it in the following step.
+#     # It seems that it's necessary to apply overrides in
+#     # include: path
+#
+#     # Convert absolute paths in `include` to
+#     # relative ones
+#     DOCKER_COMPOSE = CONFIG.docker_compose_expanded
+#     DOCKER_COMPOSE.parent.mkdir(parents=True, exist_ok=True)
+#
+#     rel_paths = []
+#     dot_landscapes = pathlib.Path(env["DOT_LANDSCAPES"])
+#
+#     # Todo:
+#     #  - [x] find a better way to implement relpath with `from` and `via`
+#     #  - [x] externalize
+#     for path in [
+#         docker_compose_git_repository,
+#         docker_compose_override,
+#     ]:
+#         rel_path = get_relative_path_via_common_root(
+#             context=context,
+#             path_src=DOCKER_COMPOSE,
+#             path_dst=pathlib.Path(path),
+#             path_common_root=dot_landscapes,
+#         )
+#
+#         rel_paths.append(rel_path.as_posix())
+#
+#     docker_dict_include = {
+#         "include": [
+#             {
+#                 "path": rel_paths,
+#             },
+#         ],
+#     }
+#
+#     docker_yaml_include = yaml.dump(docker_dict_include)
+#
+#     # Write docker-compose.yaml
+#     with open(DOCKER_COMPOSE, mode="w", encoding="utf-8") as fw:
+#         fw.write(docker_yaml_include)
+#
+#     yield Output(docker_dict_include)
+#
+#     yield AssetMaterialization(
+#         asset_key=context.asset_key,
+#         metadata={
+#             "__".join(context.asset_key.path): MetadataValue.json(docker_dict_include),
+#             "docker_yaml_repository": MetadataValue.md(
+#                 f"```yaml\n{docker_yaml_repository}\n```"
+#             ),
+#             "docker_yaml_override": MetadataValue.md(
+#                 f"```yaml\n{docker_yaml_override}\n```"
+#             ),
+#             "path_docker_yaml_override": MetadataValue.path(docker_compose_override),
+#             # Todo: "cmd_docker_run": MetadataValue.path(cmd_list_to_str(cmd_docker_run)),
+#         },
+#     )
+
+
 @asset(
     **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
+        # "build": AssetIn(
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image"]),
+        # ),
+        "compose_networks": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+        ),
+        "clone_repository": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        ),
+    },
+    description=textwrap.dedent(
+        """
+        Based on
+        - [docker-compose.yml](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
+        
+        Reference:
+        ```
+          cuebot:
+            # Use build to compile from source with latest code (recommended for development)
+            build:
+              context: ./
+              dockerfile: ./cuebot/Dockerfile
+            # Use image for faster startup with pre-built image (uncomment to use)
+            # image: opencue/cuebot
+            links:
+              - db
+            ports:
+              - "8443:8443"
+            depends_on:
+              db:
+                condition: service_started
+              flyway:
+                condition: service_completed_successfully
+            restart: always
+            environment:
+              - CUE_FRAME_LOG_DIR=/tmp/rqd/logs
+            command: --datasource.cue-data-source.jdbc-url=jdbc:postgresql://db/cuebot --datasource.cue-data-source.username=cuebot --datasource.cue-data-source.password=cuebot_password
+        ```
+        """
+    )
+)
+def compose_cuebot(
+    context: AssetExecutionContext,
+    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    # build: Dict,  # pylint: disable=redefined-outer-name
+    compose_networks: Dict,  # pylint: disable=redefined-outer-name
+    clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
+    """ """
+
+    env: Dict = CONFIG.env
+
+    config_engine: ConfigEngine = CONFIG.config_engine
+
+    network_dict = {}
+    ports_dict = {}
+
+    if "networks" in compose_networks:
+        network_dict = {"networks": list(compose_networks.get("networks", {}).keys())}
+        ports_dict = {
+            "ports": [
+                f"{CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST}:{CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER}",
+            ]
+        }
+    elif "network_mode" in compose_networks:
+        network_dict = {"network_mode": compose_networks["network_mode"]}
+
+    volumes_dict = {
+        "volumes": [
+            # f"{supervisord_conf.as_posix()}:/etc/supervisord.conf:ro",
+        ]
+    }
+
+    # For portability, convert absolute volume paths to relative paths
+
+    _volume_relative = []
+
+    for v in volumes_dict["volumes"]:
+
+        host, container = v.split(":", maxsplit=1)
+
+        volume_dir_host_rel_path = get_relative_path_via_common_root(
+            context=context,
+            path_src=CONFIG.docker_compose_expanded,
+            path_dst=pathlib.Path(host),
+            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+        )
+
+        _volume_relative.append(
+            f"{volume_dir_host_rel_path.as_posix()}:{container}",
+        )
+
+    volumes_dict = {
+        "volumes": [
+            *_volume_relative,
+        ]
+    }
+
+    service_name = "cuebot"
+    container_name, host_name = get_docker_compose_names(
+        context=context,
+        service_name=f"opencue-{service_name}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+
+    if CONFIG.OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
+        d = {
+            "image": CONFIG.OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE
+        }
+    else:
+        d = {
+            "build": {
+                "context": clone_repository.as_posix(),
+                "dockerfile": clone_repository.joinpath(
+                    "cuebot",
+                    "Dockerfile",
+                ).as_posix(),
+            },
+        }
+
+    docker_dict = {
+        "services": {
+            service_name: {
+                # Todo:
+                #  - [ ] prebuilt image?
+                **d,
+                "container_name": container_name,
+                "hostname": host_name,
+                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
+                "environment": {
+                    "CUE_FRAME_LOG_DIR": "/tmp/rqd/logs",
+                },
+                # # "image": "${DOT_OVERRIDES_REGISTRY_NAMESPACE:-docker.io/openstudiolandscapes}/%s:%s"
+                # # % (build["image_name"], build["image_tags"][0]),
+                # "image": "%s%s:%s"
+                # % (
+                #     build["image_prefixes"],
+                #     build["image_name"],
+                #     build["image_tags"][0],
+                # ),
+                **copy.deepcopy(volumes_dict),
+                **copy.deepcopy(network_dict),
+                "links": [
+                    "db",
+                ],
+                "depends_on": {
+                    "db": {
+                        "condition": "service_started",
+                    },
+                    "flyway": {
+                        "condition": "service_completed_successfully",
+                    },
+                },
+                # "healthcheck": {
+                #     # Todo:
+                #     #  - [ ] fix: test succeeds even if Postgres is down
+                #     #  "test": ["CMD-SHELL", "psql -U ${DB_USER} -d ${DB_MAIN} -c 'SELECT 1' || exit 1"],
+                #     "test": ["CMD", "curl", "-f", f"http://localhost:{env.get('KITSU_PORT_CONTAINER')}"],
+                #     "interval": "10s",
+                #     "timeout": "2s",
+                #     "retries": "3",
+                # },
+                "command": [
+                    f"--datasource.cue-data-source.jdbc-url=jdbc:postgresql://db/{CONFIG.OPENCUE_DB_PGDATABASE}",
+                    f"--datasource.cue-data-source.username={CONFIG.OPENCUE_DB_PGUSER}",
+                    f"--datasource.cue-data-source.password={CONFIG.OPENCUE_DB_PGPASSWORD}",
+                ],
+                **copy.deepcopy(ports_dict),
+            },
+        },
+    }
+
+    docker_yaml = yaml.dump(docker_dict)
+
+    yield Output(docker_dict)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(docker_dict),
+            "docker_yaml": MetadataValue.md(f"```yaml\n{docker_yaml}\n```"),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+        ),
+        # "build": AssetIn(
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image"]),
+        # ),
+        "compose_networks": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+        ),
+        "clone_repository": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        ),
+    },
+    description=textwrap.dedent(
+        """
+        Based on
+        - [docker-compose.yml](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
+        
+        Reference:
+        ```yaml
+          flyway:
+            build:
+              context: ./
+              dockerfile: ./sandbox/flyway.Dockerfile
+            links:
+              - db
+            depends_on:
+              - db
+            environment:
+              - PGUSER=cuebot
+              - PGPASSWORD=cuebot_password
+              - PGDATABASE=cuebot
+              - PGHOST=db
+              - PGPORT=5432
+            command: /opt/scripts/migrate.sh
+        ```
+        """
+    )
+)
+def compose_flyway(
+    context: AssetExecutionContext,
+    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    # build: Dict,  # pylint: disable=redefined-outer-name
+    compose_networks: Dict,  # pylint: disable=redefined-outer-name
+    clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
+    """ """
+
+    env: Dict = CONFIG.env
+
+    config_engine: ConfigEngine = CONFIG.config_engine
+
+    network_dict = {}
+    ports_dict = {}
+
+    if "networks" in compose_networks:
+        network_dict = {"networks": list(compose_networks.get("networks", {}).keys())}
+        ports_dict = {
+            # "ports": [
+            #     f"{CONFIG.kitsu_port_host}:{CONFIG.kitsu_port_container}",
+            # ]
+        }
+    elif "network_mode" in compose_networks:
+        network_dict = {"network_mode": compose_networks["network_mode"]}
+
+    volumes_dict = {
+        "volumes": [
+            # f"{supervisord_conf.as_posix()}:/etc/supervisord.conf:ro",
+        ]
+    }
+
+    # For portability, convert absolute volume paths to relative paths
+
+    _volume_relative = []
+
+    for v in volumes_dict["volumes"]:
+
+        host, container = v.split(":", maxsplit=1)
+
+        volume_dir_host_rel_path = get_relative_path_via_common_root(
+            context=context,
+            path_src=CONFIG.docker_compose_expanded,
+            path_dst=pathlib.Path(host),
+            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+        )
+
+        _volume_relative.append(
+            f"{volume_dir_host_rel_path.as_posix()}:{container}",
+        )
+
+    volumes_dict = {
+        "volumes": [
+            *_volume_relative,
+        ]
+    }
+
+    service_name = "flyway"
+    container_name, host_name = get_docker_compose_names(
+        context=context,
+        service_name=f"opencue-{service_name}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+
+    """
+
+    """
+
+    docker_dict = {
+        "services": {
+            service_name: {
+                "container_name": container_name,
+                # Todo:
+                #  - [ ] prebuilt image?
+                "build": {
+                    "context": clone_repository.as_posix(),
+                    "dockerfile": clone_repository.joinpath(
+                        "sandbox",
+                        "flyway.Dockerfile",
+                    ).as_posix(),
+                },
+                "hostname": host_name,
+                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
+                "environment": {
+                    "PGHOST": CONFIG.OPENCUE_DB_PGHOST,
+                    "PGDATABASE": CONFIG.OPENCUE_DB_PGDATABASE,
+                    "PGPASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
+                    "PGUSER": CONFIG.OPENCUE_DB_PGUSER,
+                    "PGPORT": str(CONFIG.OPENCUE_DB_PORT_CONTAINER),
+                },
+                "command": [
+                    "/opt/scripts/migrate.sh",
+               ],
+                # # "image": "${DOT_OVERRIDES_REGISTRY_NAMESPACE:-docker.io/openstudiolandscapes}/%s:%s"
+                # # % (build["image_name"], build["image_tags"][0]),
+                # "image": "%s%s:%s"
+                # % (
+                #     build["image_prefixes"],
+                #     build["image_name"],
+                #     build["image_tags"][0],
+                # ),
+                **copy.deepcopy(volumes_dict),
+                **copy.deepcopy(network_dict),
+                "links": [
+                    "db",
+                ],
+                "depends_on": {
+                    "db": {
+                        "condition": "service_started",
+                    },
+                },
+                # "healthcheck": {
+                #     # Todo:
+                #     #  - [ ] fix: test succeeds even if Postgres is down
+                #     #  "test": ["CMD-SHELL", "psql -U ${DB_USER} -d ${DB_MAIN} -c 'SELECT 1' || exit 1"],
+                #     "test": ["CMD", "curl", "-f", f"http://localhost:{env.get('KITSU_PORT_CONTAINER')}"],
+                #     "interval": "10s",
+                #     "timeout": "2s",
+                #     "retries": "3",
+                # },
+                # "command": [
+                #     "bash",
+                #     "/opt/zou/start_zou.sh",
+                # ],
+                **copy.deepcopy(ports_dict),
+            },
+        },
+    }
+
+    docker_yaml = yaml.dump(docker_dict)
+
+    yield Output(docker_dict)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(docker_dict),
+            "docker_yaml": MetadataValue.md(f"```yaml\n{docker_yaml}\n```"),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+        ),
+        # "build": AssetIn(
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image"]),
+        # ),
+        "compose_networks": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+        ),
+        "clone_repository": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        ),
+    },
+    description=textwrap.dedent(
+        """
+        Based on
+        - [docker-compose.yml](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
+        
+        Reference:
+        ```yaml
+          db:
+            image: postgres:15.1
+            environment:
+              - POSTGRES_USER=cuebot
+              - POSTGRES_PASSWORD=cuebot_password
+              - POSTGRES_DB=cuebot
+            ports:
+              - "5432:5432"
+            volumes:
+              - ./sandbox/db-data:/var/lib/postgresql/data
+        ```
+        """
+    )
+)
+def compose_db(
+    context: AssetExecutionContext,
+    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    # build: Dict,  # pylint: disable=redefined-outer-name
+    compose_networks: Dict,  # pylint: disable=redefined-outer-name
+    clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
+    """ """
+
+    env: Dict = CONFIG.env
+
+    config_engine: ConfigEngine = CONFIG.config_engine
+
+    network_dict = {}
+    ports_dict = {}
+
+    if "networks" in compose_networks:
+        network_dict = {"networks": list(compose_networks.get("networks", {}).keys())}
+        ports_dict = {
+            "ports": [
+                f"{CONFIG.OPENCUE_DB_PORT_HOST}:{CONFIG.OPENCUE_DB_PORT_CONTAINER}",
+            ]
+        }
+    elif "network_mode" in compose_networks:
+        network_dict = {"network_mode": compose_networks["network_mode"]}
+
+    opencue_db_dir_host = CONFIG.OPENCUE_DB_INSTALL_DESTINATION_expanded
+
+    opencue_db_dir_host.mkdir(parents=True, exist_ok=True)
+    context.log.info(f"Directory {opencue_db_dir_host.as_posix()} created.")
+
+    volumes_dict = {
+        "volumes": [
+            f"{opencue_db_dir_host.as_posix()}:/var/lib/postgresql/data:rw",
+        ]
+    }
+
+    # For portability, convert absolute volume paths to relative paths
+
+    _volume_relative = []
+
+    for v in volumes_dict["volumes"]:
+
+        host, container = v.split(":", maxsplit=1)
+
+        volume_dir_host_rel_path = get_relative_path_via_common_root(
+            context=context,
+            path_src=CONFIG.docker_compose_expanded,
+            path_dst=pathlib.Path(host),
+            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+        )
+
+        _volume_relative.append(
+            f"{volume_dir_host_rel_path.as_posix()}:{container}",
+        )
+
+    volumes_dict = {
+        "volumes": [
+            *_volume_relative,
+        ]
+    }
+
+    service_name = "db"
+    container_name, host_name = get_docker_compose_names(
+        context=context,
+        service_name=f"opencue-{service_name}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+
+
+    docker_dict = {
+        "services": {
+            service_name: {
+                "image": "docker.io/postgres:15.1",
+                "container_name": container_name,
+                "hostname": host_name,
+                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
+                "environment": {
+                    "POSTGRES_USER": CONFIG.OPENCUE_DB_PGUSER,
+                    "POSTGRES_PASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
+                    "POSTGRES_DB": CONFIG.OPENCUE_DB_PGDATABASE,
+                },
+                # # "image": "${DOT_OVERRIDES_REGISTRY_NAMESPACE:-docker.io/openstudiolandscapes}/%s:%s"
+                # # % (build["image_name"], build["image_tags"][0]),
+                # "image": "%s%s:%s"
+                # % (
+                #     build["image_prefixes"],
+                #     build["image_name"],
+                #     build["image_tags"][0],
+                # ),
+                **copy.deepcopy(volumes_dict),
+                **copy.deepcopy(network_dict),
+                "depends_on": {
+                    # "kitsu-init-db": {
+                    #     "condition": "service_completed_successfully",
+                    # },
+                },
+                # "healthcheck": {
+                #     # Todo:
+                #     #  - [ ] fix: test succeeds even if Postgres is down
+                #     #  "test": ["CMD-SHELL", "psql -U ${DB_USER} -d ${DB_MAIN} -c 'SELECT 1' || exit 1"],
+                #     "test": ["CMD", "curl", "-f", f"http://localhost:{env.get('KITSU_PORT_CONTAINER')}"],
+                #     "interval": "10s",
+                #     "timeout": "2s",
+                #     "retries": "3",
+                # },
+                # "command": [
+                #     "bash",
+                #     "/opt/zou/start_zou.sh",
+                # ],
+                **copy.deepcopy(ports_dict),
+            },
+        },
+    }
+
+    docker_yaml = yaml.dump(docker_dict)
+
+    yield Output(docker_dict)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(docker_dict),
+            "docker_yaml": MetadataValue.md(f"```yaml\n{docker_yaml}\n```"),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+        ),
+        # "build": AssetIn(
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image"]),
+        # ),
         "compose_networks": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
@@ -252,369 +1187,145 @@ def compose_networks(
     },
     description=textwrap.dedent(
         """
-        OpenCue components that are shipped 
-        within a ready made 
-        [`docker-compose.yml`](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
-        only need overrides on top it.
-        - Cuebot
-        - RQD
-        - Database
+        Based on
+        - [docker-compose.yml](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
+        
+        Reference:
+        ```
+          rqd:
+            image: opencue/rqd
+            environment:
+              - PYTHONUNBUFFERED=1
+              - CUEBOT_HOSTNAME=cuebot
+            depends_on:
+              cuebot:
+                condition: service_healthy
+            links:
+              - cuebot
+            ports:
+              - "8444:8444"
+            volumes:
+              - /tmp/rqd/logs:/tmp/rqd/logs
+              - /tmp/rqd/shots:/tmp/rqd/shots
+        ```
         """
     )
 )
-def compose_override(
+def compose_rqd(
     context: AssetExecutionContext,
     CONFIG: Config,  # pylint: disable=redefined-outer-name
+    # build: Dict,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     prepare_volumes: Dict,  # pylint: disable=redefined-outer-name
-) -> Generator[
-    Output[Dict[str, List[Dict[str, List[str]]]]] | AssetMaterialization, None, None
-]:
+) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
+    """ """
 
     env: Dict = CONFIG.env
 
     config_engine: ConfigEngine = CONFIG.config_engine
 
     network_dict = {}
-    # ports_dict = {}
-    ports_dict_rqd = {}
-    ports_dict_cuebot = {}
-    ports_dict_db = {}
+    ports_dict = {}
 
     if "networks" in compose_networks:
         network_dict = {"networks": list(compose_networks.get("networks", {}).keys())}
-        # ports_dict = {"ports": []}
-        ports_dict_rqd = {
-            "ports": OverrideArray(
-                [
-                    f"{CONFIG.OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST}:{CONFIG.OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER}",
-                ]
-            ),
-        }
-        ports_dict_cuebot = {
-            "ports": OverrideArray(
-                [
-                    f"{CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST}:{CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER}",
-                ]
-            ),
-        }
-        ports_dict_db = {
-            "ports": OverrideArray(
-                [
-                    f"{CONFIG.OPENCUE_DB_PORT_HOST}:{CONFIG.OPENCUE_DB_PORT_CONTAINER}",
-                ]
-            ),
+        ports_dict = {
+            "ports": [
+                f"{CONFIG.OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST}:{CONFIG.OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER}",
+            ]
         }
     elif "network_mode" in compose_networks:
         network_dict = {"network_mode": compose_networks["network_mode"]}
 
-    docker_compose_git_repository = pathlib.Path(
-        clone_repository.joinpath("docker-compose.yml")
-    )
-
-    opencue_db_dir_host = CONFIG.OPENCUE_DB_INSTALL_DESTINATION_expanded
-
-    opencue_db_dir_host.mkdir(parents=True, exist_ok=True)
-    context.log.info(f"Directory {opencue_db_dir_host.as_posix()} created.")
-
-    container_prefix = "opencue"
-
-    service_name_db = "db"
-    container_name_db, _ = get_docker_compose_names(
-        context=context,
-        service_name=f"{container_prefix}-{service_name_db}",
-        landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
-    )
-    # container_name_db = "--".join(
-    #     [f"{container_prefix}-{service_name_db}", env.get("LANDSCAPE", "default")]
-    # )
-    host_name_db = ".".join(
-        [
-            f"{container_prefix}-{service_name_db}",
-            # Todo
-            #  - [ ] For some reason, if the db hostname is suffixed with
-            #        the domain name, flyway can't reach it.
-            #        Hence, comment this out here.
-            #  - [ ] Maybe try to understand the differences in Docker between
-            #        - hostname
-            #        - domain
-            #        - subdomain.domain
-            #        - hostname.subdomain.domain
-            #        etc.
-            # env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
+    volumes_dict = {
+        "volumes": [
+            f"{prepare_volumes['logs']}:/tmp/rqd/logs:rw",
+            f"{prepare_volumes['shots']}:/tmp/rqd/shots:rw",
         ]
-    )
-    volumes_db = [
-        f"{opencue_db_dir_host.as_posix()}:/var/lib/postgresql/data:rw",
-    ]
-
-    _volume_relative_db = []
-
-    for v in volumes_db:
-
-        host, container = v.split(":", maxsplit=1)
-
-        volume_dir_host_rel_path = get_relative_path_via_common_root(
-            context=context,
-            path_src=docker_compose_git_repository,  # Probably because the root docker-compose is the one in the Git repo
-            path_dst=pathlib.Path(host),
-            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
-        )
-
-        _volume_relative_db.append(
-            f"{volume_dir_host_rel_path.as_posix()}:{container}",
-        )
-
-    service_name_flyway = "flyway"
-    container_name_flyway, host_name_flyway = get_docker_compose_names(
-        context=context,
-        service_name=f"{container_prefix}-{service_name_flyway}",
-        landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
-    )
-    # container_name_flyway = "--".join(
-    #     [f"{container_prefix}-{service_name_flyway}", env.get("LANDSCAPE", "default")]
-    # )
-    # host_name_flyway = ".".join(
-    #     [
-    #         service_name_flyway,
-    #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
-    #     ]
-    # )
-
-    service_name_cuebot = "cuebot"
-    container_name_cuebot, host_name_cuebot = get_docker_compose_names(
-        context=context,
-        service_name=f"{container_prefix}-{service_name_cuebot}",
-        landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
-    )
-    # container_name_cuebot = "--".join(
-    #     [f"{container_prefix}-{service_name_cuebot}", env.get("LANDSCAPE", "default")]
-    # )
-    # host_name_cuebot = ".".join(
-    #     [
-    #         service_name_cuebot,
-    #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
-    #     ]
-    # )
-
-    service_name_rqd = "rqd"
-    container_name_rqd, host_name_rqd = get_docker_compose_names(
-        context=context,
-        service_name=f"{container_prefix}-{service_name_rqd}",
-        landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
-    )
-    # container_name_rqd = "--".join(
-    #     [f"{container_prefix}-{service_name_rqd}", env.get("LANDSCAPE", "default")]
-    # )
-    # host_name_rqd = ".".join(
-    #     [
-    #         service_name_rqd,
-    #         env["OPENSTUDIOLANDSCAPES__DOMAIN_LAN"],
-    #     ]
-    # )
-    volumes_rqd = [
-        f"{prepare_volumes['logs']}:/tmp/rqd/logs:rw",
-        f"{prepare_volumes['shots']}:/tmp/rqd/shots:rw",
-    ]
-
-    _volume_relative_rqd = []
-
-    for v in volumes_rqd:
-
-        host, container = v.split(":", maxsplit=1)
-
-        volume_dir_host_rel_path = get_relative_path_via_common_root(
-            context=context,
-            path_src=docker_compose_git_repository,  # Probably because the root docker-compose is the one in the Git repo
-            path_dst=pathlib.Path(host),
-            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
-        )
-
-        _volume_relative_rqd.append(
-            f"{volume_dir_host_rel_path.as_posix()}:{container}",
-        )
-
-    docker_dict_override = {
-        # "networks": compose_networks.get("networks", []),
-        "services": {
-            service_name_db: {
-                "container_name": container_name_db,
-                "hostname": host_name_db,
-                "domainname": config_engine.openstudiolandscapes__domain_lan,
-                "environment": {
-                    "POSTGRES_DB": CONFIG.OPENCUE_DB_PGDATABASE,
-                    "POSTGRES_PASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
-                    "POSTGRES_USER": CONFIG.OPENCUE_DB_PGUSER,
-                },
-                "volumes": [
-                    *_volume_relative_db,
-                ],
-                **copy.deepcopy(network_dict),
-                **copy.deepcopy(ports_dict_db),
-            },
-            service_name_flyway: {
-                "container_name": container_name_flyway,
-                "hostname": host_name_flyway,
-                "domainname": config_engine.openstudiolandscapes__domain_lan,
-                "environment": {
-                    "PGHOST": CONFIG.OPENCUE_DB_PGHOST,
-                    "PGDATABASE": CONFIG.OPENCUE_DB_PGDATABASE,
-                    "PGPASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
-                    "PGUSER": CONFIG.OPENCUE_DB_PGUSER,
-                    "PGPORT": str(CONFIG.OPENCUE_DB_PORT_CONTAINER),
-                },
-                **copy.deepcopy(network_dict),
-                # "networks": [
-                #     "mongodb",
-                #     "repository",
-                # ],
-            },
-            service_name_cuebot: {
-                "container_name": container_name_cuebot,
-                "hostname": host_name_cuebot,
-                "domainname": config_engine.openstudiolandscapes__domain_lan,
-                # This might not be very helpful as a health check
-                # but a health check seems mandatory for rqd to be
-                # dependent on this service
-                "healthcheck": {
-                    "test": [
-                        "CMD",
-                        "pidof",
-                        "java",
-                    ],
-                    "interval": "10s",
-                    "timeout": "2s",
-                    "retries": "3",
-                },
-                "environment": {
-                    "CUE_FRAME_LOG_DIR": "/tmp/rqd/logs",
-                },
-                # Todo:
-                #  - [ ] Need to find out whether `ports` Override
-                #  also overrides the exports in the source ayon-docker-compose.yml
-                #  "exports": OverrideArray([]),
-                # "ports": OverrideArray(
-                #     [
-                #         f"{env.get('AYON_PORT_HOST')}:{env.get('AYON_PORT_CONTAINER')}",
-                #     ]
-                # ),
-                **copy.deepcopy(network_dict),
-                **copy.deepcopy(ports_dict_cuebot),
-            },
-            service_name_rqd: {
-                "container_name": container_name_rqd,
-                "hostname": host_name_rqd,
-                "domainname": config_engine.openstudiolandscapes__domain_lan,
-                "environment": {
-                    "PYTHONUNBUFFERED": "1",
-                    # Todo:
-                    #  - [ ] use fqdn instead of just hostname?
-                    "CUEBOT_HOSTNAME": host_name_cuebot,
-                },
-                "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
-                "volumes": [
-                    *_volume_relative_rqd,
-                ],
-                **copy.deepcopy(network_dict),
-                **copy.deepcopy(ports_dict_rqd),
-            },
-        },
     }
 
-    if not CONFIG.deploy_rqd_on_cuebot_host:
-        docker_dict_override["services"][service_name_rqd] = ResetNull(docker_dict_override["services"][service_name_rqd])
-        context.log.debug(f"{docker_dict_override['services'] = }")
+    # For portability, convert absolute volume paths to relative paths
 
-    if CONFIG.OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
-        docker_dict_override["services"][service_name_cuebot][
-            "image"
-        ] = CONFIG.OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE
-        # docker_dict_override["services"][service_name_scheduler][
-        #     "image"
-        # ] = CONFIG.OPENCUE_SCHEDULER_DOCKER_IMAGE
+    _volume_relative = []
 
-    if "networks" in compose_networks:
-        network_dict = copy.deepcopy(compose_networks)
+    for v in volumes_dict["volumes"]:
+
+        host, container = v.split(":", maxsplit=1)
+
+        volume_dir_host_rel_path = get_relative_path_via_common_root(
+            context=context,
+            path_src=CONFIG.docker_compose_expanded,
+            path_dst=pathlib.Path(host),
+            path_common_root=pathlib.Path(env["DOT_LANDSCAPES"]),
+        )
+
+        _volume_relative.append(
+            f"{volume_dir_host_rel_path.as_posix()}:{container}",
+        )
+
+    volumes_dict = {
+        "volumes": [
+            *_volume_relative,
+        ]
+    }
+
+    service_name = "rqd"
+    container_name, host_name = get_docker_compose_names(
+        context=context,
+        service_name=f"opencue-{service_name}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+
+    """
+    """
+
+    if CONFIG.OPENCUE_DEPLOY_RQD:
+
+        docker_dict = {
+            "services": {
+                service_name: {
+                    "image": "docker.io/opencue/rqd",
+                    "container_name": container_name,
+                    "hostname": host_name,
+                    "domainname": config_engine.openstudiolandscapes__domain_lan,
+                    "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
+                    "environment": {
+                        "PYTHONUNBUFFERED": "1",
+                        # Todo:
+                        #  - [ ] use fqdn instead of just hostname?
+                        "CUEBOT_HOSTNAME": f"cuebot.{config_engine.openstudiolandscapes__domain_lan}",
+                    },
+                    **copy.deepcopy(volumes_dict),
+                    **copy.deepcopy(network_dict),
+                    # "links": [
+                    #     "cuebot",
+                    # ],
+                    "depends_on": {
+                        # "kitsu-init-db": {
+                        #     "condition": "service_completed_successfully",
+                        # },
+                    },
+                    **copy.deepcopy(ports_dict),
+                },
+            },
+        }
+
     else:
-        network_dict = {}
 
-    docker_compose_override = CONFIG.docker_compose_override_expanded
+        docker_dict = {}
 
-    docker_compose_override.parent.mkdir(parents=True, exist_ok=True)
+    docker_yaml = yaml.dump(docker_dict)
 
-    with open(docker_compose_git_repository, "r") as fr:
-        # Just load is as a str to be able to use it as a MetadataValue
-        # (also shows comments of the original yml which is insightful)
-        # No post processing for now
-        docker_yaml_repository: str = fr.read()
-
-    docker_yaml_override: str = yaml.dump(docker_dict_override)
-
-    with open(docker_compose_override, "w") as fw:
-        fw.write(docker_yaml_override)
-
-    # Write compose override to disk here to be able to reference
-    # it in the following step.
-    # It seems that it's necessary to apply overrides in
-    # include: path
-
-    # Convert absolute paths in `include` to
-    # relative ones
-    DOCKER_COMPOSE = CONFIG.docker_compose_expanded
-    DOCKER_COMPOSE.parent.mkdir(parents=True, exist_ok=True)
-
-    rel_paths = []
-    dot_landscapes = pathlib.Path(env["DOT_LANDSCAPES"])
-
-    # Todo:
-    #  - [x] find a better way to implement relpath with `from` and `via`
-    #  - [x] externalize
-    for path in [
-        docker_compose_git_repository,
-        docker_compose_override,
-    ]:
-        rel_path = get_relative_path_via_common_root(
-            context=context,
-            path_src=DOCKER_COMPOSE,
-            path_dst=pathlib.Path(path),
-            path_common_root=dot_landscapes,
-        )
-
-        rel_paths.append(rel_path.as_posix())
-
-    docker_dict_include = {
-        "include": [
-            {
-                "path": rel_paths,
-            },
-        ],
-    }
-
-    docker_yaml_include = yaml.dump(docker_dict_include)
-
-    # Write docker-compose.yaml
-    with open(DOCKER_COMPOSE, mode="w", encoding="utf-8") as fw:
-        fw.write(docker_yaml_include)
-
-    yield Output(docker_dict_include)
+    yield Output(docker_dict)
 
     yield AssetMaterialization(
         asset_key=context.asset_key,
         metadata={
-            "__".join(context.asset_key.path): MetadataValue.json(docker_dict_include),
-            "docker_yaml_repository": MetadataValue.md(
-                f"```yaml\n{docker_yaml_repository}\n```"
-            ),
-            "docker_yaml_override": MetadataValue.md(
-                f"```yaml\n{docker_yaml_override}\n```"
-            ),
-            "path_docker_yaml_override": MetadataValue.path(docker_compose_override),
-            # Todo: "cmd_docker_run": MetadataValue.path(cmd_list_to_str(cmd_docker_run)),
+            "__".join(context.asset_key.path): MetadataValue.json(docker_dict),
+            "docker_yaml": MetadataValue.md(f"```yaml\n{docker_yaml}\n```"),
+            "OPENCUE_DEPLOY_RQD": MetadataValue.bool(CONFIG.OPENCUE_DEPLOY_RQD  ),
         },
     )
 
@@ -658,11 +1369,9 @@ def compose_rest_gateway(
     if "networks" in compose_networks:
         network_dict = {"networks": list(compose_networks.get("networks", {}).keys())}
         ports_dict_rest_gateway = {
-            "ports": OverrideArray(
-                [
-                    f"{CONFIG.OPENCUE_REST_GATEWAY_PORT_HOST}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
-                ]
-            ),
+            "ports": [
+                f"{CONFIG.OPENCUE_REST_GATEWAY_PORT_HOST}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
+            ]
         }
     elif "network_mode" in compose_networks:
         network_dict = {"network_mode": compose_networks["network_mode"]}
@@ -838,11 +1547,9 @@ def compose_cueweb(
     if "networks" in compose_networks:
         network_dict = {"networks": list(compose_networks.get("networks", {}).keys())}
         ports_dict_cueweb = {
-            "ports": OverrideArray(
-                [
-                    f"{CONFIG.OPENCUE_CUEWEB_PORT_HOST}:{CONFIG.OPENCUE_CUEWEB_PORT_CONTAINER}",
-                ]
-            ),
+            "ports": [
+                f"{CONFIG.OPENCUE_CUEWEB_PORT_HOST}:{CONFIG.OPENCUE_CUEWEB_PORT_CONTAINER}",
+            ]
         }
     elif "network_mode" in compose_networks:
         network_dict = {"network_mode": compose_networks["network_mode"]}
@@ -1073,11 +1780,47 @@ def opencue_test_suite__rest_gateway_docker_compose(
     )
 
 
+# compose_maps_ = {
+#     # "compose_override": AssetIn(
+#     #     AssetKey([*ASSET_HEADER["key_prefix"], "compose_override"]),
+#     # ),
+#     "compose_db": AssetIn(
+#         AssetKey([*ASSET_HEADER["key_prefix"], "compose_db"]),
+#     ),
+#     "compose_flyway": AssetIn(
+#         AssetKey([*ASSET_HEADER["key_prefix"], "compose_flyway"]),
+#     ),
+#     "compose_cuebot": AssetIn(
+#         AssetKey([*ASSET_HEADER["key_prefix"], "compose_cuebot"]),
+#     ),
+#     "compose_rest_gateway": AssetIn(
+#         AssetKey([*ASSET_HEADER["key_prefix"], "compose_rest_gateway"]),
+#     ),
+#     "compose_cueweb": AssetIn(
+#         AssetKey([*ASSET_HEADER["key_prefix"], "compose_cueweb"]),
+#     ),
+# }
+
+
+
+
 @asset(
     **ASSET_HEADER,
     ins={
-        "compose_override": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_override"]),
+        # "compose_override": AssetIn(
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "compose_override"]),
+        # ),
+        "compose_db": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_db"]),
+        ),
+        "compose_flyway": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_flyway"]),
+        ),
+        "compose_cuebot": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_cuebot"]),
+        ),
+        "compose_rqd": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_rqd"]),
         ),
         "compose_rest_gateway": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_rest_gateway"]),
