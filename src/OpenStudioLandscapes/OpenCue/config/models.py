@@ -57,7 +57,7 @@ class Config(FeatureBaseModel):
     )
 
     OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: bool = Field(
-        default=False,
+        default=True,
     )
 
     OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: str = Field(
