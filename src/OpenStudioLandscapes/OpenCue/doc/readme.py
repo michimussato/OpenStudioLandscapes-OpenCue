@@ -52,6 +52,20 @@ CUEBOT_HOSTNAME=CUEBOT_HOSTNAME rqd
 ```
 """
 
+"""
+Docs:
+- https://docs.opencue.io/docs
+
+Tutorials:
+- https://docs.opencue.io/docs/tutorials
+
+Reference:
+- https://docs.opencue.io/docs/reference
+
+User Guides:
+- https://docs.opencue.io/docs/user-guides
+"""
+
 
 # Todo:
 #  - [ ] RQD is actually the worker. Break it out to separate compose scope.

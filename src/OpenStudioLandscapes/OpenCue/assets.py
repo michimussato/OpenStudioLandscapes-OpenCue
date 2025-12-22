@@ -906,6 +906,9 @@ def compose_rqd(
         Official Resources:
         - [Deploying OpenCue REST Gateway](https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/)
           - [Docker Compose Configuration (Separate File)](https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#docker-compose-configuration-separate-file)
+        - [OpenCue REST API Reference](https://docs.opencue.io/docs/reference/rest-api-reference/)
+        - [Using the REST API](https://docs.opencue.io/docs/user-guides/using-rest-api/)
+        - [REST API Tutorial](https://docs.opencue.io/docs/tutorials/rest-api-tutorial/)
         """
     ),
 )
@@ -1078,7 +1081,11 @@ def compose_rest_gateway(
     description=textwrap.dedent(
         """
         Official Resources:
+        - [CueWeb User Guide](https://docs.opencue.io/docs/user-guides/cueweb-user-guide/)
+        - [CueWeb Tutorial](https://docs.opencue.io/docs/tutorials/cueweb-tutorial/)
+        - [CueWeb Development Guide](https://docs.opencue.io/docs/developer-guide/cueweb-development/)
         - [Deploying CueWeb](https://docs.opencue.io/docs/getting-started/deploying-cueweb/)
+        - [CueWeb Reference](https://docs.opencue.io/docs/reference/cueweb/)
         """
     ),
 )
