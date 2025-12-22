@@ -28,6 +28,15 @@ class Config(FeatureBaseModel):
 
     definitions: str = "OpenStudioLandscapes.OpenCue.definitions"
 
+    opencue_str: str = "opencue"
+
+    opencue_db: str = "opencue-db"
+    opencue_flyway: str = "opencue-flyway"
+    opencue_cuebot: str = "opencue-cuebot"
+    opencue_cueweb: str = "opencue-cueweb"
+    opencue_rest_gateway: str = "opencue-rest-gateway"
+    opencue_rqd: str = "opencue-rqd"
+
     repository_url: HttpUrl = Field(
         default="https://github.com/AcademySoftwareFoundation/OpenCue.git",
     )

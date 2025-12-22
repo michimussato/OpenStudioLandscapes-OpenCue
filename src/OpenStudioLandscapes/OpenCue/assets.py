@@ -326,13 +326,29 @@ def compose_cuebot(
         ]
     }
 
-    service_name = "cuebot"
-    container_name, host_name = get_docker_compose_names(
+    service_name_cuebot = CONFIG.opencue_cuebot
+    container_name_cuebot, host_name_cuebot = get_docker_compose_names(
         context=context,
-        service_name=f"opencue-{service_name}",
+        service_name=service_name_cuebot,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
+
+    service_name_db = CONFIG.opencue_db
+    container_name_db, host_name_db = get_docker_compose_names(
+        context=context,
+        service_name=service_name_db,
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+
+    service_name_flyway = CONFIG.opencue_flyway
+    # container_name_flyway, host_name_flyway = get_docker_compose_names(
+    #     context=context,
+    #     service_name=service_name_flyway,
+    #     landscape_id=env.get("LANDSCAPE", "default"),
+    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    # )
 
     if CONFIG.OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
         d = {
@@ -351,12 +367,12 @@ def compose_cuebot(
 
     docker_dict = {
         "services": {
-            service_name: {
+            service_name_cuebot: {
                 # Todo:
                 #  - [ ] prebuilt image?
                 **d,
-                "container_name": container_name,
-                "hostname": host_name,
+                "container_name": container_name_cuebot,
+                "hostname": host_name_cuebot,
                 "domainname": config_engine.openstudiolandscapes__domain_lan,
                 "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
                 "environment": {
@@ -365,13 +381,13 @@ def compose_cuebot(
                 **copy.deepcopy(volumes_dict),
                 **copy.deepcopy(network_dict),
                 "links": [
-                    "db",
+                    service_name_db,
                 ],
                 "depends_on": {
-                    "db": {
+                    service_name_db: {
                         "condition": "service_started",
                     },
-                    "flyway": {
+                    service_name_flyway: {
                         "condition": "service_completed_successfully",
                     },
                 },
@@ -385,7 +401,7 @@ def compose_cuebot(
                 #     "retries": "3",
                 # },
                 "command": [
-                    f"--datasource.cue-data-source.jdbc-url=jdbc:postgresql://db/{CONFIG.OPENCUE_DB_PGDATABASE}",
+                    f"--datasource.cue-data-source.jdbc-url=jdbc:postgresql://{container_name_db}/{CONFIG.OPENCUE_DB_PGDATABASE}",
                     f"--datasource.cue-data-source.username={CONFIG.OPENCUE_DB_PGUSER}",
                     f"--datasource.cue-data-source.password={CONFIG.OPENCUE_DB_PGPASSWORD}",
                 ],
@@ -496,26 +512,26 @@ def compose_flyway(
         ]
     }
 
-    service_name_db = "db"
+    service_name_db = CONFIG.opencue_db
     container_name_db, _ = get_docker_compose_names(
         context=context,
-        service_name=f"opencue-{service_name_db}",
+        service_name=service_name_db,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    service_name = "flyway"
-    container_name, host_name = get_docker_compose_names(
+    service_name_flyway = CONFIG.opencue_flyway
+    container_name_flyway, host_name_flyway = get_docker_compose_names(
         context=context,
-        service_name=f"opencue-{service_name}",
+        service_name=service_name_flyway,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
     docker_dict = {
         "services": {
-            service_name: {
-                "container_name": container_name,
+            service_name_flyway: {
+                "container_name": container_name_flyway,
                 # Todo:
                 #  - [x] prebuilt image?
                 #        Not available
@@ -526,7 +542,7 @@ def compose_flyway(
                         "flyway.Dockerfile",
                     ).as_posix(),
                 },
-                "hostname": host_name,
+                "hostname": host_name_flyway,
                 "domainname": config_engine.openstudiolandscapes__domain_lan,
                 "restart": DockerComposePolicies.RESTART_POLICY.NO.value,
                 "environment": {
@@ -542,10 +558,10 @@ def compose_flyway(
                 **copy.deepcopy(volumes_dict),
                 **copy.deepcopy(network_dict),
                 "links": [
-                    "db",
+                    service_name_db,
                 ],
                 "depends_on": {
-                    "db": {
+                    service_name_db: {
                         "condition": "service_started",
                     },
                 },
@@ -670,10 +686,10 @@ def compose_db(
         ]
     }
 
-    service_name = "db"
+    service_name = CONFIG.opencue_db
     container_name, host_name = get_docker_compose_names(
         context=context,
-        service_name=f"opencue-{service_name}",
+        service_name=service_name,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
@@ -812,18 +828,18 @@ def compose_rqd(
         ]
     }
 
-    service_name_cuebot = "cuebot"
+    service_name_cuebot = CONFIG.opencue_cuebot
     container_name_cuebot, host_name_cuebot = get_docker_compose_names(
         context=context,
-        service_name=f"opencue-{service_name_cuebot}",
+        service_name=service_name_cuebot,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    service_name = "rqd"
+    service_name = CONFIG.opencue_rqd
     container_name, host_name = get_docker_compose_names(
         context=context,
-        service_name=f"opencue-{service_name}",
+        service_name=service_name,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
@@ -951,7 +967,7 @@ def compose_rest_gateway(
         ]
     }
 
-    container_prefix = "opencue"
+    # container_prefix = "opencue"
 
     # service_name_rqd = "rqd"
     # container_name_rqd, host_name_rqd = get_docker_compose_names(
@@ -961,15 +977,15 @@ def compose_rest_gateway(
     #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
     # )
 
-    service_name_cuebot = "cuebot"
+    service_name_cuebot = CONFIG.opencue_cuebot
     container_name_cuebot, _ = get_docker_compose_names(
         context=context,
-        service_name=f"{container_prefix}-{service_name_cuebot}",
+        service_name=service_name_cuebot,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    service_name_db = "db"
+    service_name_db = CONFIG.opencue_db
     # container_name_db, _ = get_docker_compose_names(
     #     context=context,
     #     service_name=f"{container_prefix}-{service_name_db}",
@@ -977,10 +993,10 @@ def compose_rest_gateway(
     #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
     # )
 
-    service_name_rest_gateway = "opencue-rest-gateway"
+    service_name_rest_gateway = CONFIG.opencue_rest_gateway
     container_name_rest_gateway, host_name_rest_gateway = get_docker_compose_names(
         context=context,
-        service_name=f"{container_prefix}-{service_name_rest_gateway}",
+        service_name=service_name_rest_gateway,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
@@ -1118,7 +1134,7 @@ def compose_cueweb(
             f"{volume_dir_host_rel_path.as_posix()}:{container}",
         )
 
-    container_prefix = "opencue"
+    # container_prefix = "opencue"
 
     # service_name_rqd = "rqd"
     # container_name_rqd, host_name_rqd = get_docker_compose_names(
@@ -1136,26 +1152,26 @@ def compose_cueweb(
     #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
     # )
 
-    service_name_db = "db"
+    service_name_db = CONFIG.opencue_db
     container_name_db, _ = get_docker_compose_names(
         context=context,
-        service_name=f"{container_prefix}-{service_name_db}",
+        service_name=service_name_db,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    service_name_rest_gateway = "opencue-rest-gateway"
+    service_name_rest_gateway = CONFIG.opencue_rest_gateway
     container_name_rest_gateway, host_name_rest_gateway = get_docker_compose_names(
         context=context,
-        service_name=f"{container_prefix}-{service_name_rest_gateway}",
+        service_name=service_name_rest_gateway,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    service_name_cueweb = "cueweb"
+    service_name_cueweb = CONFIG.opencue_cueweb
     container_name_cueweb, host_name_cueweb = get_docker_compose_names(
         context=context,
-        service_name=f"{container_prefix}-{service_name_cueweb}",
+        service_name=service_name_cueweb,
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
