@@ -44,14 +44,6 @@ class Config(FeatureBaseModel):
         default="docker-compose.yml",
     )
 
-    docker_compose_override: pathlib.Path = Field(
-        default=pathlib.Path(
-            "{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/docker_compose/docker-compose.override.yml"
-        ),
-        description="The path to the `docker-compose.yml` file.",
-        frozen=True,
-    )
-
     OPENCUE_DEPLOY_RQD: bool = Field(
         default=False,
     )
@@ -211,24 +203,6 @@ class Config(FeatureBaseModel):
     )
 
     # EXPANDABLE PATHS
-    @property
-    def docker_compose_override_expanded(self) -> pathlib.Path:
-        LOGGER.debug(f"{self.env = }")
-        if self.env is None:
-            raise KeyError("`env` is `None`.")
-        LOGGER.debug(f"Expanding {self.docker_compose_override}...")
-        ret = pathlib.Path(
-            self.docker_compose_override.expanduser()
-            .as_posix()
-            .format(
-                **{
-                    "FEATURE": self.feature_name,
-                    **self.env,
-                }
-            )
-        )
-        return ret
-
     @property
     def OPENCUE_DB_INSTALL_DESTINATION_expanded(self) -> pathlib.Path:
         LOGGER.debug(f"{self.env = }")

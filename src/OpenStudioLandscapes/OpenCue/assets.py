@@ -496,6 +496,14 @@ def compose_flyway(
         ]
     }
 
+    service_name_db = "db"
+    container_name_db, _ = get_docker_compose_names(
+        context=context,
+        service_name=f"opencue-{service_name_db}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+
     service_name = "flyway"
     container_name, host_name = get_docker_compose_names(
         context=context,
@@ -522,7 +530,7 @@ def compose_flyway(
                 "domainname": config_engine.openstudiolandscapes__domain_lan,
                 "restart": DockerComposePolicies.RESTART_POLICY.NO.value,
                 "environment": {
-                    "PGHOST": CONFIG.OPENCUE_DB_PGHOST,
+                    "PGHOST": container_name_db,
                     "PGDATABASE": CONFIG.OPENCUE_DB_PGDATABASE,
                     "PGPASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
                     "PGUSER": CONFIG.OPENCUE_DB_PGUSER,
@@ -804,6 +812,14 @@ def compose_rqd(
         ]
     }
 
+    service_name_cuebot = "cuebot"
+    container_name_cuebot, host_name_cuebot = get_docker_compose_names(
+        context=context,
+        service_name=f"opencue-{service_name_cuebot}",
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+
     service_name = "rqd"
     container_name, host_name = get_docker_compose_names(
         context=context,
@@ -826,7 +842,7 @@ def compose_rqd(
                         "PYTHONUNBUFFERED": "1",
                         # Todo:
                         #  - [ ] use fqdn instead of just hostname?
-                        "CUEBOT_HOSTNAME": f"cuebot.{config_engine.openstudiolandscapes__domain_lan}",
+                        "CUEBOT_HOSTNAME": container_name_cuebot,  # f"cuebot.{config_engine.openstudiolandscapes__domain_lan}",
                     },
                     **copy.deepcopy(volumes_dict),
                     **copy.deepcopy(network_dict),
@@ -946,7 +962,7 @@ def compose_rest_gateway(
     # )
 
     service_name_cuebot = "cuebot"
-    container_name_cuebot, host_name_cuebot = get_docker_compose_names(
+    container_name_cuebot, _ = get_docker_compose_names(
         context=context,
         service_name=f"{container_prefix}-{service_name_cuebot}",
         landscape_id=env.get("LANDSCAPE", "default"),
@@ -954,12 +970,12 @@ def compose_rest_gateway(
     )
 
     service_name_db = "db"
-    container_name_db, _ = get_docker_compose_names(
-        context=context,
-        service_name=f"{container_prefix}-{service_name_db}",
-        landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
-    )
+    # container_name_db, _ = get_docker_compose_names(
+    #     context=context,
+    #     service_name=f"{container_prefix}-{service_name_db}",
+    #     landscape_id=env.get("LANDSCAPE", "default"),
+    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    # )
 
     service_name_rest_gateway = "opencue-rest-gateway"
     container_name_rest_gateway, host_name_rest_gateway = get_docker_compose_names(
@@ -1164,10 +1180,11 @@ def compose_cueweb(
                 "domainname": config_engine.openstudiolandscapes__domain_lan,
                 "environment": {
                     # https://docs.opencue.io/docs/getting-started/deploying-cueweb/#environment-configuration
-                    "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{host_name_rest_gateway}.{config_engine.openstudiolandscapes__domain_lan}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
-                    "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}.{config_engine.openstudiolandscapes__domain_lan}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
+                    "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{host_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
+                    "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
                     "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
                     "NEXT_TELEMETRY_DISABLED": 1,
+                    "NEXT_PUBLIC_AUTH_PROVIDER": "",
                 },
                 "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
                 "volumes": [
