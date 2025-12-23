@@ -56,41 +56,511 @@ A local config store location will be created if it doesn't exist, together with
 The following settings are available in `OpenStudioLandscapes-OpenCue` and are accessible throughout the [`OpenStudioLandscapes-OpenCue`](https://github.com/michimussato/OpenStudioLandscapes-OpenCue/tree/main/OpenStudioLandscapes/OpenCue/config/models.py) package.
 
 ```yaml
-# Base Information
-group_name: "OpenStudioLandscapes_OpenCue"
-key_prefixes:
-  - "OpenStudioLandscapes_OpenCue"
+# ===
+# env
+# ---
+#
+# Type: typing.Dict
+# Base Class:
+#     Description:
+#         None
+#     Default value:
+#         None
 
-#compose_scope: "default"
 
-#enabled: true
+# =============
+# config_engine
+# -------------
+#
+# Type: <class 'OpenStudioLandscapes.engine.config.models.ConfigEngine'>
+# Base Class:
+#     Description:
+#         None
+#     Default value:
+#         None
 
-#repository_url: "https://github.com/AcademySoftwareFoundation/OpenCue.git",
-#repository_branch: "master"
-#repository_subdir: "OpenCue"
-#docker_compose_yml: "docker-compose.yml"
-#docker_compose_override: "{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/docker_compose/docker-compose.override.yml"
-#OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: true
-#OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: "docker.io/opencue/cuebot"
 
-# CueBot
-#OPENCUE_WEB_PORT_CONTAINER: 3000
-#OPENCUE_WEB_PORT_HOST: 1234
-#OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST: 8443
-#OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER: 8443
+# =============
+# config_parent
+# -------------
+#
+# Type: <class 'OpenStudioLandscapes.engine.config.models.FeatureBaseModel'>
+# Base Class:
+#     Description:
+#         None
+#     Default value:
+#         None
 
-# RQD
-#OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST: 8444
-#OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER: 8444
 
-# DB
-#OPENCUE_DB_INSTALL_DESTINATION: "{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/data/opencue_db/postgresql"
-#OPENCUE_DB_PORT_HOST: 5342
-#OPENCUE_DB_PORT_CONTAINER: 5432
-#OPENCUE_DB_PGHOST: "opencue-db"
-#OPENCUE_DB_PGDATABASE: "cuebot"
-#OPENCUE_DB_PGPASSWORD: "cuebot_password"
-#OPENCUE_DB_PGUSER: "cuebot"
+# ============
+# distribution
+# ------------
+#
+# Type: <class 'importlib.metadata.Distribution'>
+# Base Class:
+#     Description:
+#         None
+#     Default value:
+#         None
+
+
+# ==========
+# group_name
+# ----------
+#
+# Type: <class 'str'>
+# Base Class:
+#     Description:
+#         None
+#     Default value:
+#         None
+
+
+# ============
+# key_prefixes
+# ------------
+#
+# Type: typing.List[str]
+# Base Class:
+#     Description:
+#         None
+#     Default value:
+#         None
+
+
+# =======
+# enabled
+# -------
+#
+# Type: <class 'bool'>
+# Base Class:
+#     Description:
+#         Whether the Feature is enabled or not.
+#     Default value:
+#         True
+
+
+# =============
+# compose_scope
+# -------------
+#
+# Type: <class 'str'>
+# Base Class:
+#     Description:
+#         None
+#     Default value:
+#         default
+
+
+# ============
+# feature_name
+# ------------
+#
+# Type: <class 'str'>
+# Base Class:
+#     Description:
+#         The name of the feature. It is derived from the `OpenStudioLandscapes.<Feature>.dist` attribute.
+#     Default value:
+#         PydanticUndefined
+feature_name: OpenStudioLandscapes-OpenCue
+
+
+# ==============
+# docker_compose
+# --------------
+#
+# Type: <class 'pathlib.Path'>
+# Base Class:
+#     Description:
+#         The path to the `docker-compose.yml` file.
+#     Default value:
+#         {DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/docker_compose/docker-compose.yml
+
+
+# ===========
+# opencue_str
+# -----------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+opencue_str: opencue
+
+
+# ==========
+# opencue_db
+# ----------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+opencue_db: opencue-db
+
+
+# ==============
+# opencue_flyway
+# --------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+opencue_flyway: opencue-flyway
+
+
+# ==============
+# opencue_cuebot
+# --------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+opencue_cuebot: opencue-cuebot
+
+
+# ==============
+# opencue_cueweb
+# --------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+opencue_cueweb: opencue-cueweb
+
+
+# ====================
+# opencue_rest_gateway
+# --------------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+opencue_rest_gateway: opencue-rest-gateway
+
+
+# ===========
+# opencue_rqd
+# -----------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+opencue_rqd: opencue-rqd
+
+
+# ==============
+# repository_url
+# --------------
+#
+# Type: <class 'pydantic.networks.HttpUrl'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+repository_url: https://github.com/AcademySoftwareFoundation/OpenCue.git
+
+
+# =================
+# repository_branch
+# -----------------
+#
+# Type: <enum 'Branches'>
+# Sub Class Description:
+#     The branch of the OpenCue repository.
+# Examples:
+#     ['master']
+repository_branch: master
+
+
+# =================
+# repository_subdir
+# -----------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+repository_subdir: OpenCue
+
+
+# ==================
+# docker_compose_yml
+# ------------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+docker_compose_yml: docker-compose.yml
+
+
+# ==================
+# OPENCUE_DEPLOY_RQD
+# ------------------
+#
+# Type: <class 'bool'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_DEPLOY_RQD: false
+
+
+# ========================================
+# OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE
+# ----------------------------------------
+#
+# Type: <class 'bool'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: true
+
+
+# ====================================
+# OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE
+# ------------------------------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: docker.io/opencue/cuebot
+
+
+# ========================
+# OPENCUE_CUEWEB_PORT_HOST
+# ------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_CUEWEB_PORT_HOST: 3100
+
+
+# =============================
+# OPENCUE_CUEWEB_PORT_CONTAINER
+# -----------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_CUEWEB_PORT_CONTAINER: 3000
+
+
+# =========================
+# OPENCUE_CUEWEB_JWT_SECRET
+# -------------------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_CUEWEB_JWT_SECRET: default-secret-key
+
+
+# ==============================
+# OPENCUE_REST_GATEWAY_PORT_HOST
+# ------------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_REST_GATEWAY_PORT_HOST: 8448
+
+
+# ===================================
+# OPENCUE_REST_GATEWAY_PORT_CONTAINER
+# -----------------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_REST_GATEWAY_PORT_CONTAINER: 8448
+
+
+# =====================
+# OPENCUE_WEB_PORT_HOST
+# ---------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_WEB_PORT_HOST: 1234
+
+
+# ==========================
+# OPENCUE_WEB_PORT_CONTAINER
+# --------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_WEB_PORT_CONTAINER: 3000
+
+
+# =================================
+# OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST
+# ---------------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST: 8443
+
+
+# ======================================
+# OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER
+# --------------------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER: 8443
+
+
+# =================================
+# OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST
+# ---------------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST: 8444
+
+
+# ======================================
+# OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER
+# --------------------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER: 8444
+
+
+# ==============================
+# OPENCUE_DB_INSTALL_DESTINATION
+# ------------------------------
+#
+# Type: <class 'pathlib.Path'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_DB_INSTALL_DESTINATION: '{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/data/opencue_db/postgresql'
+
+
+# ====================
+# OPENCUE_DB_PORT_HOST
+# --------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_DB_PORT_HOST: 5342
+
+
+# =========================
+# OPENCUE_DB_PORT_CONTAINER
+# -------------------------
+#
+# Type: <class 'int'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_DB_PORT_CONTAINER: 5432
+
+
+# =================
+# OPENCUE_DB_PGHOST
+# -----------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_DB_PGHOST: opencue-db
+
+
+# =====================
+# OPENCUE_DB_PGDATABASE
+# ---------------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_DB_PGDATABASE: cuebot
+
+
+# =================
+# OPENCUE_DB_PGUSER
+# -----------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_DB_PGUSER: cuebot
+
+
+# =====================
+# OPENCUE_DB_PGPASSWORD
+# ---------------------
+#
+# Type: <class 'str'>
+# Sub Class Description:
+#     None
+# Examples:
+#     None
+OPENCUE_DB_PGPASSWORD: cuebot_password
+
+
 
 ```
 
@@ -217,4 +687,4 @@ Currently, the following Python interpreters are enabled for testing:
 
 ***
 
-Last changed: **2025-12-19 21:11:35 UTC**
+Last changed: **2025-12-23 12:26:18 UTC**
