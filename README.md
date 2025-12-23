@@ -62,10 +62,17 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are a
 #
 # Type: typing.Dict
 # Base Class:
+#     Required: False
 #     Description:
 #         None
 #     Default value:
 #         None
+# Description:
+#     None
+# Required: False
+#     None
+# Examples:
+#     None
 
 
 # =============
@@ -74,10 +81,17 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are a
 #
 # Type: <class 'OpenStudioLandscapes.engine.config.models.ConfigEngine'>
 # Base Class:
+#     Required: False
 #     Description:
 #         None
 #     Default value:
 #         None
+# Description:
+#     None
+# Required: False
+#     None
+# Examples:
+#     None
 
 
 # =============
@@ -86,10 +100,17 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are a
 #
 # Type: <class 'OpenStudioLandscapes.engine.config.models.FeatureBaseModel'>
 # Base Class:
+#     Required: False
 #     Description:
 #         None
 #     Default value:
 #         None
+# Description:
+#     None
+# Required: False
+#     None
+# Examples:
+#     None
 
 
 # ============
@@ -98,10 +119,17 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are a
 #
 # Type: <class 'importlib.metadata.Distribution'>
 # Base Class:
+#     Required: False
 #     Description:
 #         None
 #     Default value:
 #         None
+# Description:
+#     None
+# Required: False
+#     None
+# Examples:
+#     None
 
 
 # ==========
@@ -110,10 +138,17 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are a
 #
 # Type: <class 'str'>
 # Base Class:
+#     Required: False
 #     Description:
 #         None
 #     Default value:
 #         None
+# Description:
+#     None
+# Required: False
+#     None
+# Examples:
+#     None
 
 
 # ============
@@ -122,10 +157,17 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are a
 #
 # Type: typing.List[str]
 # Base Class:
+#     Required: False
 #     Description:
 #         None
 #     Default value:
 #         None
+# Description:
+#     None
+# Required: False
+#     None
+# Examples:
+#     None
 
 
 # =======
@@ -134,10 +176,17 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are a
 #
 # Type: <class 'bool'>
 # Base Class:
+#     Required: False
 #     Description:
 #         Whether the Feature is enabled or not.
 #     Default value:
 #         True
+# Description:
+#     Whether the Feature is enabled or not.
+# Required: False
+#     Whether the Feature is enabled or not.
+# Examples:
+#     None
 
 
 # =============
@@ -146,10 +195,17 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are a
 #
 # Type: <class 'str'>
 # Base Class:
+#     Required: False
 #     Description:
 #         None
 #     Default value:
 #         default
+# Description:
+#     None
+# Required: False
+#     None
+# Examples:
+#     ['default', 'license_server', 'worker']
 
 
 # ============
@@ -158,10 +214,17 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are a
 #
 # Type: <class 'str'>
 # Base Class:
+#     Required: True
 #     Description:
 #         The name of the feature. It is derived from the `OpenStudioLandscapes.<Feature>.dist` attribute.
 #     Default value:
 #         PydanticUndefined
+# Description:
+#     None
+# Required: False
+#     None
+# Examples:
+#     None
 feature_name: OpenStudioLandscapes-OpenCue
 
 
@@ -171,10 +234,17 @@ feature_name: OpenStudioLandscapes-OpenCue
 #
 # Type: <class 'pathlib.Path'>
 # Base Class:
+#     Required: False
 #     Description:
 #         The path to the `docker-compose.yml` file.
 #     Default value:
 #         {DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/docker_compose/docker-compose.yml
+# Description:
+#     The path to the `docker-compose.yml` file.
+# Required: False
+#     The path to the `docker-compose.yml` file.
+# Examples:
+#     None
 
 
 # ===========
@@ -182,7 +252,9 @@ feature_name: OpenStudioLandscapes-OpenCue
 # -----------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -194,7 +266,9 @@ opencue_str: opencue
 # ----------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -206,7 +280,9 @@ opencue_db: opencue-db
 # --------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -218,7 +294,9 @@ opencue_flyway: opencue-flyway
 # --------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -230,7 +308,9 @@ opencue_cuebot: opencue-cuebot
 # --------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -242,7 +322,9 @@ opencue_cueweb: opencue-cueweb
 # --------------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -254,7 +336,9 @@ opencue_rest_gateway: opencue-rest-gateway
 # -----------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -266,7 +350,9 @@ opencue_rqd: opencue-rqd
 # --------------
 #
 # Type: <class 'pydantic.networks.HttpUrl'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -278,7 +364,9 @@ repository_url: https://github.com/AcademySoftwareFoundation/OpenCue.git
 # -----------------
 #
 # Type: <enum 'Branches'>
-# Sub Class Description:
+# Description:
+#     The branch of the OpenCue repository.
+# Required: False
 #     The branch of the OpenCue repository.
 # Examples:
 #     ['master']
@@ -290,7 +378,9 @@ repository_branch: master
 # -----------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -302,7 +392,9 @@ repository_subdir: OpenCue
 # ------------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -314,7 +406,9 @@ docker_compose_yml: docker-compose.yml
 # ------------------
 #
 # Type: <class 'bool'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -326,7 +420,9 @@ OPENCUE_DEPLOY_RQD: false
 # ----------------------------------------
 #
 # Type: <class 'bool'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -338,7 +434,9 @@ OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: true
 # ------------------------------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -350,7 +448,9 @@ OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: docker.io/opencue/cuebot
 # ------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -362,7 +462,9 @@ OPENCUE_CUEWEB_PORT_HOST: 3100
 # -----------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -374,7 +476,9 @@ OPENCUE_CUEWEB_PORT_CONTAINER: 3000
 # -------------------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -386,7 +490,9 @@ OPENCUE_CUEWEB_JWT_SECRET: default-secret-key
 # ------------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -398,7 +504,9 @@ OPENCUE_REST_GATEWAY_PORT_HOST: 8448
 # -----------------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -410,7 +518,9 @@ OPENCUE_REST_GATEWAY_PORT_CONTAINER: 8448
 # ---------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -422,7 +532,9 @@ OPENCUE_WEB_PORT_HOST: 1234
 # --------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -434,7 +546,9 @@ OPENCUE_WEB_PORT_CONTAINER: 3000
 # ---------------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -446,7 +560,9 @@ OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST: 8443
 # --------------------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -458,7 +574,9 @@ OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER: 8443
 # ---------------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -470,7 +588,9 @@ OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST: 8444
 # --------------------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -482,7 +602,9 @@ OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER: 8444
 # ------------------------------
 #
 # Type: <class 'pathlib.Path'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -494,7 +616,9 @@ OPENCUE_DB_INSTALL_DESTINATION: '{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/data/ope
 # --------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -506,7 +630,9 @@ OPENCUE_DB_PORT_HOST: 5342
 # -------------------------
 #
 # Type: <class 'int'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -518,7 +644,9 @@ OPENCUE_DB_PORT_CONTAINER: 5432
 # -----------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -530,7 +658,9 @@ OPENCUE_DB_PGHOST: opencue-db
 # ---------------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -542,7 +672,9 @@ OPENCUE_DB_PGDATABASE: cuebot
 # -----------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -554,7 +686,9 @@ OPENCUE_DB_PGUSER: cuebot
 # ---------------------
 #
 # Type: <class 'str'>
-# Sub Class Description:
+# Description:
+#     None
+# Required: False
 #     None
 # Examples:
 #     None
@@ -687,4 +821,4 @@ Currently, the following Python interpreters are enabled for testing:
 
 ***
 
-Last changed: **2025-12-23 12:26:18 UTC**
+Last changed: **2025-12-23 12:48:39 UTC**
