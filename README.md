@@ -703,9 +703,6 @@ OPENCUE_DB_PGUSER: cuebot
 # Examples:
 #     None
 OPENCUE_DB_PGPASSWORD: cuebot_password
-
-
-
 ```
 
 ***
@@ -831,4 +828,4 @@ Currently, the following Python interpreters are enabled for testing:
 
 ***
 
-Last changed: **2025-12-23 13:35:02 UTC**
+Last changed: **2025-12-23 13:37:22 UTC**
