@@ -1,6 +1,6 @@
 import enum
 import pathlib
-from typing import List
+from typing import List, Dict
 
 from dagster import get_dagster_logger
 from pydantic import (
@@ -122,6 +122,15 @@ class Config(FeatureBaseModel):
         #  - [ ] set this dynamically after issue is fixed:
         #        - https://github.com/AcademySoftwareFoundation/OpenCue/issues/2127
         default="default-secret-key",
+    )
+
+    OPENCUE_CUEWEB_ADDITIONAL_ENV: Dict = Field(
+        default={
+            "NEXT_TELEMETRY_DISABLED": 1,
+            "NEXT_PUBLIC_AUTH_PROVIDER": "",
+        },
+        description="Disabling third-party authentication is not possible at the moment. "
+                    "Bug report pending: https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133",
     )
 
     # REST Gateway

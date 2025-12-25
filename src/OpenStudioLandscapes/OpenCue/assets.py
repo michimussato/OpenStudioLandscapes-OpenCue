@@ -1206,8 +1206,7 @@ def compose_cueweb(
                     "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{host_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
                     "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
                     "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
-                    "NEXT_TELEMETRY_DISABLED": 1,
-                    "NEXT_PUBLIC_AUTH_PROVIDER": "",
+                    **CONFIG.OPENCUE_CUEWEB_ADDITIONAL_ENV,
                 },
                 "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
                 "volumes": [
