@@ -78,7 +78,7 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are b
 
 
 <details>
-<summary><code>config.yml</code> (click to expand)</summary>
+<summary><code>config.yml</code></summary>
 
 
 ```yaml
@@ -779,4 +779,4 @@ To follow up on the previous LinkedIn publications, visit:
 
 ***
 
-Last changed: **2025-12-26 10:56:52 UTC**
+Last changed: **2025-12-26 10:59:46 UTC**
