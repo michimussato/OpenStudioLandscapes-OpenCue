@@ -7,7 +7,10 @@
    2. [Install](#install)
    3. [Configure](#configure)
       1. [Default Configuration](#default-configuration)
-2. [Community](#community)
+2. [External Resources](#external-resources)
+   1. [Official Documentation](#official-documentation)
+   2. [Components](#components)
+3. [Community](#community)
 
 ***
 
@@ -758,6 +761,25 @@ OPENCUE_DB_PGPASSWORD: cuebot_password
 
 ***
 
+# External Resources
+
+[![Logo OpenCue ](https://docs.opencue.io/assets/images/opencue_logo_with_text.png)](https://www.opencue.io/)
+
+OpenCue is an official ASWF project and provides an open source render management system.
+
+## Official Documentation
+
+- [Homepage](https://www.opencue.io/)
+- [Documentation](https://docs.opencue.io/docs/)]
+- [Tutorials](https://docs.opencue.io/docs/tutorials)
+- [Reference](https://docs.opencue.io/docs/reference)
+- [User Guides](https://docs.opencue.io/docs/user-guides)
+- [GitHub](https://github.com/AcademySoftwareFoundation/OpenCue)
+
+## Components
+
+- [OpenCue Overview](https://docs.opencue.io/docs/concepts/opencue-overview/)
+
 ***
 
 # Community
@@ -781,4 +803,4 @@ To follow up on the previous LinkedIn publications, visit:
 
 ***
 
-Last changed: **2025-12-26 13:35:02 UTC**
+Last changed: **2025-12-28 10:38:56 UTC**
