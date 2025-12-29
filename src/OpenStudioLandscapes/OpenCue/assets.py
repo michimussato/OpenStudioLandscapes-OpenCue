@@ -19,7 +19,6 @@ from dagster import (
     Output,
     asset,
 )
-
 from git.exc import GitCommandError
 from OpenStudioLandscapes.engine.common_assets.compose import get_compose
 from OpenStudioLandscapes.engine.common_assets.compose_scope import (
@@ -270,7 +269,7 @@ def compose_networks(
             command: --datasource.cue-data-source.jdbc-url=jdbc:postgresql://db/cuebot --datasource.cue-data-source.username=cuebot --datasource.cue-data-source.password=cuebot_password
         ```
         """
-    )
+    ),
 )
 def compose_cuebot(
     context: AssetExecutionContext,
@@ -297,9 +296,7 @@ def compose_cuebot(
     elif "network_mode" in compose_networks:
         network_dict = {"network_mode": compose_networks["network_mode"]}
 
-    volumes_dict = {
-        "volumes": []
-    }
+    volumes_dict = {"volumes": []}
 
     # For portability, convert absolute volume paths to relative paths
 
@@ -351,9 +348,7 @@ def compose_cuebot(
     # )
 
     if CONFIG.OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
-        d = {
-            "image": CONFIG.OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE
-        }
+        d = {"image": CONFIG.OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE}
     else:
         d = {
             "build": {
@@ -460,7 +455,7 @@ def compose_cuebot(
             command: /opt/scripts/migrate.sh
         ```
         """
-    )
+    ),
 )
 def compose_flyway(
     context: AssetExecutionContext,
@@ -483,9 +478,7 @@ def compose_flyway(
     elif "network_mode" in compose_networks:
         network_dict = {"network_mode": compose_networks["network_mode"]}
 
-    volumes_dict = {
-        "volumes": []
-    }
+    volumes_dict = {"volumes": []}
 
     # For portability, convert absolute volume paths to relative paths
 
@@ -624,7 +617,7 @@ def compose_flyway(
               - ./sandbox/db-data:/var/lib/postgresql/data
         ```
         """
-    )
+    ),
 )
 def compose_db(
     context: AssetExecutionContext,
@@ -693,7 +686,6 @@ def compose_db(
         landscape_id=env.get("LANDSCAPE", "default"),
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
-
 
     docker_dict = {
         "services": {
@@ -768,7 +760,7 @@ def compose_db(
               - /tmp/rqd/shots:/tmp/rqd/shots
         ```
         """
-    )
+    ),
 )
 def compose_rqd(
     context: AssetExecutionContext,
@@ -883,7 +875,7 @@ def compose_rqd(
         metadata={
             "__".join(context.asset_key.path): MetadataValue.json(docker_dict),
             "docker_yaml": MetadataValue.md(f"```yaml\n{docker_yaml}\n```"),
-            "OPENCUE_DEPLOY_RQD": MetadataValue.bool(CONFIG.OPENCUE_DEPLOY_RQD  ),
+            "OPENCUE_DEPLOY_RQD": MetadataValue.bool(CONFIG.OPENCUE_DEPLOY_RQD),
         },
     )
 
@@ -937,9 +929,7 @@ def compose_rest_gateway(
     elif "network_mode" in compose_networks:
         network_dict = {"network_mode": compose_networks["network_mode"]}
 
-    volumes_dict = {
-        "volumes": []
-    }
+    volumes_dict = {"volumes": []}
 
     docker_compose_git_repository = pathlib.Path(
         clone_repository.joinpath("docker-compose.yml")
@@ -1284,24 +1274,24 @@ def compose_cueweb(
              -d '{}'
         ```
         """
-    )
+    ),
 )
 def opencue_test_suite__rest_gateway_docker_compose(
     context: AssetExecutionContext,
     CONFIG: Config,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
-) -> Generator[
-    Output[subprocess.CompletedProcess] | AssetMaterialization, None, None
-]:
+) -> Generator[Output[subprocess.CompletedProcess] | AssetMaterialization, None, None]:
 
     env: Dict = CONFIG.env
 
-    cmd = (f"pwd "
-           "&& echo ${JWT_SECRET} "
-           "&& export JWT_SECRET "
-           f"&& . .venv/bin/activate "
-           f"&& cd {clone_repository.as_posix()}/rest_gateway "
-           f"&& {shutil.which('bash')} test_rest_gateway_docker_compose.sh")
+    cmd = (
+        f"pwd "
+        "&& echo ${JWT_SECRET} "
+        "&& export JWT_SECRET "
+        f"&& . .venv/bin/activate "
+        f"&& cd {clone_repository.as_posix()}/rest_gateway "
+        f"&& {shutil.which('bash')} test_rest_gateway_docker_compose.sh"
+    )
 
     proc: subprocess.CompletedProcess = subprocess.run(
         # [
@@ -1371,6 +1361,8 @@ def compose_maps(
     yield AssetMaterialization(
         asset_key=context.asset_key,
         metadata={
-            "__".join(context.asset_key.path): MetadataValue.md(f"```json\n{ret_json}\n```"),
+            "__".join(context.asset_key.path): MetadataValue.md(
+                f"```json\n{ret_json}\n```"
+            ),
         },
     )

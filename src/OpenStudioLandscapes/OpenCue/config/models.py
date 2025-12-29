@@ -1,6 +1,6 @@
 import enum
 import pathlib
-from typing import List, Dict
+from typing import Dict, List
 
 from dagster import get_dagster_logger
 from pydantic import (
@@ -11,10 +11,10 @@ from pydantic import (
 
 LOGGER = get_dagster_logger(__name__)
 
-from OpenStudioLandscapes.engine.config.str_gen import get_config_str
 from OpenStudioLandscapes.engine.config.models import FeatureBaseModel
+from OpenStudioLandscapes.engine.config.str_gen import get_config_str
 
-from OpenStudioLandscapes.OpenCue import dist, constants
+from OpenStudioLandscapes.OpenCue import constants, dist
 
 
 class Branches(enum.StrEnum):
@@ -130,7 +130,7 @@ class Config(FeatureBaseModel):
             "NEXT_PUBLIC_AUTH_PROVIDER": "",
         },
         description="Disabling third-party authentication is not possible at the moment. "
-                    "Bug report pending: https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133",
+        "Bug report pending: https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133",
     )
 
     # REST Gateway
@@ -244,4 +244,3 @@ class Config(FeatureBaseModel):
 CONFIG_STR = get_config_str(
     Config=Config,
 )
-

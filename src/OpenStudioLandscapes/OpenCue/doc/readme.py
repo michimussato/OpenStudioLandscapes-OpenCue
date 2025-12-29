@@ -2,7 +2,6 @@ import textwrap
 
 import snakemd
 
-
 """
 [CueGUI](https://docs.opencue.io/docs/getting-started/installing-cuegui/)
 
