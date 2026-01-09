@@ -107,7 +107,7 @@ class Config(FeatureBaseModel):
     # https://docs.opencue.io/docs/getting-started/deploying-scheduler/
 
     OPENCUE_CUEWEB_PORT_HOST: PositiveInt = Field(
-        default=3100,
+        default=3111,
     )
 
     OPENCUE_CUEWEB_PORT_CONTAINER: PositiveInt = Field(
