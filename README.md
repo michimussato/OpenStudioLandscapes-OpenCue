@@ -70,7 +70,7 @@ A local config store location will be created if it doesn't exist, together with
 > [!TIP]
 > 
 > To specify a config store location different than
-> the default, you can do so be setting the environment variable
+> the default, you can do so by setting the environment variable
 > `OPENSTUDIOLANDSCAPES__CONFIGSTORE_ROOT`:
 > 
 > ```shell
@@ -498,7 +498,7 @@ OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: docker.io/opencue/cuebot
 #     False
 # Examples:
 #     None
-OPENCUE_CUEWEB_PORT_HOST: 3100
+OPENCUE_CUEWEB_PORT_HOST: 3111
 
 
 # =============================
@@ -812,4 +812,4 @@ To follow up on the previous LinkedIn publications, visit:
 
 ***
 
-Last changed: **2025-12-31 12:41:14 UTC**
+Last changed: **2026-01-22 09:30:33 UTC**

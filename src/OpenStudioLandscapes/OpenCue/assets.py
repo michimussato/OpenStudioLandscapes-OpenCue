@@ -20,7 +20,9 @@ from dagster import (
     asset,
 )
 from git.exc import GitCommandError
+from OpenStudioLandscapes.engine.common_assets.cmd import get_feature__cmd
 from OpenStudioLandscapes.engine.common_assets.compose import get_compose
+
 # from OpenStudioLandscapes.engine.common_assets.compose_scope import (
 #     get_compose_scope_group__cmd,
 # )
@@ -28,7 +30,6 @@ from OpenStudioLandscapes.engine.common_assets.docker_compose_graph import (
     get_docker_compose_graph,
 )
 from OpenStudioLandscapes.engine.common_assets.feature import get_feature__CONFIG
-from OpenStudioLandscapes.engine.common_assets.cmd import get_feature__cmd
 from OpenStudioLandscapes.engine.common_assets.feature_out import get_feature_out_v2
 from OpenStudioLandscapes.engine.common_assets.group_in import (
     get_feature_in,
@@ -241,8 +242,7 @@ def compose_networks(
             AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
     },
-    description=textwrap.dedent(
-        """
+    description=textwrap.dedent("""
         Based on
         - [docker-compose.yml](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
         
@@ -269,8 +269,7 @@ def compose_networks(
               - CUE_FRAME_LOG_DIR=/tmp/rqd/logs
             command: --datasource.cue-data-source.jdbc-url=jdbc:postgresql://db/cuebot --datasource.cue-data-source.username=cuebot --datasource.cue-data-source.password=cuebot_password
         ```
-        """
-    ),
+        """),
 )
 def compose_cuebot(
     context: AssetExecutionContext,
@@ -432,8 +431,7 @@ def compose_cuebot(
             AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
     },
-    description=textwrap.dedent(
-        """
+    description=textwrap.dedent("""
         Based on
         - [docker-compose.yml](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
         
@@ -455,8 +453,7 @@ def compose_cuebot(
               - PGPORT=5432
             command: /opt/scripts/migrate.sh
         ```
-        """
-    ),
+        """),
 )
 def compose_flyway(
     context: AssetExecutionContext,
@@ -599,8 +596,7 @@ def compose_flyway(
         #     AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         # ),
     },
-    description=textwrap.dedent(
-        """
+    description=textwrap.dedent("""
         Based on
         - [docker-compose.yml](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
         
@@ -617,8 +613,7 @@ def compose_flyway(
             volumes:
               - ./sandbox/db-data:/var/lib/postgresql/data
         ```
-        """
-    ),
+        """),
 )
 def compose_db(
     context: AssetExecutionContext,
@@ -737,8 +732,7 @@ def compose_db(
             AssetKey([*ASSET_HEADER["key_prefix"], "prepare_volumes"]),
         ),
     },
-    description=textwrap.dedent(
-        """
+    description=textwrap.dedent("""
         Based on
         - [docker-compose.yml](https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/docker-compose.yml)
         
@@ -760,8 +754,7 @@ def compose_db(
               - /tmp/rqd/logs:/tmp/rqd/logs
               - /tmp/rqd/shots:/tmp/rqd/shots
         ```
-        """
-    ),
+        """),
 )
 def compose_rqd(
     context: AssetExecutionContext,
@@ -894,16 +887,14 @@ def compose_rqd(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
     },
-    description=textwrap.dedent(
-        """
+    description=textwrap.dedent("""
         Official Resources:
         - [Deploying OpenCue REST Gateway](https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/)
           - [Docker Compose Configuration (Separate File)](https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#docker-compose-configuration-separate-file)
         - [OpenCue REST API Reference](https://docs.opencue.io/docs/reference/rest-api-reference/)
         - [Using the REST API](https://docs.opencue.io/docs/user-guides/using-rest-api/)
         - [REST API Tutorial](https://docs.opencue.io/docs/tutorials/rest-api-tutorial/)
-        """
-    ),
+        """),
 )
 def compose_rest_gateway(
     context: AssetExecutionContext,
@@ -1069,16 +1060,14 @@ def compose_rest_gateway(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
     },
-    description=textwrap.dedent(
-        """
+    description=textwrap.dedent("""
         Official Resources:
         - [CueWeb User Guide](https://docs.opencue.io/docs/user-guides/cueweb-user-guide/)
         - [CueWeb Tutorial](https://docs.opencue.io/docs/tutorials/cueweb-tutorial/)
         - [CueWeb Development Guide](https://docs.opencue.io/docs/developer-guide/cueweb-development/)
         - [Deploying CueWeb](https://docs.opencue.io/docs/getting-started/deploying-cueweb/)
         - [CueWeb Reference](https://docs.opencue.io/docs/reference/cueweb/)
-        """
-    ),
+        """),
 )
 def compose_cueweb(
     context: AssetExecutionContext,
@@ -1250,8 +1239,7 @@ def compose_cueweb(
             AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
     },
-    description=textwrap.dedent(
-        """
+    description=textwrap.dedent("""
         Test requires `JWT_SECRET` set to default `default-secret-key`.
         
         Bug report pending: 
@@ -1274,8 +1262,7 @@ def compose_cueweb(
              -X POST "http://localhost:8448/show.ShowInterface/GetShows" \\
              -d '{}'
         ```
-        """
-    ),
+        """),
 )
 def opencue_test_suite__rest_gateway_docker_compose(
     context: AssetExecutionContext,

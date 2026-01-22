@@ -86,24 +86,18 @@ def readme_feature(
 
     doc.add_paragraph(
         snakemd.Inline(
-            text=textwrap.dedent(
-                """\
+            text=textwrap.dedent("""\
                 Logo OpenCue\
-                """
-            ),
+                """),
             image="https://docs.opencue.io/assets/images/opencue_logo_with_text.png",
             link="https://www.opencue.io/",
         ).__str__()
     )
 
-    doc.add_paragraph(
-        text=textwrap.dedent(
-            """\
+    doc.add_paragraph(text=textwrap.dedent("""\
             OpenCue is an official ASWF project and provides 
             an open source render management system.\
-            """
-        )
-    )
+            """))
 
     doc.add_heading(
         text="Official Documentation",
