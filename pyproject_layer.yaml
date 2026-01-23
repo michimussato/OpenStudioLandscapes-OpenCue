@@ -4,17 +4,19 @@ project:
   description: OpenCue Feature for OpenStudioLandscapes
   name: OpenStudioLandscapes-OpenCue
   optional-dependencies:
+    optional-base:
+    - OpenStudioLandscapes @ git+https://github.com/michimussato/OpenStudioLandscapes.git
     dev:
-    - OpenStudioLandscapes-OpenCue[testing]
     - OpenStudioLandscapes-OpenCue[lint]
-    - OpenStudioLandscapes-OpenCue[nox]
     - OpenStudioLandscapes-OpenCue[sbom]
-    - OpenStudioLandscapes-OpenCue[coverage]
     - OpenStudioLandscapes-OpenCue[readme]
-    nox:
-    - OpenStudioLandscapes-OpenCue[testing]
+    lint:
+    - OpenStudioLandscapes-OpenCue[optional-base]
+    readme:
+    - OpenStudioLandscapes-OpenCue[optional-base]
     sbom:
     - OpenStudioLandscapes-OpenCue[graphviz]
+    - OpenStudioLandscapes-OpenCue[optional-base]
   urls:
     Homepage: https://github.com/michimussato/OpenStudioLandscapes-OpenCue
 tool:
