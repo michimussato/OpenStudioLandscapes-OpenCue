@@ -85,7 +85,6 @@ src/OpenStudioLandscapes/OpenCue/config/models.py:21:4: C0103: Class constant na
 src/OpenStudioLandscapes/OpenCue/config/models.py:24:0: C0115: Missing class docstring (missing-class-docstring)
 src/OpenStudioLandscapes/OpenCue/config/models.py:225:4: C0116: Missing function or method docstring (missing-function-docstring)
 src/OpenStudioLandscapes/OpenCue/config/models.py:225:4: C0103: Attribute name "OPENCUE_DB_INSTALL_DESTINATION_expanded" doesn't conform to snake_case naming style (invalid-name)
-src/OpenStudioLandscapes/OpenCue/config/models.py:232:12: E1101: Instance of 'FieldInfo' has no 'expanduser' member (no-member)
 ************* Module OpenStudioLandscapes.OpenCue.doc.readme
 src/OpenStudioLandscapes/OpenCue/doc/readme.py:37:0: C0301: Line too long (123/100) (line-too-long)
 src/OpenStudioLandscapes/OpenCue/doc/readme.py:69:1: W0511: Todo: (fixme)
@@ -96,5 +95,5 @@ src/OpenStudioLandscapes/OpenCue/doc/readme.py:73:0: C0116: Missing function or 
 src/OpenStudioLandscapes/OpenCue/doc/readme.py:88:8: C2801: Unnecessarily calls dunder method __str__. Use str built-in function. (unnecessary-dunder-call)
 
 ------------------------------------------------------------------
-Your code has been rated at 7.22/10 (previous run: 6.66/10, +0.57)
+Your code has been rated at 7.37/10 (previous run: 7.28/10, +0.09)
 

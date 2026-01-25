@@ -1053,19 +1053,6 @@
         "message-id": "C0103"
     },
     {
-        "type": "error",
-        "module": "OpenStudioLandscapes.OpenCue.config.models",
-        "obj": "Config.OPENCUE_DB_INSTALL_DESTINATION_expanded",
-        "line": 232,
-        "column": 12,
-        "endLine": 232,
-        "endColumn": 58,
-        "path": "src/OpenStudioLandscapes/OpenCue/config/models.py",
-        "symbol": "no-member",
-        "message": "Instance of 'FieldInfo' has no 'expanduser' member",
-        "message-id": "E1101"
-    },
-    {
         "type": "convention",
         "module": "OpenStudioLandscapes.OpenCue.doc.readme",
         "obj": "",
