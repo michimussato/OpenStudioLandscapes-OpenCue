@@ -322,6 +322,7 @@ def compose_cuebot(
             {
                 *_volume_relative,
                 *config_engine.global_bind_volumes,
+                *CONFIG.local_bind_volumes,
             }
         )
     }
@@ -376,6 +377,7 @@ def compose_cuebot(
                 "environment": {
                     "CUE_FRAME_LOG_DIR": "/tmp/rqd/logs",
                     **config_engine.global_environment_variables,
+                    **CONFIG.local_environment_variables,
                 },
                 **copy.deepcopy(volumes_dict),
                 **copy.deepcopy(network_dict),
@@ -506,6 +508,7 @@ def compose_flyway(
             {
                 *_volume_relative,
                 *config_engine.global_bind_volumes,
+                *CONFIG.local_bind_volumes,
             }
         )
     }
@@ -550,6 +553,7 @@ def compose_flyway(
                     "PGUSER": CONFIG.OPENCUE_DB_PGUSER,
                     "PGPORT": str(CONFIG.OPENCUE_DB_PORT_CONTAINER),
                     **config_engine.global_environment_variables,
+                    **CONFIG.local_environment_variables,
                 },
                 "command": [
                     "/opt/scripts/migrate.sh",
@@ -682,6 +686,7 @@ def compose_db(
             {
                 *_volume_relative,
                 *config_engine.global_bind_volumes,
+                *CONFIG.local_bind_volumes,
             }
         )
     }
@@ -707,6 +712,7 @@ def compose_db(
                     "POSTGRES_PASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
                     "POSTGRES_DB": CONFIG.OPENCUE_DB_PGDATABASE,
                     **config_engine.global_environment_variables,
+                    **CONFIG.local_environment_variables,
                 },
                 **copy.deepcopy(volumes_dict),
                 **copy.deepcopy(network_dict),
@@ -825,6 +831,7 @@ def compose_rqd(
             {
                 *_volume_relative,
                 *config_engine.global_bind_volumes,
+                *CONFIG.local_bind_volumes,
             }
         )
     }
@@ -860,6 +867,8 @@ def compose_rqd(
                         # Todo:
                         #  - [ ] use fqdn instead of just hostname?
                         "CUEBOT_HOSTNAME": container_name_cuebot,  # f"cuebot.{config_engine.openstudiolandscapes__domain_lan}",
+                        **config_engine.global_environment_variables,
+                        **CONFIG.local_environment_variables,
                     },
                     **copy.deepcopy(volumes_dict),
                     **copy.deepcopy(network_dict),
@@ -966,6 +975,7 @@ def compose_rest_gateway(
             {
                 *_volume_relative_rest_gateway,
                 *config_engine.global_bind_volumes,
+                *CONFIG.local_bind_volumes,
             }
         )
     }
@@ -1028,6 +1038,7 @@ def compose_rest_gateway(
                     "LOG_LEVEL": "debug",
                     "CORS_ALLOWED_ORIGINS": "*",
                     **config_engine.global_environment_variables,
+                    **CONFIG.local_environment_variables,
                 },
                 "depends_on": {
                     service_name_db: {
@@ -1140,11 +1151,14 @@ def compose_cueweb(
             f"{volume_dir_host_rel_path.as_posix()}:{container}",
         )
 
+    # Todo
+    #  - [ ] No volumes needed?
     # volumes_dict_cueweb = {
     #     "volumes": list(
     #         {
     #             *_volume_relative,
     #             *config_engine.global_bind_volumes,
+    #             *CONFIG.local_bind_volumes,
     #         }
     #     ),
     # }
@@ -1216,6 +1230,7 @@ def compose_cueweb(
                     "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
                     **CONFIG.OPENCUE_CUEWEB_ADDITIONAL_ENV,
                     **config_engine.global_environment_variables,
+                    **CONFIG.local_environment_variables,
                 },
                 "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
                 "volumes": [
