@@ -318,9 +318,12 @@ def compose_cuebot(
         )
 
     volumes_dict = {
-        "volumes": [
-            *_volume_relative,
-        ]
+        "volumes": list(
+            {
+                *_volume_relative,
+                *config_engine.global_bind_volumes,
+            }
+        )
     }
 
     service_name_cuebot = CONFIG.opencue_cuebot
@@ -372,6 +375,7 @@ def compose_cuebot(
                 "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
                 "environment": {
                     "CUE_FRAME_LOG_DIR": "/tmp/rqd/logs",
+                    **config_engine.global_environment_variables,
                 },
                 **copy.deepcopy(volumes_dict),
                 **copy.deepcopy(network_dict),
@@ -498,9 +502,12 @@ def compose_flyway(
         )
 
     volumes_dict = {
-        "volumes": [
-            *_volume_relative,
-        ]
+        "volumes": list(
+            {
+                *_volume_relative,
+                *config_engine.global_bind_volumes,
+            }
+        )
     }
 
     service_name_db = CONFIG.opencue_db
@@ -542,6 +549,7 @@ def compose_flyway(
                     "PGPASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
                     "PGUSER": CONFIG.OPENCUE_DB_PGUSER,
                     "PGPORT": str(CONFIG.OPENCUE_DB_PORT_CONTAINER),
+                    **config_engine.global_environment_variables,
                 },
                 "command": [
                     "/opt/scripts/migrate.sh",
@@ -670,9 +678,12 @@ def compose_db(
         )
 
     volumes_dict = {
-        "volumes": [
-            *_volume_relative,
-        ]
+        "volumes": list(
+            {
+                *_volume_relative,
+                *config_engine.global_bind_volumes,
+            }
+        )
     }
 
     service_name = CONFIG.opencue_db
@@ -695,6 +706,7 @@ def compose_db(
                     "POSTGRES_USER": CONFIG.OPENCUE_DB_PGUSER,
                     "POSTGRES_PASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
                     "POSTGRES_DB": CONFIG.OPENCUE_DB_PGDATABASE,
+                    **config_engine.global_environment_variables,
                 },
                 **copy.deepcopy(volumes_dict),
                 **copy.deepcopy(network_dict),
@@ -809,9 +821,12 @@ def compose_rqd(
         )
 
     volumes_dict = {
-        "volumes": [
-            *_volume_relative,
-        ]
+        "volumes": list(
+            {
+                *_volume_relative,
+                *config_engine.global_bind_volumes,
+            }
+        )
     }
 
     service_name_cuebot = CONFIG.opencue_cuebot
@@ -947,9 +962,12 @@ def compose_rest_gateway(
         )
 
     volumes_dict = {
-        "volumes": [
-            *_volume_relative_rest_gateway,
-        ]
+        "volumes": list(
+            {
+                *_volume_relative_rest_gateway,
+                *config_engine.global_bind_volumes,
+            }
+        )
     }
 
     # container_prefix = "opencue"
@@ -1009,6 +1027,7 @@ def compose_rest_gateway(
                     "JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
                     "LOG_LEVEL": "debug",
                     "CORS_ALLOWED_ORIGINS": "*",
+                    **config_engine.global_environment_variables,
                 },
                 "depends_on": {
                     service_name_db: {
@@ -1121,6 +1140,15 @@ def compose_cueweb(
             f"{volume_dir_host_rel_path.as_posix()}:{container}",
         )
 
+    # volumes_dict_cueweb = {
+    #     "volumes": list(
+    #         {
+    #             *_volume_relative,
+    #             *config_engine.global_bind_volumes,
+    #         }
+    #     ),
+    # }
+
     # container_prefix = "opencue"
 
     # service_name_rqd = "rqd"
@@ -1187,6 +1215,7 @@ def compose_cueweb(
                     "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
                     "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
                     **CONFIG.OPENCUE_CUEWEB_ADDITIONAL_ENV,
+                    **config_engine.global_environment_variables,
                 },
                 "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
                 "volumes": [
