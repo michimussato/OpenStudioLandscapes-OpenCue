@@ -229,7 +229,7 @@ class Config(FeatureBaseModel):
 
         LOGGER.debug(f"Expanding {self.OPENCUE_DB_INSTALL_DESTINATION}...")
         ret = pathlib.Path(
-            self.OPENCUE_DB_INSTALL_DESTINATION.expanduser()
+            self.OPENCUE_DB_INSTALL_DESTINATION.expanduser()  # pylint: disable=E1101
             .as_posix()
             .format(
                 **{
