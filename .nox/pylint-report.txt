@@ -75,16 +75,15 @@ src/OpenStudioLandscapes/OpenCue/__init__.py:6:5: W0511: TODO: Import directly (
 src/OpenStudioLandscapes/OpenCue/__init__.py:1:0: C0114: Missing module docstring (missing-module-docstring)
 src/OpenStudioLandscapes/OpenCue/__init__.py:1:0: C0103: Module name "OpenCue" doesn't conform to snake_case naming style (invalid-name)
 ************* Module OpenStudioLandscapes.OpenCue.config.models
-src/OpenStudioLandscapes/OpenCue/config/models.py:121:9: W0511: Todo (fixme)
+src/OpenStudioLandscapes/OpenCue/config/models.py:120:9: W0511: Todo (fixme)
 src/OpenStudioLandscapes/OpenCue/config/models.py:1:0: C0114: Missing module docstring (missing-module-docstring)
 src/OpenStudioLandscapes/OpenCue/config/models.py:14:0: C0413: Import "from OpenStudioLandscapes.engine.config.models import FeatureBaseModel" should be placed at the top of the module (wrong-import-position)
-src/OpenStudioLandscapes/OpenCue/config/models.py:15:0: C0413: Import "from OpenStudioLandscapes.engine.config.str_gen import get_config_str" should be placed at the top of the module (wrong-import-position)
-src/OpenStudioLandscapes/OpenCue/config/models.py:17:0: C0413: Import "from OpenStudioLandscapes.OpenCue import constants, dist" should be placed at the top of the module (wrong-import-position)
-src/OpenStudioLandscapes/OpenCue/config/models.py:20:0: C0115: Missing class docstring (missing-class-docstring)
-src/OpenStudioLandscapes/OpenCue/config/models.py:21:4: C0103: Class constant name "master" doesn't conform to UPPER_CASE naming style (invalid-name)
-src/OpenStudioLandscapes/OpenCue/config/models.py:24:0: C0115: Missing class docstring (missing-class-docstring)
-src/OpenStudioLandscapes/OpenCue/config/models.py:225:4: C0116: Missing function or method docstring (missing-function-docstring)
-src/OpenStudioLandscapes/OpenCue/config/models.py:225:4: C0103: Attribute name "OPENCUE_DB_INSTALL_DESTINATION_expanded" doesn't conform to snake_case naming style (invalid-name)
+src/OpenStudioLandscapes/OpenCue/config/models.py:16:0: C0413: Import "from OpenStudioLandscapes.OpenCue import constants, dist" should be placed at the top of the module (wrong-import-position)
+src/OpenStudioLandscapes/OpenCue/config/models.py:19:0: C0115: Missing class docstring (missing-class-docstring)
+src/OpenStudioLandscapes/OpenCue/config/models.py:20:4: C0103: Class constant name "master" doesn't conform to UPPER_CASE naming style (invalid-name)
+src/OpenStudioLandscapes/OpenCue/config/models.py:23:0: C0115: Missing class docstring (missing-class-docstring)
+src/OpenStudioLandscapes/OpenCue/config/models.py:224:4: C0116: Missing function or method docstring (missing-function-docstring)
+src/OpenStudioLandscapes/OpenCue/config/models.py:224:4: C0103: Attribute name "OPENCUE_DB_INSTALL_DESTINATION_expanded" doesn't conform to snake_case naming style (invalid-name)
 ************* Module OpenStudioLandscapes.OpenCue.doc.readme
 src/OpenStudioLandscapes/OpenCue/doc/readme.py:37:0: C0301: Line too long (123/100) (line-too-long)
 src/OpenStudioLandscapes/OpenCue/doc/readme.py:69:1: W0511: Todo: (fixme)
@@ -95,5 +94,5 @@ src/OpenStudioLandscapes/OpenCue/doc/readme.py:73:0: C0116: Missing function or 
 src/OpenStudioLandscapes/OpenCue/doc/readme.py:88:8: C2801: Unnecessarily calls dunder method __str__. Use str built-in function. (unnecessary-dunder-call)
 
 ------------------------------------------------------------------
-Your code has been rated at 7.37/10 (previous run: 7.28/10, +0.09)
+Your code has been rated at 7.40/10 (previous run: 7.30/10, +0.09)
 

@@ -149,7 +149,7 @@
         {
           "comment": "PackageSource: VCS 'git'",
           "type": "vcs",
-          "url": "https://github.com/michimussato/OpenStudioLandscapes.git#ab517e6524bbddea4573767a9e9d0b545d10bc64"
+          "url": "https://github.com/michimussato/OpenStudioLandscapes.git#2e698295e7f737228c24a41b436c2f8fafef7636"
         },
         {
           "comment": "from packaging metadata Project-URL: Homepage",
@@ -161,10 +161,10 @@
       "properties": [
         {
           "name": "cdx:python:package:source:vcs:commit_id",
-          "value": "ab517e6524bbddea4573767a9e9d0b545d10bc64"
+          "value": "2e698295e7f737228c24a41b436c2f8fafef7636"
         }
       ],
-      "purl": "pkg:pypi/openstudiolandscapes@0.0.0?vcs_url=git%2Bhttps://github.com/michimussato/OpenStudioLandscapes.git%40ab517e6524bbddea4573767a9e9d0b545d10bc64",
+      "purl": "pkg:pypi/openstudiolandscapes@0.0.0?vcs_url=git%2Bhttps://github.com/michimussato/OpenStudioLandscapes.git%402e698295e7f737228c24a41b436c2f8fafef7636",
       "type": "library",
       "version": "0.0.0"
     },
@@ -2305,7 +2305,7 @@
       "version": "0.1.2"
     },
     {
-      "bom-ref": "multidict==6.7.0",
+      "bom-ref": "multidict==6.7.1",
       "description": "multidict implementation",
       "externalReferences": [
         {
@@ -2350,9 +2350,9 @@
         }
       ],
       "name": "multidict",
-      "purl": "pkg:pypi/multidict@6.7.0",
+      "purl": "pkg:pypi/multidict@6.7.1",
       "type": "library",
-      "version": "6.7.0"
+      "version": "6.7.1"
     },
     {
       "bom-ref": "nox==2025.11.12",
@@ -4704,7 +4704,7 @@
       "dependsOn": [
         "typing_extensions==4.15.0"
       ],
-      "ref": "multidict==6.7.0"
+      "ref": "multidict==6.7.1"
     },
     {
       "dependsOn": [
@@ -5003,14 +5003,14 @@
     {
       "dependsOn": [
         "idna==3.11",
-        "multidict==6.7.0",
+        "multidict==6.7.1",
         "propcache==0.4.1"
       ],
       "ref": "yarl==1.22.0"
     }
   ],
   "metadata": {
-    "timestamp": "2026-01-25T22:46:26.158514+00:00",
+    "timestamp": "2026-01-26T18:28:45.925677+00:00",
     "tools": {
       "components": [
         {
@@ -5114,7 +5114,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:bc504317-f82f-4caa-a4c2-0ba5fadd4342",
+  "serialNumber": "urn:uuid:543b1130-3343-4a88-ad91-3d2379fc101e",
   "version": 1,
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
