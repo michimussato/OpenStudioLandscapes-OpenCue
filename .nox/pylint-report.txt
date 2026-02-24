@@ -94,5 +94,5 @@ src/OpenStudioLandscapes/OpenCue/doc/readme.py:73:0: C0116: Missing function or 
 src/OpenStudioLandscapes/OpenCue/doc/readme.py:88:8: C2801: Unnecessarily calls dunder method __str__. Use str built-in function. (unnecessary-dunder-call)
 
 ------------------------------------------------------------------
-Your code has been rated at 7.40/10 (previous run: 5.52/10, +1.87)
+Your code has been rated at 7.40/10 (previous run: 5.61/10, +1.79)
 
