@@ -64,6 +64,10 @@ class Config(FeatureBaseModel):
         default="docker.io/opencue/cuebot",
     )
 
+    OPENCUE_RQD_DOCKER_IMAGE: str = Field(
+        default="docker.io/opencue/rqd",
+    )
+
     # this doesn't seem to work with an override:
     # removing a service from an existing docker-compose
     # file. Maybe we read the original and generate

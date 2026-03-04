@@ -860,7 +860,7 @@ def compose_rqd(
         docker_dict = {
             "services": {
                 service_name: {
-                    "image": "docker.io/opencue/rqd",
+                    "image": CONFIG.OPENCUE_RQD_DOCKER_IMAGE,
                     "container_name": container_name,
                     "hostname": host_name,
                     "domainname": config_engine.openstudiolandscapes__domain_lan,
