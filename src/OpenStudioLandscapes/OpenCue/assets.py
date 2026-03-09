@@ -809,6 +809,12 @@ def build_docker_image(
 
     pip_install_str: str = get_pip_install_str(pip_install_packages=CONFIG.pip_packages)
 
+    # Todo
+    #  - [ ] [root@lenovo opencue]# rez env blender -- which blender
+    #        /data/share/tools/blender-5.0.1-linux-x64/blender
+    #        [root@lenovo opencue]# rez env blender -- blender -b -v
+    #        blender: error while loading shared libraries: libX11.so.6: cannot open shared object file: No such file or directory
+
     # @formatter:off
     docker_file_str = textwrap.dedent("""\
         # {auto_generated}
