@@ -810,10 +810,26 @@ def build_docker_image(
     pip_install_str: str = get_pip_install_str(pip_install_packages=CONFIG.pip_packages)
 
     # Todo
-    #  - [ ] [root@lenovo opencue]# rez env blender -- which blender
+    #  - [x] [root@lenovo opencue]# rez env blender -- which blender
     #        /data/share/tools/blender-5.0.1-linux-x64/blender
     #        [root@lenovo opencue]# rez env blender -- blender -b -v
+    #        #
     #        blender: error while loading shared libraries: libX11.so.6: cannot open shared object file: No such file or directory
+    #        [root@lenovo opencue]# rez env blender -- blender -b -v
+    #        Blender 5.0.1 (hash a3db93c5b259 built 2025-12-16 01:30:59)
+    #        Blender 5.0.1
+    #                build date: 2025-12-16
+    #                build time: 01:30:59
+    #                build commit date: 2025-12-15
+    #                build commit time: 16:36
+    #                build hash: a3db93c5b259
+    #                build branch: blender-v5.0-release
+    #                build platform: Linux
+    #                build type: Release
+    #                build c flags:  -Wall -Werror=implicit-function-declaration -Wstrict-prototypes -Werror=return-type -Werror=vla -Wmissing-prototypes -Wno-char-subscripts -Wno-unknown-pragmas -Wpointer-arith -Wunused-parameter -Wwrite-strings -Wlogical-op -Wundef -Winit-self -Wmissing-include-dirs -Wno-div-by-zero -Wtype-limits -Wformat-signedness -Wrestrict -Wno-stringop-overread -Wno-stringop-overflow -Wnonnull -Wabsolute-value -Wuninitialized -Wredundant-decls -Wshadow -Wimplicit-fallthrough=5 -Wno-error=unused-but-set-variable  -march=x86-64-v2 -std=gnu11 -pipe -fPIC -funsigned-char -fno-strict-aliasing -ffp-contract=off
+    #                build c++ flags:  -Wuninitialized -Wredundant-decls -Wall -Wno-invalid-offsetof -Wno-sign-compare -Wlogical-op -Winit-self -Wmissing-include-dirs -Wno-div-by-zero -Wtype-limits -Werror=return-type -Wno-char-subscripts -Wno-unknown-pragmas -Wpointer-arith -Wunused-parameter -Wwrite-strings -Wundef -Wcomma-subscript -Wformat-signedness -Wrestrict -Wno-suggest-override -Wuninitialized -Wno-stringop-overread -Wno-stringop-overflow -Wimplicit-fallthrough=5 -Wundef -Wmissing-declarations  -march=x86-64-v2 -pipe -fPIC -funsigned-char -fno-strict-aliasing -ffp-contract=off
+    #                build link flags:  -Wl,--version-script='/home/blender/git/blender-v500/blender.git/source/creator/symbols_unix.map'
+    #                build system: CMake
 
     # @formatter:off
     docker_file_str = textwrap.dedent("""\
@@ -844,7 +860,12 @@ def build_docker_image(
 
         SHELL ["/bin/bash", "-c"]
         
-        RUN dnf install -y which file
+        # General packages
+        RUN dnf install -y {dnf_packages_general}
+            
+        # Blender 5.0.1
+        # on docker.io/rockylinux:8.9
+        RUN dnf install -y {dnf_packages_blender_5}
         
         ################################################################################
         # Multi Stage: Stage Rez
@@ -862,6 +883,8 @@ def build_docker_image(
 
         # https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/rqd/Dockerfile
         # comes with python39
+        # Todo:
+        #  - [ ] Install OpenStudioLandscapes Python (3.11)
         RUN python3.9 ./rez-{rez_version}/install.py --verbose /opt/rez
 
         RUN chmod +x /opt/rez/completion/complete.sh
@@ -907,6 +930,8 @@ def build_docker_image(
         pip_install_str=pip_install_str.format(
             **env,
         ),
+        dnf_packages_general=" ".join(CONFIG.dnf_packages_general),
+        dnf_packages_blender_5=" ".join(CONFIG.dnf_packages_blender_5),
         rez_version=config_engine.openstudiolandscapes__rez_config.rez_version,
         timezone=config_engine.tz,
         image_name=image_name,

@@ -30,6 +30,27 @@ class Config(FeatureBaseModel):
         frozen=True,
     )
 
+    dnf_packages_general: List = Field(
+        default=[
+            "which",
+            "file",
+        ],
+        frozen=True,
+    )
+
+    dnf_packages_blender_5: List = Field(
+        default=[
+            "libX11",
+            "libXrender",
+            "libXfixes",
+            "libXi",
+            "libxkbcommon",
+            "libSM",
+            "libGL",
+        ],
+        frozen=True,
+    )
+
     key_prefixes: List[str] = constants.ASSET_HEADER["key_prefix"]
 
     opencue_str: str = "opencue"
