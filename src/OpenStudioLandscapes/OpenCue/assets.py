@@ -5,6 +5,7 @@ import pathlib
 import shutil
 import subprocess
 import textwrap
+import urllib.parse
 from typing import Dict, Generator, List, Union
 
 import git
@@ -36,9 +37,11 @@ from OpenStudioLandscapes.engine.common_assets.group_in import (
     get_feature_in_parent,
 )
 from OpenStudioLandscapes.engine.common_assets.group_out import get_group_out
-from OpenStudioLandscapes.engine.config.models import ConfigEngine
+from OpenStudioLandscapes.engine.config.models import ConfigEngine, DockerConfigModel
 from OpenStudioLandscapes.engine.constants import *
 from OpenStudioLandscapes.engine.enums import *
+from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
+from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
 from OpenStudioLandscapes.engine.utils import *
 from OpenStudioLandscapes.engine.utils.docker.compose_dicts import *
 
@@ -740,11 +743,216 @@ def compose_db(
 @asset(
     **ASSET_HEADER,
     ins={
+        "feature_in": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
+        ),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+        ),
+    },
+    retry_policy=build_docker_image_retry_policy,
+)
+def build_docker_image(
+    context: AssetExecutionContext,
+    feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
+    CONFIG: Config,  # pylint: disable=redefined-outer-name
+) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
+    """ """
+
+    env: Dict = CONFIG.env
+
+    docker_config_json: pathlib.Path = (
+        feature_in.openstudiolandscapes_base.docker_config_json
+    )
+
+    config_engine: ConfigEngine = CONFIG.config_engine
+
+    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
+
+    docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
+
+    docker_file = pathlib.Path(
+        env["DOT_LANDSCAPES"],
+        env.get("LANDSCAPE", "default"),
+        f"{dist.name}",
+        "__".join(context.asset_key.path),
+        "Dockerfiles",
+        "Dockerfile",
+    )
+
+    docker_file.parent.mkdir(parents=True, exist_ok=True)
+
+    #################################################
+
+    (
+        image_name,
+        image_prefixes,
+        tags,
+        build_base_parent_image_prefix,
+        build_base_parent_image_name,
+        build_base_parent_image_tags,
+    ) = get_image_metadata(
+        context=context,
+        docker_image=docker_image,
+        docker_config=docker_config,
+        env=env,
+    )
+
+    #################################################
+
+    # dnf_install_str_: str = get_dnf_install_str(
+    #     dnf_install_packages=[
+    #         *CONFIG.dnf_packages_base,
+    #         *CONFIG.openstudiolandscapes__rez_config.dnf_packages_rez,
+    #     ],
+    # )
+
+    pip_install_str: str = get_pip_install_str(pip_install_packages=CONFIG.pip_packages)
+
+    # @formatter:off
+    docker_file_str = textwrap.dedent("""\
+        # {auto_generated}
+        # {dagster_url}
+        
+        ################################################################################
+        # Multi Stage: Stage 1
+        # FROM {parent_image} AS {image_name}
+        FROM {parent_image} AS base
+        LABEL authors="{AUTHOR}"
+
+        ENV CONTAINER_TIMEZONE={timezone}
+        ENV SET_CONTAINER_TIMEZONE=true
+        
+        WORKDIR /usr/bin
+        RUN ln -s python3.9 python
+        
+        WORKDIR /opt/opencue
+            
+        # Prepend to PATH /opt/python{PYTHON_MAJ}.{PYTHON_MIN}/bin
+        ENV PATH="/opt/python{PYTHON_MAJ}.{PYTHON_MIN}/bin:$PATH"
+        # Prepend to PATH /opt/rez/bin/rez
+        ENV PATH="/opt/rez/bin/rez:$PATH"
+
+        ENV LC_ALL=C.UTF-8
+        ENV LANG=C.UTF-8
+
+        SHELL ["/bin/bash", "-c"]
+        
+        RUN dnf install -y which file
+        
+        ################################################################################
+        # Multi Stage: Stage Rez
+        # # Rez Installer
+        FROM base AS rez_installer
+        
+        # COPY --from=build_python "/opt/python{PYTHON_MAJ}.{PYTHON_MIN}" "/opt/python{PYTHON_MAJ}.{PYTHON_MIN}"
+
+        WORKDIR /build/rez
+
+        RUN curl -L "https://github.com/AcademySoftwareFoundation/rez/archive/refs/tags/{rez_version}.tar.gz" -o rez-{rez_version}.tar.gz \\
+            && file rez-{rez_version}.tar.gz \\
+            && tar -xzvf rez-{rez_version}.tar.gz \\
+            && rm rez-{rez_version}.tar.gz
+
+        # https://github.com/AcademySoftwareFoundation/OpenCue/blob/master/rqd/Dockerfile
+        # comes with python39
+        RUN python3.9 ./rez-{rez_version}/install.py --verbose /opt/rez
+
+        RUN chmod +x /opt/rez/completion/complete.sh
+        RUN /opt/rez/completion/complete.sh
+        
+        # # Rez Build Test
+        FROM rez_installer AS rez_build_test
+        
+        WORKDIR /build/rez/rez-{rez_version}/example_packages/hello_world
+
+        RUN rez bind -vvvvv --quickstart
+        RUN rez build -vvvvv --install
+
+        RUN rez env -vvvvv hello_world -- hello
+
+        RUN echo "hello_world successfully tested" > /rez_hello_world_test.txt
+        
+        ################################################################################        
+        # Multi Stage: Stage FINAL
+        FROM base AS {image_name}
+        
+        COPY --from=rez_installer  "/opt/rez" "/opt/rez"
+        COPY --from=rez_build_test "/rez_hello_world_test.txt" "/rez_hello_world_test.txt"
+
+        RUN python3.9 -m pip install --root-user-action=ignore --upgrade pip setuptools setuptools_scm wheel \\
+            && python3.9 -m pip cache purge
+
+        {pip_install_str}
+        
+        WORKDIR /opt/opencue
+        
+        # RQD gRPC server
+        EXPOSE 8444
+        
+        # NOTE: This shell out is needed to avoid RQD getting PID 0 which leads to leaking child processes.
+        ENTRYPOINT ["/bin/bash", "-c", "set -e && rqd"]
+        """).format(
+        auto_generated=f"AUTO-GENERATED by Dagster Asset {'__'.join(context.asset_key.path)}",
+        dagster_url=urllib.parse.quote(
+            f"http://localhost:3000/asset-groups/{'%2F'.join(context.asset_key.path)}",
+            safe=":/%",
+        ),
+        pip_install_str=pip_install_str.format(
+            **env,
+        ),
+        rez_version=config_engine.openstudiolandscapes__rez_config.rez_version,
+        timezone=config_engine.tz,
+        image_name=image_name,
+        # Todo: this won't work as expected if len(tags) > 1
+        parent_image=CONFIG.OPENCUE_RQD_DOCKER_IMAGE,
+        **env,
+    )
+    # @formatter:on
+
+    with open(docker_file, "w") as fw:
+        fw.write(docker_file_str)
+
+    with open(docker_file, "r") as fr:
+        docker_file_content = fr.read()
+
+    #################################################
+
+    image_data, logs = create_image(
+        context=context,
+        image_name=image_name,
+        image_prefixes=image_prefixes,
+        tags=tags,
+        docker_image=docker_image,
+        docker_config=docker_config,
+        docker_config_json=docker_config_json,
+        docker_file=docker_file,
+    )
+
+    yield Output(image_data)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(image_data),
+            "docker_file": MetadataValue.md(f"```yaml\n{docker_file_content}\n```"),
+            "docker_image": MetadataValue.path(f"{image_data['image_prefixes']}{image_data['image_name']}:{image_data['image_tags'][0]}"),
+            "logs": MetadataValue.json(logs),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "compose_networks": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+        ),
+        "build": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image"]),
         ),
         # "clone_repository": AssetIn(
         #     AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
@@ -781,6 +989,7 @@ def compose_rqd(
     context: AssetExecutionContext,
     CONFIG: Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
+    build: Dict,  # pylint: disable=redefined-outer-name
     # clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     prepare_volumes: Dict,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
@@ -860,7 +1069,12 @@ def compose_rqd(
         docker_dict = {
             "services": {
                 service_name: {
-                    "image": CONFIG.OPENCUE_RQD_DOCKER_IMAGE,
+                    "image": "%s%s:%s"
+                    % (
+                        build["image_prefixes"],
+                        build["image_name"],
+                        build["image_tags"][0],
+                    ),
                     "container_name": container_name,
                     "hostname": host_name,
                     "domainname": config_engine.openstudiolandscapes__domain_lan,

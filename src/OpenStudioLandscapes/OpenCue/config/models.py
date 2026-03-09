@@ -25,6 +25,11 @@ class Config(FeatureBaseModel):
 
     group_name: str = constants.ASSET_HEADER["group_name"]
 
+    pip_packages: List = Field(
+        default=[],
+        frozen=True,
+    )
+
     key_prefixes: List[str] = constants.ASSET_HEADER["key_prefix"]
 
     opencue_str: str = "opencue"
