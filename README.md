@@ -309,6 +309,57 @@ feature_name: OpenStudioLandscapes-OpenCue
 #     None
 
 
+# ============
+# pip_packages
+# ------------
+#
+# Type: typing.List
+# Description:
+#     None
+# Required:
+#     False
+# Examples:
+#     None
+pip_packages: []
+
+
+# ====================
+# dnf_packages_general
+# --------------------
+#
+# Type: typing.List
+# Description:
+#     None
+# Required:
+#     False
+# Examples:
+#     None
+dnf_packages_general:
+- which
+- file
+
+
+# ======================
+# dnf_packages_blender_5
+# ----------------------
+#
+# Type: typing.List
+# Description:
+#     None
+# Required:
+#     False
+# Examples:
+#     None
+dnf_packages_blender_5:
+- libX11
+- libXrender
+- libXfixes
+- libXi
+- libxkbcommon
+- libSM
+- libGL
+
+
 # ===========
 # opencue_str
 # -----------
@@ -503,6 +554,20 @@ OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: true
 # Examples:
 #     None
 OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: docker.io/opencue/cuebot
+
+
+# ========================
+# OPENCUE_RQD_DOCKER_IMAGE
+# ------------------------
+#
+# Type: <class 'str'>
+# Description:
+#     None
+# Required:
+#     False
+# Examples:
+#     None
+OPENCUE_RQD_DOCKER_IMAGE: docker.io/opencue/rqd
 
 
 # ========================
@@ -830,4 +895,4 @@ To follow up on the previous LinkedIn publications, visit:
 
 ***
 
-Last changed: **2026-02-24 11:27:43 UTC**
+Last changed: **2026-03-11 15:32:38 UTC**
