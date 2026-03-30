@@ -562,34 +562,35 @@ def compose_flyway(
                 },
                 "command": [
                     "/opt/scripts/migrate.sh",
-                    #  ?column?
-                    # ----------
-                    # 
-                    # 1
-                    # (1 row)
-                    # Applying database migrations...
-                    # A new version of Flyway is available
-                    # Upgrade Flyway: https://rd.gt/3TItF25
-                    # Flyway Community Edition 9.11.0 by Redgate
-                    # See what's new here: https://flywaydb.org/documentation/learnmore/releaseNotes#9.11.0
-                    # Database: jdbc:postgresql://opencue-db.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer:5432/cuebot (PostgreSQL 15.1)
-                    # ERROR: Validate failed: Migrations have failed validation
-                    # Detected resolved migration not applied to database: 35.
-                    # To ignore this migration, set -ignoreMigrationPatterns='*:ignored'. To allow executing this migration, set -outOfOrder=true.
-                    # Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | A new version of Flyway is available
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Upgrade Flyway: https://rd.gt/3TItF25
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Flyway Community Edition 9.11.0 by Redgate
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | See what's new here: https://flywaydb.org/documentation/learnmore/releaseNotes#9.11.0
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         |
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Database: jdbc:postgresql://opencue-db.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer:5432/cuebot (PostgreSQL 15.1)
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | ERROR: Validate failed: Migrations have failed validation
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Detected resolved migration not applied to database: 35.
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | To ignore this migration, set -ignoreMigrationPatterns='*:ignored'. To allow executing this migration, set -outOfOrder=true.
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
-                    #  Container opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer Error service "opencue-flyway" didn't complete successfully: exit 1
-                    # opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer exited with code 1
-                    # Doesn't work: "-outOfOrder=true",
+                    # Todo:
+                    #   ?column?
+                    #  ----------
+                    #  1
+                    #  (1 row)
+                    #  Applying database migrations...
+                    #  A new version of Flyway is available
+                    #  Upgrade Flyway: https://rd.gt/3TItF25
+                    #  Flyway Community Edition 9.11.0 by Redgate
+                    #  See what's new here: https://flywaydb.org/documentation/learnmore/releaseNotes#9.11.0
+                    #  Database: jdbc:postgresql://opencue-db.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer:5432/cuebot (PostgreSQL 15.1)
+                    #  ERROR: Validate failed: Migrations have failed validation
+                    #  Detected resolved migration not applied to database: 35.
+                    #  To ignore this migration, set -ignoreMigrationPatterns='*:ignored'. To allow executing this migration, set -outOfOrder=true.
+                    #  Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | A new version of Flyway is available
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Upgrade Flyway: https://rd.gt/3TItF25
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Flyway Community Edition 9.11.0 by Redgate
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | See what's new here: https://flywaydb.org/documentation/learnmore/releaseNotes#9.11.0
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         |
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Database: jdbc:postgresql://opencue-db.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer:5432/cuebot (PostgreSQL 15.1)
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | ERROR: Validate failed: Migrations have failed validation
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Detected resolved migration not applied to database: 35.
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | To ignore this migration, set -ignoreMigrationPatterns='*:ignored'. To allow executing this migration, set -outOfOrder=true.
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer                         | Need more flexibility with validation rules? Learn more: https://rd.gt/3AbJUZE
+                    #   Container opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer Error service "opencue-flyway" didn't complete successfully: exit 1
+                    #  opencue-flyway.2026-01-21_17-22-54__seasoned-jelly-wholesale-mixer exited with code 1
+                    #  Didn't work: "-outOfOrder=true",
+                    #  Solution so far: re-create the database
                 ],
                 **copy.deepcopy(volumes_dict),
                 **copy.deepcopy(network_dict),
