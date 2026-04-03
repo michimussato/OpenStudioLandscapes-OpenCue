@@ -5,13 +5,21 @@ import snakemd
 """
 [CueGUI](https://docs.opencue.io/docs/getting-started/installing-cuegui/)
 
+Requirements:
+sh: line 1: /usr/bin/xterm: No such file or directory
+- xterm
+
+xterm: cannot load font "-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso10646-1"
+https://forum.manjaro.org/t/xterm-missing-default-fonts/35113/2
+- 
+
 ```
 # https://docs.opencue.io/docs/getting-started/installing-cuegui/#option-1-installing-from-pypi
-python3.11 -m .venv
-source .venv/bin/activate
-pip install --upgrade pip
+python3.11 -m venv py311_cuegui
+source py311_cuegui/bin/activate
+pip install --upgrade pip setuptools wheel opencue-cuegui
 
-pip install opencue-cuegui
+# pip install --upgrade opencue-cuegui
 # cuebot:CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST
 # localhost:8443
 # CUEBOT_HOSTS=localhost:8443 cuegui
@@ -22,11 +30,11 @@ CUEBOT_HOSTS=$CUEBOT_HOSTNAME_OR_IP cuegui
 
 ```
 # https://docs.opencue.io/docs/getting-started/installing-cuegui/#option-1-installing-from-pypi
-python3.11 -m .venv
-source .venv/bin/activate
-pip install --upgrade pip
+python3.11 -m venv py311_cuesubmit
+source py311_cuesubmit/bin/activate
+pip install --upgrade pip setuptools wheel opencue-cuegui opencue-cuesubmit
 
-pip install opencue-cuesubmit
+# pip install opencue-cuesubmit
 # cuebot:CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST
 # localhost:8443
 # CUEBOT_HOSTS=localhost:8443 cuesubmit
@@ -39,9 +47,9 @@ CUEBOT_HOSTS=$CUEBOT_HOSTNAME_OR_IP cuesubmit
 
 ```
 # https://docs.opencue.io/docs/getting-started/installing-cuegui/#option-1-installing-from-pypi
-python3.11 -m .venv
-source .venv/bin/activate
-pip install --upgrade pip
+python3.11 -m venv py311_rqd
+source py311_rqd/bin/activate
+pip install --upgrade pip setuptools wheel opencue-cuegui opencue-rqd
 
 pip install opencue-rqd
 # cuebot:CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST
