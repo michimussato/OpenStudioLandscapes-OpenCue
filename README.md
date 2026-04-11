@@ -8,7 +8,7 @@
       1. [Clone and Install](#clone-and-install)
    3. [Configure](#configure)
       1. [Default Configuration](#default-configuration)
-   4. [Local Development](#local-development)
+   4. [Local Development/Unit Testing/Debugging](#local-developmentunit-testingdebugging)
 2. [External Resources](#external-resources)
    1. [Official Documentation](#official-documentation)
    2. [Components](#components)
@@ -74,7 +74,7 @@ A local config store location will be created if it doesn't exist, together with
 > controlled repository. This makes it easy to track changes
 > you made to the `config.yml`.
 
-The following settings are available in `OpenStudioLandscapes-OpenCue` and are based on [`OpenStudioLandscapes-OpenCue/tree/main/OpenStudioLandscapes/OpenCue/config/models.py`](https://github.com/michimussato/OpenStudioLandscapes-OpenCue/tree/main/OpenStudioLandscapes/OpenCue/config/models.py).
+The following settings are available in `OpenStudioLandscapes-OpenCue` and are based on [`OpenStudioLandscapes-OpenCue/tree/main/src/OpenStudioLandscapes/OpenCue/config/models.py`](https://github.com/michimussato/OpenStudioLandscapes-OpenCue/tree/main/src/OpenStudioLandscapes/OpenCue/config/models.py).
 
 ### Default Configuration
 
@@ -839,10 +839,12 @@ OPENCUE_DB_PGPASSWORD: cuebot_password
 </details>
 
 
-## Local Development
+## Local Development/Unit Testing/Debugging
+
+This is for isolated development, unit testing and debugging. Instead of the [`OpenStudioLandscapes-OpenCue/tree/main/src/OpenStudioLandscapes/OpenCue/definitions.py`](https://github.com/michimussato/OpenStudioLandscapes-OpenCue/tree/main/src/OpenStudioLandscapes/OpenCue/definitions.py), the accompanying [`OpenStudioLandscapes-OpenCue/tree/main/workspace.yaml`](https://github.com/michimussato/OpenStudioLandscapes-OpenCue/tree/main/workspace.yaml) loads the [`OpenStudioLandscapes-OpenCue/tree/main/src/OpenStudioLandscapes/OpenCue/_definitions_with_upstream_specs.py`](https://github.com/michimussato/OpenStudioLandscapes-OpenCue/tree/main/src/OpenStudioLandscapes/OpenCue/_definitions_with_upstream_specs.py) which also contains [`AssetSpec`](https://release-1-9-13.archive.dagster-docs.io/api/dagster/assets#dagster.AssetSpec) definitions for upstream dependencies as [external assets](https://release-1-9-13.archive.dagster-docs.io/guides/build/assets/external-assets).
 
 ```shell
-cd ./.features/OpenStudioLandscapes-OpenCue
+# cd ./.features/OpenStudioLandscapes-OpenCue
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip setuptools setuptools_scm wheel
@@ -903,4 +905,4 @@ To follow up on the previous LinkedIn publications, visit:
 
 ***
 
-Last changed: **2026-04-11 01:55:12 UTC**
+Last changed: **2026-04-11 11:18:27 UTC**
