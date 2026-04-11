@@ -149,7 +149,7 @@
         {
           "comment": "PackageSource: VCS 'git'",
           "type": "vcs",
-          "url": "https://github.com/michimussato/OpenStudioLandscapes.git#d6ce0ea595c0a27c4e05ec4330d2ef2a748cc8a8"
+          "url": "https://github.com/michimussato/OpenStudioLandscapes.git#0e28f59373b1d9578c6ff041c4c555ec8a803ff6"
         },
         {
           "comment": "from packaging metadata Project-URL: Homepage",
@@ -161,10 +161,10 @@
       "properties": [
         {
           "name": "cdx:python:package:source:vcs:commit_id",
-          "value": "d6ce0ea595c0a27c4e05ec4330d2ef2a748cc8a8"
+          "value": "0e28f59373b1d9578c6ff041c4c555ec8a803ff6"
         }
       ],
-      "purl": "pkg:pypi/openstudiolandscapes@0.0.0?vcs_url=git%2Bhttps://github.com/michimussato/OpenStudioLandscapes.git%40d6ce0ea595c0a27c4e05ec4330d2ef2a748cc8a8",
+      "purl": "pkg:pypi/openstudiolandscapes@0.0.0?vcs_url=git%2Bhttps://github.com/michimussato/OpenStudioLandscapes.git%400e28f59373b1d9578c6ff041c4c555ec8a803ff6",
       "type": "library",
       "version": "0.0.0"
     },
@@ -333,7 +333,7 @@
       "version": "2.20.0"
     },
     {
-      "bom-ref": "SQLAlchemy==2.0.48",
+      "bom-ref": "SQLAlchemy==2.0.49",
       "description": "Database Abstraction Library",
       "externalReferences": [
         {
@@ -361,9 +361,9 @@
         }
       ],
       "name": "SQLAlchemy",
-      "purl": "pkg:pypi/sqlalchemy@2.0.48",
+      "purl": "pkg:pypi/sqlalchemy@2.0.49",
       "type": "library",
-      "version": "2.0.48"
+      "version": "2.0.49"
     },
     {
       "bom-ref": "SnakeMD==2.4.0",
@@ -813,7 +813,7 @@
       "version": "3.4.7"
     },
     {
-      "bom-ref": "click==8.3.1",
+      "bom-ref": "click==8.3.2",
       "description": "Composable command line interface toolkit",
       "externalReferences": [
         {
@@ -851,9 +851,9 @@
         }
       ],
       "name": "click",
-      "purl": "pkg:pypi/click@8.3.1",
+      "purl": "pkg:pypi/click@8.3.2",
       "type": "library",
-      "version": "8.3.1"
+      "version": "8.3.2"
     },
     {
       "bom-ref": "coloredlogs==14.0",
@@ -1737,7 +1737,7 @@
       "version": "0.21"
     },
     {
-      "bom-ref": "greenlet==3.3.2",
+      "bom-ref": "greenlet==3.4.0",
       "description": "Lightweight in-process concurrent programming",
       "externalReferences": [
         {
@@ -1773,9 +1773,9 @@
         }
       ],
       "name": "greenlet",
-      "purl": "pkg:pypi/greenlet@3.3.2",
+      "purl": "pkg:pypi/greenlet@3.4.0",
       "type": "library",
-      "version": "3.3.2"
+      "version": "3.4.0"
     },
     {
       "bom-ref": "grpcio==1.80.0",
@@ -2241,7 +2241,7 @@
       "version": "30.4.4"
     },
     {
-      "bom-ref": "lxml==6.0.2",
+      "bom-ref": "lxml==6.0.3",
       "description": "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API.",
       "externalReferences": [
         {
@@ -2269,9 +2269,9 @@
         }
       ],
       "name": "lxml",
-      "purl": "pkg:pypi/lxml@6.0.2",
+      "purl": "pkg:pypi/lxml@6.0.3",
       "type": "library",
-      "version": "6.0.2"
+      "version": "6.0.3"
     },
     {
       "bom-ref": "markdown-it-py==4.0.0",
@@ -2375,7 +2375,7 @@
       "version": "6.7.1"
     },
     {
-      "bom-ref": "nox==2026.2.9",
+      "bom-ref": "nox==2026.4.10",
       "description": "Flexible test automation.",
       "externalReferences": [
         {
@@ -2408,9 +2408,9 @@
         }
       ],
       "name": "nox",
-      "purl": "pkg:pypi/nox@2026.2.9",
+      "purl": "pkg:pypi/nox@2026.4.10",
       "type": "library",
-      "version": "2026.2.9"
+      "version": "2026.4.10"
     },
     {
       "bom-ref": "packageurl-python==0.17.6",
@@ -2551,7 +2551,7 @@
       "version": "32.0.1"
     },
     {
-      "bom-ref": "pipdeptree==2.34.0",
+      "bom-ref": "pipdeptree==2.35.1",
       "description": "Command line utility to show dependency tree of packages.",
       "externalReferences": [
         {
@@ -2589,12 +2589,12 @@
         }
       ],
       "name": "pipdeptree",
-      "purl": "pkg:pypi/pipdeptree@2.34.0",
+      "purl": "pkg:pypi/pipdeptree@2.35.1",
       "type": "library",
-      "version": "2.34.0"
+      "version": "2.35.1"
     },
     {
-      "bom-ref": "platformdirs==4.9.4",
+      "bom-ref": "platformdirs==4.9.6",
       "description": "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`.",
       "externalReferences": [
         {
@@ -2632,9 +2632,9 @@
         }
       ],
       "name": "platformdirs",
-      "purl": "pkg:pypi/platformdirs@4.9.4",
+      "purl": "pkg:pypi/platformdirs@4.9.6",
       "type": "library",
-      "version": "4.9.4"
+      "version": "4.9.6"
     },
     {
       "bom-ref": "propcache==0.4.1",
@@ -2998,7 +2998,7 @@
       "version": "2.9.0.post0"
     },
     {
-      "bom-ref": "python-discovery==1.2.1",
+      "bom-ref": "python-discovery==1.2.2",
       "description": "Python interpreter discovery",
       "externalReferences": [
         {
@@ -3036,9 +3036,9 @@
         }
       ],
       "name": "python-discovery",
-      "purl": "pkg:pypi/python-discovery@1.2.1",
+      "purl": "pkg:pypi/python-discovery@1.2.2",
       "type": "library",
-      "version": "1.2.1"
+      "version": "1.2.2"
     },
     {
       "bom-ref": "python-dotenv==1.2.2",
@@ -3296,7 +3296,7 @@
       "version": "1.1.0"
     },
     {
-      "bom-ref": "rich==14.3.3",
+      "bom-ref": "rich==14.3.4",
       "description": "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal",
       "externalReferences": [
         {
@@ -3319,9 +3319,9 @@
         }
       ],
       "name": "rich",
-      "purl": "pkg:pypi/rich@14.3.3",
+      "purl": "pkg:pypi/rich@14.3.4",
       "type": "library",
-      "version": "14.3.3"
+      "version": "14.3.4"
     },
     {
       "bom-ref": "rpds-py==0.30.0",
@@ -3786,13 +3786,13 @@
       "version": "4.15.0"
     },
     {
-      "bom-ref": "tzdata==2025.3",
+      "bom-ref": "tzdata==2026.1",
       "description": "Provider of IANA time zone data",
       "externalReferences": [
         {
           "comment": "from packaging metadata Project-URL: Documentation",
           "type": "documentation",
-          "url": "https://tzdata.readthedocs.io"
+          "url": "https://tzdata.python.org"
         },
         {
           "comment": "from packaging metadata Project-URL: Bug Reports",
@@ -3819,9 +3819,9 @@
         }
       ],
       "name": "tzdata",
-      "purl": "pkg:pypi/tzdata@2025.3",
+      "purl": "pkg:pypi/tzdata@2026.1",
       "type": "library",
-      "version": "2025.3"
+      "version": "2026.1"
     },
     {
       "bom-ref": "universal_pathlib==0.3.10",
@@ -3913,7 +3913,7 @@
       "version": "2.6.3"
     },
     {
-      "bom-ref": "uvicorn==0.42.0",
+      "bom-ref": "uvicorn==0.44.0",
       "description": "The lightning-fast ASGI server.",
       "externalReferences": [
         {
@@ -3952,9 +3952,9 @@
           "value": "standard"
         }
       ],
-      "purl": "pkg:pypi/uvicorn@0.42.0",
+      "purl": "pkg:pypi/uvicorn@0.44.0",
       "type": "library",
-      "version": "0.42.0"
+      "version": "0.44.0"
     },
     {
       "bom-ref": "uvloop==0.22.1",
@@ -3986,7 +3986,7 @@
       "version": "0.22.1"
     },
     {
-      "bom-ref": "virtualenv==21.2.0",
+      "bom-ref": "virtualenv==21.2.1",
       "description": "Virtual Python Environment builder",
       "externalReferences": [
         {
@@ -4019,9 +4019,9 @@
         }
       ],
       "name": "virtualenv",
-      "purl": "pkg:pypi/virtualenv@21.2.0",
+      "purl": "pkg:pypi/virtualenv@21.2.1",
       "type": "library",
-      "version": "21.2.0"
+      "version": "21.2.1"
     },
     {
       "bom-ref": "watchdog==5.0.3",
@@ -4336,7 +4336,7 @@
         "docker-compose-graph==1.0.0.post1.dev5+ga91125bef",
         "email-validator==2.3.0",
         "graphviz==0.21",
-        "pipdeptree==2.34.0"
+        "pipdeptree==2.35.1"
       ],
       "ref": "OpenStudioLandscapes-OpenCue==0.0.0"
     },
@@ -4354,8 +4354,8 @@
         "email-validator==2.3.0",
         "graphviz==0.21",
         "human-readable-id==0.0.3",
-        "nox==2026.2.9",
-        "pipdeptree==2.34.0",
+        "nox==2026.4.10",
+        "pipdeptree==2.35.1",
         "pydot==4.0.1"
       ],
       "ref": "OpenStudioLandscapes==0.0.0"
@@ -4374,11 +4374,11 @@
     },
     {
       "dependsOn": [
-        "greenlet==3.3.2",
+        "greenlet==3.4.0",
         "psycopg2-binary==2.9.11",
         "typing_extensions==4.15.0"
       ],
-      "ref": "SQLAlchemy==2.0.48"
+      "ref": "SQLAlchemy==2.0.49"
     },
     {
       "ref": "SnakeMD==2.4.0"
@@ -4386,10 +4386,10 @@
     {
       "dependsOn": [
         "Mako==1.3.10",
-        "SQLAlchemy==2.0.48",
+        "SQLAlchemy==2.0.49",
         "tomli==2.4.1",
         "typing_extensions==4.15.0",
-        "tzdata==2025.3"
+        "tzdata==2026.1"
       ],
       "ref": "alembic==1.18.4"
     },
@@ -4419,7 +4419,7 @@
       "dependsOn": [
         "python-dateutil==2.9.0.post0",
         "pytz==2026.1.post1",
-        "tzdata==2025.3"
+        "tzdata==2026.1"
       ],
       "ref": "arrow==1.4.0"
     },
@@ -4442,7 +4442,7 @@
       "ref": "charset-normalizer==3.4.7"
     },
     {
-      "ref": "click==8.3.1"
+      "ref": "click==8.3.2"
     },
     {
       "dependsOn": [
@@ -4468,7 +4468,7 @@
       "dependsOn": [
         "jsonschema==4.26.0",
         "license-expression==30.4.4",
-        "lxml==6.0.2",
+        "lxml==6.0.3",
         "packageurl-python==0.17.6",
         "py-serializable==2.1.0",
         "referencing==0.37.0",
@@ -4499,11 +4499,11 @@
     },
     {
       "dependsOn": [
-        "click==8.3.1",
+        "click==8.3.2",
         "dagster-graphql==1.9.11",
         "dagster==1.9.11",
         "starlette==1.0.0",
-        "uvicorn==0.42.0"
+        "uvicorn==0.44.0"
       ],
       "ref": "dagster-webserver==1.9.11"
     },
@@ -4511,10 +4511,10 @@
       "dependsOn": [
         "Jinja2==3.1.6",
         "PyYAML==6.0.3",
-        "SQLAlchemy==2.0.48",
+        "SQLAlchemy==2.0.49",
         "alembic==1.18.4",
         "antlr4-python3-runtime==4.13.2",
-        "click==8.3.1",
+        "click==8.3.2",
         "coloredlogs==14.0",
         "dagster-pipes==1.9.11",
         "docstring_parser==0.17.0",
@@ -4528,7 +4528,7 @@
         "python-dotenv==1.2.2",
         "pytz==2026.1.post1",
         "requests==2.33.1",
-        "rich==14.3.3",
+        "rich==14.3.4",
         "setuptools==82.0.1",
         "six==1.17.0",
         "structlog==25.5.0",
@@ -4537,7 +4537,7 @@
         "toposort==1.10",
         "tqdm==4.67.3",
         "typing_extensions==4.15.0",
-        "tzdata==2025.3",
+        "tzdata==2026.1",
         "universal_pathlib==0.3.10",
         "watchdog==5.0.3"
       ],
@@ -4650,7 +4650,7 @@
       "dependsOn": [
         "setuptools==82.0.1"
       ],
-      "ref": "greenlet==3.3.2"
+      "ref": "greenlet==3.4.0"
     },
     {
       "dependsOn": [
@@ -4726,7 +4726,7 @@
       "ref": "license-expression==30.4.4"
     },
     {
-      "ref": "lxml==6.0.2"
+      "ref": "lxml==6.0.3"
     },
     {
       "dependsOn": [
@@ -4755,13 +4755,13 @@
         "humanize==4.15.0",
         "packaging==26.0",
         "tomli==2.4.1",
-        "virtualenv==21.2.0"
+        "virtualenv==21.2.1"
       ],
-      "ref": "nox==2026.2.9"
+      "ref": "nox==2026.4.10"
     },
     {
       "dependsOn": [
-        "SQLAlchemy==2.0.48",
+        "SQLAlchemy==2.0.49",
         "setuptools==82.0.1",
         "wheel==0.46.3"
       ],
@@ -4787,13 +4787,13 @@
       "dependsOn": [
         "graphviz==0.21",
         "packaging==26.0",
-        "rich==14.3.3",
-        "virtualenv==21.2.0"
+        "rich==14.3.4",
+        "virtualenv==21.2.1"
       ],
-      "ref": "pipdeptree==2.34.0"
+      "ref": "pipdeptree==2.35.1"
     },
     {
-      "ref": "platformdirs==4.9.4"
+      "ref": "platformdirs==4.9.6"
     },
     {
       "ref": "propcache==0.4.1"
@@ -4817,7 +4817,7 @@
         "pydantic_core==2.41.5",
         "typing-inspection==0.4.2",
         "typing_extensions==4.15.0",
-        "tzdata==2025.3"
+        "tzdata==2026.1"
       ],
       "ref": "pydantic==2.12.5"
     },
@@ -4849,14 +4849,14 @@
     {
       "dependsOn": [
         "filelock==3.25.2",
-        "platformdirs==4.9.4",
+        "platformdirs==4.9.6",
         "setuptools==82.0.1"
       ],
-      "ref": "python-discovery==1.2.1"
+      "ref": "python-discovery==1.2.2"
     },
     {
       "dependsOn": [
-        "click==8.3.1"
+        "click==8.3.2"
       ],
       "ref": "python-dotenv==1.2.2"
     },
@@ -4907,7 +4907,7 @@
         "Pygments==2.20.0",
         "markdown-it-py==4.0.0"
       ],
-      "ref": "rich==14.3.3"
+      "ref": "rich==14.3.4"
     },
     {
       "ref": "rpds-py==0.30.0"
@@ -4918,7 +4918,7 @@
         "packaging==26.0",
         "pip==26.0.1",
         "tomli==2.4.1",
-        "virtualenv==21.2.0",
+        "virtualenv==21.2.1",
         "wheel==0.46.3"
       ],
       "ref": "setuptools==82.0.1"
@@ -4972,7 +4972,7 @@
       "ref": "typing_extensions==4.15.0"
     },
     {
-      "ref": "tzdata==2025.3"
+      "ref": "tzdata==2026.1"
     },
     {
       "dependsOn": [
@@ -4993,7 +4993,7 @@
     {
       "dependsOn": [
         "PyYAML==6.0.3",
-        "click==8.3.1",
+        "click==8.3.2",
         "h11==0.16.0",
         "httptools==0.7.1",
         "python-dotenv==1.2.2",
@@ -5002,7 +5002,7 @@
         "watchfiles==1.1.1",
         "websockets==16.0"
       ],
-      "ref": "uvicorn==0.42.0"
+      "ref": "uvicorn==0.44.0"
     },
     {
       "dependsOn": [
@@ -5014,11 +5014,11 @@
       "dependsOn": [
         "distlib==0.4.0",
         "filelock==3.25.2",
-        "platformdirs==4.9.4",
-        "python-discovery==1.2.1",
+        "platformdirs==4.9.6",
+        "python-discovery==1.2.2",
         "typing_extensions==4.15.0"
       ],
-      "ref": "virtualenv==21.2.0"
+      "ref": "virtualenv==21.2.1"
     },
     {
       "dependsOn": [
@@ -5055,7 +5055,7 @@
     }
   ],
   "metadata": {
-    "timestamp": "2026-04-03T02:11:24.099149+00:00",
+    "timestamp": "2026-04-11T12:00:55.304340+00:00",
     "tools": {
       "components": [
         {
@@ -5159,7 +5159,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:a8063d1d-199b-4169-a5dd-d72488811b58",
+  "serialNumber": "urn:uuid:b1e68af2-03f6-4083-84a1-7a40f1082d7f",
   "version": 1,
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
