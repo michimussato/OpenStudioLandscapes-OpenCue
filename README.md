@@ -8,6 +8,7 @@
       1. [Clone and Install](#clone-and-install)
    3. [Configure](#configure)
       1. [Default Configuration](#default-configuration)
+   4. [Local Development](#local-development)
 2. [External Resources](#external-resources)
    1. [Official Documentation](#official-documentation)
    2. [Components](#components)
@@ -40,7 +41,6 @@ source .venv/bin/activate
 openstudiolandscapes clone-feature --repo=https://github.com/michimussato/OpenStudioLandscapes-OpenCue.git
 deactivate
 # Check the resulting console output for installation instructions
-
 ```
 
 ### Clone and Install
@@ -51,7 +51,6 @@ source .venv/bin/activate
 openstudiolandscapes clone-feature --repo=https://github.com/michimussato/OpenStudioLandscapes-OpenCue.git \
     && pip install --editable ./.features/OpenStudioLandscapes-OpenCue
 deactivate
-
 ```
 
 For more info on `pip` see [VCS Support of `pip`](https://pip.pypa.io/en/stable/topics/vcs-support/).
@@ -78,7 +77,6 @@ A local config store location will be created if it doesn't exist, together with
 The following settings are available in `OpenStudioLandscapes-OpenCue` and are based on [`OpenStudioLandscapes-OpenCue/tree/main/OpenStudioLandscapes/OpenCue/config/models.py`](https://github.com/michimussato/OpenStudioLandscapes-OpenCue/tree/main/OpenStudioLandscapes/OpenCue/config/models.py).
 
 ### Default Configuration
-
 
 <details open>
 <summary><code>config.yml</code></summary>
@@ -838,9 +836,19 @@ OPENCUE_DB_PGUSER: cuebot
 OPENCUE_DB_PGPASSWORD: cuebot_password
 ```
 
-
 </details>
 
+
+## Local Development
+
+```shell
+cd ./.features/OpenStudioLandscapes-OpenCue
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip setuptools setuptools_scm wheel
+pip install --editable .[dev]
+dagster dev --workspace workspace.yaml
+```
 
 ***
 
@@ -895,4 +903,4 @@ To follow up on the previous LinkedIn publications, visit:
 
 ***
 
-Last changed: **2026-04-03 02:46:02 UTC**
+Last changed: **2026-04-11 01:55:12 UTC**
