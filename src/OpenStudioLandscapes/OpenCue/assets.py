@@ -49,6 +49,11 @@ from OpenStudioLandscapes.OpenCue import dist
 from OpenStudioLandscapes.OpenCue.config.models import CONFIG_STR, Config
 from OpenStudioLandscapes.OpenCue.constants import *
 
+# Current issue:
+# dnf: command not found for rqd
+# WTF?
+# -> disabled for now
+
 # https://github.com/yaml/pyyaml/issues/722#issuecomment-1969292770
 yaml.SafeDumper.add_multi_representer(
     data_type=enum.Enum,
