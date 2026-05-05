@@ -3,14 +3,13 @@ import pathlib
 from typing import Dict, List
 
 from OpenStudioLandscapes.engine.config.models import FeatureBaseModel
-from OpenStudioLandscapes.engine.logging.loggers import FEATURE_LOGGER as LOGGER
 from pydantic import (
     Field,
     HttpUrl,
     PositiveInt,
 )
 
-from OpenStudioLandscapes.OpenCue import constants, dist
+from OpenStudioLandscapes.OpenCue import constants, dist, LOGGER
 
 
 class Branches(enum.StrEnum):
