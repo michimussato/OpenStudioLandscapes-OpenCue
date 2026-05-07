@@ -83,757 +83,250 @@ The following settings are available in `OpenStudioLandscapes-OpenCue` and are b
 
 
 ```yaml
-# ===
-# env
-# ---
-#
-# Type: typing.Dict
-# Base Class Info:
-#     Required:
-#         False
-#     Description:
-#         None
-#     Default value:
-#         PydanticUndefined
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
+$defs:
+  Branches:
+    enum:
+    - master
+    title: Branches
+    type: string
+properties:
+  OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER:
+    default: 8443
+    exclusiveMinimum: 0
+    title: Opencue Cuebot Grpc Cue Port Container
+    type: integer
+  OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST:
+    default: 8443
+    exclusiveMinimum: 0
+    title: Opencue Cuebot Grpc Cue Port Host
+    type: integer
+  OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER:
+    default: 8444
+    exclusiveMinimum: 0
+    title: Opencue Cuebot Grpc Rqd Port Container
+    type: integer
+  OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST:
+    default: 8444
+    exclusiveMinimum: 0
+    title: Opencue Cuebot Grpc Rqd Port Host
+    type: integer
+  OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE:
+    default: docker.io/opencue/cuebot
+    title: Opencue Cuebot Prebuilt Docker Image
+    type: string
+  OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
+    default: true
+    title: Opencue Cuebot Use Prebuilt Docker Image
+    type: boolean
+  OPENCUE_CUEWEB_ADDITIONAL_ENV:
+    additionalProperties: true
+    default:
+      NEXT_PUBLIC_AUTH_PROVIDER: ''
+      NEXT_TELEMETRY_DISABLED: 1
+    description: 'Disabling third-party authentication is not possible at the moment.
+      Bug report pending: https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133'
+    title: Opencue Cueweb Additional Env
+    type: object
+  OPENCUE_CUEWEB_JWT_SECRET:
+    default: default-secret-key
+    title: Opencue Cueweb Jwt Secret
+    type: string
+  OPENCUE_CUEWEB_PORT_CONTAINER:
+    default: 3000
+    exclusiveMinimum: 0
+    title: Opencue Cueweb Port Container
+    type: integer
+  OPENCUE_CUEWEB_PORT_HOST:
+    default: 3111
+    exclusiveMinimum: 0
+    title: Opencue Cueweb Port Host
+    type: integer
+  OPENCUE_DB_INSTALL_DESTINATION:
+    default: '{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/data/opencue_db/postgresql'
+    format: path
+    title: Opencue Db Install Destination
+    type: string
+  OPENCUE_DB_PGDATABASE:
+    default: cuebot
+    title: Opencue Db Pgdatabase
+    type: string
+  OPENCUE_DB_PGHOST:
+    default: opencue-db
+    title: Opencue Db Pghost
+    type: string
+  OPENCUE_DB_PGPASSWORD:
+    default: cuebot_password
+    title: Opencue Db Pgpassword
+    type: string
+  OPENCUE_DB_PGUSER:
+    default: cuebot
+    title: Opencue Db Pguser
+    type: string
+  OPENCUE_DB_PORT_CONTAINER:
+    default: 5432
+    exclusiveMinimum: 0
+    title: Opencue Db Port Container
+    type: integer
+  OPENCUE_DB_PORT_HOST:
+    default: 5342
+    exclusiveMinimum: 0
+    title: Opencue Db Port Host
+    type: integer
+  OPENCUE_DEPLOY_RQD:
+    default: false
+    title: Opencue Deploy Rqd
+    type: boolean
+  OPENCUE_REST_GATEWAY_PORT_CONTAINER:
+    default: 8448
+    exclusiveMinimum: 0
+    title: Opencue Rest Gateway Port Container
+    type: integer
+  OPENCUE_REST_GATEWAY_PORT_HOST:
+    default: 8448
+    exclusiveMinimum: 0
+    title: Opencue Rest Gateway Port Host
+    type: integer
+  OPENCUE_RQD_DOCKER_IMAGE:
+    default: docker.io/opencue/rqd
+    title: Opencue Rqd Docker Image
+    type: string
+  OPENCUE_WEB_PORT_CONTAINER:
+    default: 3000
+    exclusiveMinimum: 0
+    title: Opencue Web Port Container
+    type: integer
+  OPENCUE_WEB_PORT_HOST:
+    default: 1234
+    exclusiveMinimum: 0
+    title: Opencue Web Port Host
+    type: integer
+  compose_scope:
+    default: default
+    examples:
+    - default
+    - license_server
+    - worker
+    title: Compose Scope
+    type: string
+  dnf_packages_blender_5:
+    default:
+    - libX11
+    - libXrender
+    - libXfixes
+    - libXi
+    - libxkbcommon
+    - libSM
+    - libGL
+    items: {}
+    title: Dnf Packages Blender 5
+    type: array
+  dnf_packages_general:
+    default:
+    - which
+    - file
+    items: {}
+    title: Dnf Packages General
+    type: array
+  docker_compose:
+    default: '{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/docker_compose/docker-compose.yml'
+    description: The path to the `docker-compose.yml` file.
+    format: path
+    title: Docker Compose
+    type: string
+  docker_compose_yml:
+    default: docker-compose.yml
+    title: Docker Compose Yml
+    type: string
+  enabled:
+    default: true
+    description: Whether the Feature is enabled or not.
+    title: Enabled
+    type: boolean
+  env:
+    additionalProperties: true
+    title: Env
+    type: object
+  feature_name:
+    default: OpenStudioLandscapes-OpenCue
+    title: Feature Name
+    type: string
+  group_name:
+    default: OpenStudioLandscapes_OpenCue
+    title: Group Name
+    type: string
+  key_prefixes:
+    default:
+    - OpenStudioLandscapes_OpenCue
+    items:
+      type: string
+    title: Key Prefixes
+    type: array
+  local_bind_volumes:
+    description: Here you can define Feature specific, arbitrary, absolute bind volume
+      mappings.
+    items:
+      type: string
+    title: Local Bind Volumes
+    type: array
+  local_environment_variables:
+    additionalProperties:
+      type: string
+    description: Here you can define Feature specific, arbitrary environment variables.
+    title: Local Environment Variables
+    type: object
+  opencue_cuebot:
+    default: opencue-cuebot
+    title: Opencue Cuebot
+    type: string
+  opencue_cueweb:
+    default: opencue-cueweb
+    title: Opencue Cueweb
+    type: string
+  opencue_db:
+    default: opencue-db
+    title: Opencue Db
+    type: string
+  opencue_flyway:
+    default: opencue-flyway
+    title: Opencue Flyway
+    type: string
+  opencue_rest_gateway:
+    default: opencue-rest-gateway
+    title: Opencue Rest Gateway
+    type: string
+  opencue_rqd:
+    default: opencue-rqd
+    title: Opencue Rqd
+    type: string
+  opencue_str:
+    default: opencue
+    title: Opencue Str
+    type: string
+  pip_packages:
+    default: []
+    items: {}
+    title: Pip Packages
+    type: array
+  repository_branch:
+    $ref: '#/$defs/Branches'
+    default: master
+    description: The branch of the OpenCue repository.
+    examples:
+    - master
+  repository_subdir:
+    default: OpenCue
+    title: Repository Subdir
+    type: string
+  repository_url:
+    default: https://github.com/AcademySoftwareFoundation/OpenCue.git
+    format: uri
+    maxLength: 2083
+    minLength: 1
+    title: Repository Url
+    type: string
+title: Config
+type: object
 
-
-# ==================
-# local_bind_volumes
-# ------------------
-#
-# Type: typing.List[str]
-# Base Class Info:
-#     Required:
-#         False
-#     Description:
-#         Here you can define Feature specific, arbitrary, absolute bind volume mappings.
-#     Default value:
-#         PydanticUndefined
-# Description:
-#     Here you can define Feature specific, arbitrary, absolute bind volume mappings.
-# Required:
-#     False
-# Examples:
-#     None
-
-
-# ===========================
-# local_environment_variables
-# ---------------------------
-#
-# Type: typing.Dict[str, str]
-# Base Class Info:
-#     Required:
-#         False
-#     Description:
-#         Here you can define Feature specific, arbitrary environment variables.
-#     Default value:
-#         PydanticUndefined
-# Description:
-#     Here you can define Feature specific, arbitrary environment variables.
-# Required:
-#     False
-# Examples:
-#     None
-
-
-# =============
-# config_engine
-# -------------
-#
-# Type: <class 'OpenStudioLandscapes.engine.config.models.ConfigEngine'>
-# Base Class Info:
-#     Required:
-#         False
-#     Description:
-#         None
-#     Default value:
-#         None
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-
-
-# ============
-# distribution
-# ------------
-#
-# Type: <class 'importlib.metadata.Distribution'>
-# Base Class Info:
-#     Required:
-#         False
-#     Description:
-#         None
-#     Default value:
-#         None
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-
-
-# ==========
-# group_name
-# ----------
-#
-# Type: <class 'str'>
-# Base Class Info:
-#     Required:
-#         True
-#     Description:
-#         Dagster Group name. This will represent the group node name. See https://docs.dagster.io/api/dagster/assets for more information
-#     Default value:
-#         PydanticUndefined
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-group_name: OpenStudioLandscapes_OpenCue
-
-
-# ============
-# key_prefixes
-# ------------
-#
-# Type: typing.List[str]
-# Base Class Info:
-#     Required:
-#         True
-#     Description:
-#         Dagster Asset key prefixes. This will be reflected in the nesting (directory structure) of the Asset. See https://docs.dagster.io/api/dagster/assets for more information
-#     Default value:
-#         PydanticUndefined
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-key_prefixes:
-- OpenStudioLandscapes_OpenCue
-
-
-# =======
-# enabled
-# -------
-#
-# Type: <class 'bool'>
-# Base Class Info:
-#     Required:
-#         False
-#     Description:
-#         Whether the Feature is enabled or not.
-#     Default value:
-#         True
-# Description:
-#     Whether the Feature is enabled or not.
-# Required:
-#     False
-# Examples:
-#     None
-
-
-# =============
-# compose_scope
-# -------------
-#
-# Type: <class 'str'>
-# Base Class Info:
-#     Required:
-#         False
-#     Description:
-#         None
-#     Default value:
-#         default
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     ['default', 'license_server', 'worker']
-
-
-# ============
-# feature_name
-# ------------
-#
-# Type: <class 'str'>
-# Base Class Info:
-#     Required:
-#         True
-#     Description:
-#         The name of the feature. It is derived from the `OpenStudioLandscapes.<Feature>.dist` attribute.
-#     Default value:
-#         PydanticUndefined
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-feature_name: OpenStudioLandscapes-OpenCue
-
-
-# ==============
-# docker_compose
-# --------------
-#
-# Type: <class 'pathlib.Path'>
-# Base Class Info:
-#     Required:
-#         False
-#     Description:
-#         The path to the `docker-compose.yml` file.
-#     Default value:
-#         {DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/docker_compose/docker-compose.yml
-# Description:
-#     The path to the `docker-compose.yml` file.
-# Required:
-#     False
-# Examples:
-#     None
-
-
-# ============
-# pip_packages
-# ------------
-#
-# Type: typing.List
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-pip_packages: []
-
-
-# ====================
-# dnf_packages_general
-# --------------------
-#
-# Type: typing.List
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-dnf_packages_general:
-- which
-- file
-
-
-# ======================
-# dnf_packages_blender_5
-# ----------------------
-#
-# Type: typing.List
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-dnf_packages_blender_5:
-- libX11
-- libXrender
-- libXfixes
-- libXi
-- libxkbcommon
-- libSM
-- libGL
-
-
-# ===========
-# opencue_str
-# -----------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-opencue_str: opencue
-
-
-# ==========
-# opencue_db
-# ----------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-opencue_db: opencue-db
-
-
-# ==============
-# opencue_flyway
-# --------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-opencue_flyway: opencue-flyway
-
-
-# ==============
-# opencue_cuebot
-# --------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-opencue_cuebot: opencue-cuebot
-
-
-# ==============
-# opencue_cueweb
-# --------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-opencue_cueweb: opencue-cueweb
-
-
-# ====================
-# opencue_rest_gateway
-# --------------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-opencue_rest_gateway: opencue-rest-gateway
-
-
-# ===========
-# opencue_rqd
-# -----------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-opencue_rqd: opencue-rqd
-
-
-# ==============
-# repository_url
-# --------------
-#
-# Type: <class 'pydantic.networks.HttpUrl'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-repository_url: https://github.com/AcademySoftwareFoundation/OpenCue.git
-
-
-# =================
-# repository_branch
-# -----------------
-#
-# Type: <enum 'Branches'>
-# Description:
-#     The branch of the OpenCue repository.
-# Required:
-#     False
-# Examples:
-#     ['master']
-repository_branch: master
-
-
-# =================
-# repository_subdir
-# -----------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-repository_subdir: OpenCue
-
-
-# ==================
-# docker_compose_yml
-# ------------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-docker_compose_yml: docker-compose.yml
-
-
-# ==================
-# OPENCUE_DEPLOY_RQD
-# ------------------
-#
-# Type: <class 'bool'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_DEPLOY_RQD: false
-
-
-# ========================================
-# OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE
-# ----------------------------------------
-#
-# Type: <class 'bool'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: true
-
-
-# ====================================
-# OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE
-# ------------------------------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: docker.io/opencue/cuebot
-
-
-# ========================
-# OPENCUE_RQD_DOCKER_IMAGE
-# ------------------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_RQD_DOCKER_IMAGE: docker.io/opencue/rqd
-
-
-# ========================
-# OPENCUE_CUEWEB_PORT_HOST
-# ------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEWEB_PORT_HOST: 3111
-
-
-# =============================
-# OPENCUE_CUEWEB_PORT_CONTAINER
-# -----------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEWEB_PORT_CONTAINER: 3000
-
-
-# =========================
-# OPENCUE_CUEWEB_JWT_SECRET
-# -------------------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEWEB_JWT_SECRET: default-secret-key
-
-
-# =============================
-# OPENCUE_CUEWEB_ADDITIONAL_ENV
-# -----------------------------
-#
-# Type: typing.Dict
-# Description:
-#     Disabling third-party authentication is not possible at the moment. Bug report pending: https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEWEB_ADDITIONAL_ENV:
-  NEXT_PUBLIC_AUTH_PROVIDER: ''
-  NEXT_TELEMETRY_DISABLED: 1
-
-
-# ==============================
-# OPENCUE_REST_GATEWAY_PORT_HOST
-# ------------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_REST_GATEWAY_PORT_HOST: 8448
-
-
-# ===================================
-# OPENCUE_REST_GATEWAY_PORT_CONTAINER
-# -----------------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_REST_GATEWAY_PORT_CONTAINER: 8448
-
-
-# =====================
-# OPENCUE_WEB_PORT_HOST
-# ---------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_WEB_PORT_HOST: 1234
-
-
-# ==========================
-# OPENCUE_WEB_PORT_CONTAINER
-# --------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_WEB_PORT_CONTAINER: 3000
-
-
-# =================================
-# OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST
-# ---------------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEBOT_GRPC_CUE_PORT_HOST: 8443
-
-
-# ======================================
-# OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER
-# --------------------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER: 8443
-
-
-# =================================
-# OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST
-# ---------------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST: 8444
-
-
-# ======================================
-# OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER
-# --------------------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_CUEBOT_GRPC_RQD_PORT_CONTAINER: 8444
-
-
-# ==============================
-# OPENCUE_DB_INSTALL_DESTINATION
-# ------------------------------
-#
-# Type: <class 'pathlib.Path'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_DB_INSTALL_DESTINATION: '{DOT_LANDSCAPES}/{LANDSCAPE}/{FEATURE}/data/opencue_db/postgresql'
-
-
-# ====================
-# OPENCUE_DB_PORT_HOST
-# --------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_DB_PORT_HOST: 5342
-
-
-# =========================
-# OPENCUE_DB_PORT_CONTAINER
-# -------------------------
-#
-# Type: <class 'int'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_DB_PORT_CONTAINER: 5432
-
-
-# =================
-# OPENCUE_DB_PGHOST
-# -----------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_DB_PGHOST: opencue-db
-
-
-# =====================
-# OPENCUE_DB_PGDATABASE
-# ---------------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_DB_PGDATABASE: cuebot
-
-
-# =================
-# OPENCUE_DB_PGUSER
-# -----------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_DB_PGUSER: cuebot
-
-
-# =====================
-# OPENCUE_DB_PGPASSWORD
-# ---------------------
-#
-# Type: <class 'str'>
-# Description:
-#     None
-# Required:
-#     False
-# Examples:
-#     None
-OPENCUE_DB_PGPASSWORD: cuebot_password
 ```
 
 </details>
@@ -905,4 +398,4 @@ To follow up on the previous LinkedIn publications, visit:
 
 ***
 
-Last changed: **2026-04-28 14:36:02 UTC**
+Last changed: **2026-05-07 19:21:01 UTC**

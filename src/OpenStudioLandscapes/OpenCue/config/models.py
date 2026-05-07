@@ -10,9 +10,9 @@ from pydantic import (
 )
 
 from OpenStudioLandscapes.OpenCue import (
-    dist,
     LOGGER,
     constants,
+    dist,
 )
 
 
