@@ -21,22 +21,9 @@ from dagster import (
     asset,
 )
 from git.exc import GitCommandError
-from OpenStudioLandscapes.engine.common_assets.cmd import get_feature__cmd
-from OpenStudioLandscapes.engine.common_assets.compose import get_compose
 
-# from OpenStudioLandscapes.engine.common_assets.compose_scope import (
-#     get_compose_scope_group__cmd,
-# )
-from OpenStudioLandscapes.engine.common_assets.docker_compose_graph import (
-    get_docker_compose_graph,
-)
-from OpenStudioLandscapes.engine.common_assets.feature import get_feature__CONFIG
-from OpenStudioLandscapes.engine.common_assets.feature_out import get_feature_out_v2
-from OpenStudioLandscapes.engine.common_assets.group_in import (
-    get_feature_in,
-    get_feature_in_parent,
-)
-from OpenStudioLandscapes.engine.common_assets.group_out import get_group_out
+from OpenStudioLandscapes.engine.common_assets import *
+
 from OpenStudioLandscapes.engine.config.models import ConfigEngine, DockerConfigModel
 from OpenStudioLandscapes.engine.constants import *
 from OpenStudioLandscapes.engine.enums import *
@@ -45,9 +32,7 @@ from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_
 from OpenStudioLandscapes.engine.utils import *
 from OpenStudioLandscapes.engine.utils.docker.compose_dicts import *
 
-from OpenStudioLandscapes.OpenCue import dist
-from OpenStudioLandscapes.OpenCue.config.models import CONFIG_STR, Config
-from OpenStudioLandscapes.OpenCue.constants import *
+from OpenStudioLandscapes.OpenCue import *
 
 # Current issue:
 # dnf: command not found for rqd
@@ -61,39 +46,39 @@ yaml.SafeDumper.add_multi_representer(
 )
 
 
-cmd: AssetsDefinition = get_feature__cmd(
-    ASSET_HEADER=ASSET_HEADER,
+cmd: AssetsDefinition = cmd.get_feature__cmd(
+    ASSET_HEADER=constants.ASSET_HEADER,
 )
 
-CONFIG: AssetsDefinition = get_feature__CONFIG(
-    ASSET_HEADER=ASSET_HEADER,
-    CONFIG_STR=CONFIG_STR,
-    search_model_of_type=Config,
+CONFIG: AssetsDefinition = feature.get_feature__CONFIG(
+    ASSET_HEADER=constants.ASSET_HEADER,
+    CONFIG_STR=config.models.CONFIG_STR,
+    search_model_of_type=config.models.Config,
 )
 
-feature_in: AssetsDefinition = get_feature_in(
-    ASSET_HEADER=ASSET_HEADER,
+feature_in: AssetsDefinition = group_in.get_feature_in(
+    ASSET_HEADER=constants.ASSET_HEADER,
     ASSET_HEADER_BASE=ASSET_HEADER_BASE,
     ASSET_HEADER_FEATURE_IN={},
 )
 
-group_out: AssetsDefinition = get_group_out(
-    ASSET_HEADER=ASSET_HEADER,
+group_out: AssetsDefinition = group_out.get_group_out(
+    ASSET_HEADER=constants.ASSET_HEADER,
 )
 
 
-docker_compose_graph: AssetsDefinition = get_docker_compose_graph(
-    ASSET_HEADER=ASSET_HEADER,
+docker_compose_graph: AssetsDefinition = docker_compose_graph.get_docker_compose_graph(
+    ASSET_HEADER=constants.ASSET_HEADER,
 )
 
 
-compose: AssetsDefinition = get_compose(
-    ASSET_HEADER=ASSET_HEADER,
+compose: AssetsDefinition = compose.get_compose(
+    ASSET_HEADER=constants.ASSET_HEADER,
 )
 
 
-feature_out_v2: AssetsDefinition = get_feature_out_v2(
-    ASSET_HEADER=ASSET_HEADER,
+feature_out_v2: AssetsDefinition = feature_out.get_feature_out_v2(
+    ASSET_HEADER=constants.ASSET_HEADER,
 )
 
 
@@ -101,23 +86,23 @@ feature_out_v2: AssetsDefinition = get_feature_out_v2(
 # - feature_in_parent
 # - CONFIG_PARENT
 # if ConfigParent is or type FeatureBaseModel
-feature_in_parent: Union[AssetsDefinition, None] = get_feature_in_parent(
-    ASSET_HEADER=ASSET_HEADER,
+feature_in_parent: Union[AssetsDefinition, None] = group_in.get_feature_in_parent(
+    ASSET_HEADER=constants.ASSET_HEADER,
     config_parent=ConfigParent,
 )
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
     },
 )
 def clone_repository(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
 
     env: dict = CONFIG.env
@@ -156,16 +141,16 @@ def clone_repository(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
     },
 )
 def prepare_volumes(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
     """https://www.opencue.io/docs/quick-starts/quick-start-linux/#deploying-the-opencue-sandbox-environment"""
 
@@ -199,16 +184,16 @@ def prepare_volumes(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
     },
 )
 def compose_networks(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[
     Output[Dict[str, Dict[str, Dict[str, str]]]] | AssetMaterialization, None, None
 ]:
@@ -238,16 +223,16 @@ def compose_networks(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
     },
     description=textwrap.dedent("""
@@ -281,7 +266,7 @@ def compose_networks(
 )
 def compose_cuebot(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
@@ -434,16 +419,16 @@ def compose_cuebot(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
     },
     description=textwrap.dedent("""
@@ -472,7 +457,7 @@ def compose_cuebot(
 )
 def compose_flyway(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
@@ -635,13 +620,13 @@ def compose_flyway(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
         # "clone_repository": AssetIn(
         #     AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
@@ -668,7 +653,7 @@ def compose_flyway(
 )
 def compose_db(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     # clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
@@ -775,20 +760,20 @@ def compose_db(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "feature_in": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "feature_in"]),
         ),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
     },
 )
 def write_dockerfile(
     context: AssetExecutionContext,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
     """ """
 
@@ -989,16 +974,16 @@ def write_dockerfile(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "feature_in": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "feature_in"]),
         ),
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "write_dockerfile": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "write_dockerfile"])
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "write_dockerfile"])
         ),
     },
     retry_policy=build_docker_image_retry_policy,
@@ -1006,7 +991,7 @@ def write_dockerfile(
 def build_docker_image(
     context: AssetExecutionContext,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     write_dockerfile: pathlib.Path,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
     """ """
@@ -1074,22 +1059,22 @@ def build_docker_image(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
         "build": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "build_docker_image"]),
         ),
         # "clone_repository": AssetIn(
-        #     AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        #     AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
         # ),
         "prepare_volumes": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "prepare_volumes"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "prepare_volumes"]),
         ),
     },
     description=textwrap.dedent("""
@@ -1118,7 +1103,7 @@ def build_docker_image(
 )
 def compose_rqd(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     build: Dict,  # pylint: disable=redefined-outer-name
     # clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -1248,16 +1233,16 @@ def compose_rqd(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
     },
     description=textwrap.dedent("""
@@ -1271,7 +1256,7 @@ def compose_rqd(
 )
 def compose_rest_gateway(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
@@ -1428,16 +1413,16 @@ def compose_rest_gateway(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
     },
     description=textwrap.dedent("""
@@ -1451,7 +1436,7 @@ def compose_rest_gateway(
 )
 def compose_cueweb(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
@@ -1625,13 +1610,13 @@ def compose_cueweb(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
     },
     description=textwrap.dedent("""
@@ -1661,7 +1646,7 @@ def compose_cueweb(
 )
 def opencue_test_suite__rest_gateway_docker_compose(
     context: AssetExecutionContext,
-    CONFIG: Config,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[subprocess.CompletedProcess] | AssetMaterialization, None, None]:
 
@@ -1706,25 +1691,25 @@ def opencue_test_suite__rest_gateway_docker_compose(
 
 
 @asset(
-    **ASSET_HEADER,
+    **constants.ASSET_HEADER,
     ins={
         "compose_db": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_db"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_db"]),
         ),
         "compose_flyway": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_flyway"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_flyway"]),
         ),
         "compose_cuebot": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_cuebot"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_cuebot"]),
         ),
         "compose_rqd": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_rqd"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_rqd"]),
         ),
         "compose_rest_gateway": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_rest_gateway"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_rest_gateway"]),
         ),
         "compose_cueweb": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "compose_cueweb"]),
+            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_cueweb"]),
         ),
     },
 )

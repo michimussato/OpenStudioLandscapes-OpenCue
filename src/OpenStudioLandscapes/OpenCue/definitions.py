@@ -4,6 +4,9 @@ from dagster import (
 )
 
 import OpenStudioLandscapes.OpenCue.assets
+from OpenStudioLandscapes.OpenCue import *
+
+LOGGER.info(f"Loading {dist.name} assets...")
 
 assets_base = load_assets_from_modules(
     modules=[OpenStudioLandscapes.OpenCue.assets],
