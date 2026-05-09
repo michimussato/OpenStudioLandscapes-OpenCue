@@ -11,8 +11,8 @@ from pydantic import (
 
 from OpenStudioLandscapes.OpenCue import (
     LOGGER,
-    constants,
     dist,
+    ASSET_HEADER,
 )
 
 
@@ -23,7 +23,7 @@ class Branches(enum.StrEnum):
 class Config(FeatureBaseModel):
     feature_name: str = dist.name
 
-    group_name: str = constants.ASSET_HEADER["group_name"]
+    group_name: str = ASSET_HEADER["group_name"]
 
     pip_packages: List = Field(
         default=[],
@@ -51,7 +51,7 @@ class Config(FeatureBaseModel):
         frozen=True,
     )
 
-    key_prefixes: List[str] = constants.ASSET_HEADER["key_prefix"]
+    key_prefixes: List[str] = ASSET_HEADER["key_prefix"]
 
     opencue_str: str = "opencue"
 

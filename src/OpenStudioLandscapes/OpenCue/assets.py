@@ -55,8 +55,8 @@ from OpenStudioLandscapes.engine.utils.docker.compose_dicts import (
 
 from OpenStudioLandscapes.OpenCue import (
     config,
-    constants,
     dist,
+    ASSET_HEADER,
 )
 
 # Current issue:
@@ -72,38 +72,38 @@ yaml.SafeDumper.add_multi_representer(
 
 
 cmd: AssetsDefinition = cmd.get_feature__cmd(
-    ASSET_HEADER=constants.ASSET_HEADER,
+    ASSET_HEADER=ASSET_HEADER,
 )
 
 CONFIG: AssetsDefinition = feature.get_feature__CONFIG(
-    ASSET_HEADER=constants.ASSET_HEADER,
+    ASSET_HEADER=ASSET_HEADER,
     CONFIG_STR=config.models.CONFIG_STR,
     search_model_of_type=config.models.Config,
 )
 
 feature_in: AssetsDefinition = group_in.get_feature_in(
-    ASSET_HEADER=constants.ASSET_HEADER,
+    ASSET_HEADER=ASSET_HEADER,
     ASSET_HEADER_BASE=ASSET_HEADER_BASE,
     ASSET_HEADER_FEATURE_IN={},
 )
 
 group_out: AssetsDefinition = group_out.get_group_out(
-    ASSET_HEADER=constants.ASSET_HEADER,
+    ASSET_HEADER=ASSET_HEADER,
 )
 
 
 docker_compose_graph: AssetsDefinition = docker_compose_graph.get_docker_compose_graph(
-    ASSET_HEADER=constants.ASSET_HEADER,
+    ASSET_HEADER=ASSET_HEADER,
 )
 
 
 compose: AssetsDefinition = compose.get_compose(
-    ASSET_HEADER=constants.ASSET_HEADER,
+    ASSET_HEADER=ASSET_HEADER,
 )
 
 
 feature_out_v2: AssetsDefinition = feature_out.get_feature_out_v2(
-    ASSET_HEADER=constants.ASSET_HEADER,
+    ASSET_HEADER=ASSET_HEADER,
 )
 
 
@@ -112,16 +112,16 @@ feature_out_v2: AssetsDefinition = feature_out.get_feature_out_v2(
 # - CONFIG_PARENT
 # if ConfigParent is or type FeatureBaseModel
 feature_in_parent: Union[AssetsDefinition, None] = group_in.get_feature_in_parent(
-    ASSET_HEADER=constants.ASSET_HEADER,
+    ASSET_HEADER=ASSET_HEADER,
     config_parent=ConfigParent,
 )
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
     },
 )
@@ -166,10 +166,10 @@ def clone_repository(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
     },
 )
@@ -209,10 +209,10 @@ def prepare_volumes(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
     },
 )
@@ -248,16 +248,16 @@ def compose_networks(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
     },
     description=textwrap.dedent("""
@@ -444,16 +444,16 @@ def compose_cuebot(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
     },
     description=textwrap.dedent("""
@@ -645,13 +645,13 @@ def compose_flyway(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
         # "clone_repository": AssetIn(
         #     AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
@@ -785,13 +785,13 @@ def compose_db(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "feature_in": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "feature_in"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
         ),
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
     },
 )
@@ -999,16 +999,16 @@ def write_dockerfile(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "feature_in": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "feature_in"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
         ),
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "write_dockerfile": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "write_dockerfile"])
+            AssetKey([*ASSET_HEADER["key_prefix"], "write_dockerfile"])
         ),
     },
     retry_policy=build_docker_image_retry_policy,
@@ -1084,22 +1084,22 @@ def build_docker_image(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
         "build": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "build_docker_image"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image"]),
         ),
         # "clone_repository": AssetIn(
-        #     AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         # ),
         "prepare_volumes": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "prepare_volumes"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "prepare_volumes"]),
         ),
     },
     description=textwrap.dedent("""
@@ -1258,16 +1258,16 @@ def compose_rqd(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
     },
     description=textwrap.dedent("""
@@ -1438,16 +1438,16 @@ def compose_rest_gateway(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
         "compose_networks": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_networks"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
     },
     description=textwrap.dedent("""
@@ -1635,13 +1635,13 @@ def compose_cueweb(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "CONFIG": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "CONFIG"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
         "clone_repository": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "clone_repository"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
         ),
     },
     description=textwrap.dedent("""
@@ -1716,25 +1716,25 @@ def opencue_test_suite__rest_gateway_docker_compose(
 
 
 @asset(
-    **constants.ASSET_HEADER,
+    **ASSET_HEADER,
     ins={
         "compose_db": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_db"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_db"]),
         ),
         "compose_flyway": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_flyway"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_flyway"]),
         ),
         "compose_cuebot": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_cuebot"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_cuebot"]),
         ),
         "compose_rqd": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_rqd"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_rqd"]),
         ),
         "compose_rest_gateway": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_rest_gateway"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_rest_gateway"]),
         ),
         "compose_cueweb": AssetIn(
-            AssetKey([*constants.ASSET_HEADER["key_prefix"], "compose_cueweb"]),
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_cueweb"]),
         ),
     },
 )
