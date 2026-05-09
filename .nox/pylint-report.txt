@@ -50,9 +50,6 @@ src/OpenStudioLandscapes/OpenCue/assets.py:1741:0: C0116: Missing function or me
 ************* Module OpenStudioLandscapes.OpenCue.definitions
 src/OpenStudioLandscapes/OpenCue/definitions.py:1:0: C0114: Missing module docstring (missing-module-docstring)
 src/OpenStudioLandscapes/OpenCue/definitions.py:12:0: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
-************* Module OpenStudioLandscapes.OpenCue.constants
-src/OpenStudioLandscapes/OpenCue/constants.py:9:1: W0511: Todo (fixme)
-src/OpenStudioLandscapes/OpenCue/constants.py:1:0: C0114: Missing module docstring (missing-module-docstring)
 ************* Module OpenStudioLandscapes.OpenCue._definitions_with_upstream_specs
 src/OpenStudioLandscapes/OpenCue/_definitions_with_upstream_specs.py:1:0: C0114: Missing module docstring (missing-module-docstring)
 ************* Module OpenStudioLandscapes.OpenCue.__init__
@@ -60,6 +57,7 @@ src/OpenStudioLandscapes/OpenCue/__init__.py:15:5: W0511: TODO: Import directly 
 ************* Module OpenStudioLandscapes.OpenCue
 src/OpenStudioLandscapes/OpenCue/__init__.py:1:0: C0114: Missing module docstring (missing-module-docstring)
 src/OpenStudioLandscapes/OpenCue/__init__.py:1:0: C0103: Module name "OpenCue" doesn't conform to snake_case naming style (invalid-name)
+src/OpenStudioLandscapes/OpenCue/__init__.py:39:4: C0103: Constant name "fill" doesn't conform to UPPER_CASE naming style (invalid-name)
 ************* Module OpenStudioLandscapes.OpenCue.config.models
 src/OpenStudioLandscapes/OpenCue/config/models.py:150:9: W0511: Todo (fixme)
 src/OpenStudioLandscapes/OpenCue/config/models.py:1:0: C0114: Missing module docstring (missing-module-docstring)
@@ -82,5 +80,5 @@ src/OpenStudioLandscapes/OpenCue/doc/readme.py:81:0: C0116: Missing function or 
 src/OpenStudioLandscapes/OpenCue/doc/readme.py:96:8: C2801: Unnecessarily calls dunder method __str__. Use str built-in function. (unnecessary-dunder-call)
 
 ------------------------------------------------------------------
-Your code has been rated at 8.03/10 (previous run: 7.20/10, +0.83)
+Your code has been rated at 8.04/10 (previous run: 7.21/10, +0.83)
 

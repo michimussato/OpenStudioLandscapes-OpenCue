@@ -54,9 +54,9 @@ from OpenStudioLandscapes.engine.utils.docker.compose_dicts import (
 )
 
 from OpenStudioLandscapes.OpenCue import (
+    ASSET_HEADER,
     config,
     dist,
-    ASSET_HEADER,
 )
 
 # Current issue:
