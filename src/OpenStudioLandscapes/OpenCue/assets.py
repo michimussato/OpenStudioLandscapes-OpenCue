@@ -1,13 +1,14 @@
 # pylint: disable=line-too-long,invalid-name
 import copy
-import re
+# import re
 import enum
+import time
 import json
 import pathlib
-import shutil
-import subprocess
+# import shutil
+# import subprocess
 import textwrap
-import urllib.parse
+# import urllib.parse
 from typing import Dict, Generator, List, Union
 
 import git
@@ -40,14 +41,15 @@ from OpenStudioLandscapes.engine.constants import (
 from OpenStudioLandscapes.engine.enums import (
     DockerComposePolicies,
 )
-from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
-from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
+# from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
+# from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
 from OpenStudioLandscapes.engine.utils import (
-    create_image,
+    # create_image,
     get_docker_compose_names,
-    get_docker_run_cmd,
-    get_image_metadata,
-    get_pip_install_str,
+    parse_docker_image_path,
+    # get_docker_run_cmd,
+    # get_image_metadata,
+    # get_pip_install_str,
     get_relative_path_via_common_root,
     get_image_name,
 )
@@ -125,6 +127,14 @@ feature_in_parent: Union[AssetsDefinition, None] = group_in.get_feature_in_paren
 #
 # for now, manually prepend this to /home/michael/.local/share/OpenStudioLandscapes/.landscapes/2026-07-16_09-14-15__sideways-flicker-truthful-motorcycle/OpenStudioLandscapes-OpenCue/docker_compose/docker_compose_up.sh
 # $(which docker) --config ../../../2026-07-16_09-14-15__sideways-flicker-truthful-motorcycle/OpenStudioLandscapes/OpenStudioLandscapes_Base__docker_config_json compose --progress plain --file ../../../2026-07-16_09-14-15__sideways-flicker-truthful-motorcycle/OpenStudioLandscapes-OpenCue/docker_compose/docker-compose.yml --project-name 2026-07-16_09-14-15__sideways-flicker-truthful-motorcycle-default build --no-cache
+#
+# Or we could remove images on request
+# docker image rm
+# 2026-07-16_09-14-15__sideways-flicker-truthful-motorcycle-default-opencue-cuebot:latest   ca84b0321b18       1.07GB          427MB   U
+# 2026-07-16_09-14-15__sideways-flicker-truthful-motorcycle-default-opencue-flyway:latest   62b254652cc1       2.07GB          644MB   U
+# 2026-07-16_09-14-15__sideways-flicker-truthful-motorcycle-default-opencue-rqd:latest      3c99a29e57c7        148MB         37.2MB   U
+# opencue/cueweb:latest                                                                     65bed261f11d       3.88GB          776MB   U
+# opencue/rest-gateway:latest                                                               d5064b7d5f85        168MB         44.5MB   U
 
 
 @asset(
@@ -386,6 +396,29 @@ def compose_cuebot(
     compose_cuebot_base = compose_opencue_base.get("services", {}).get("cuebot", {})
     compose_cuebot_base.pop("profiles", None)
 
+    image_name = get_image_name(context=context)
+    context.log.debug(f"{image_name = }")
+
+    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
+
+    image_prefixes = parse_docker_image_path(
+        docker_config=docker_config,
+        context=context,
+    )
+    context.log.debug(f"{image_prefixes = }")
+
+    tags = [
+        env.get("LANDSCAPE", str(time.time())),
+    ]
+    context.log.debug(f"{tags = }")
+
+    image_data = {
+        "image_name": image_name,
+        "image_prefixes": image_prefixes,
+        "image_tags": tags,
+        "image_parent": {},
+    }
+
     context_ = clone_repository.joinpath(compose_cuebot_base["build"]["context"])
     d = {
         "build": {
@@ -407,6 +440,9 @@ def compose_cuebot(
                 # Todo:
                 #  - [ ] prebuilt image?
                 **d,
+                # name and tag the resulting image:
+                # - https://docs.docker.com/reference/compose-file/build/#tags
+                "image": f"{image_data['image_prefixes']}{image_data['image_name']}:{image_data['image_tags'][0]}",
                 "container_name": container_name_cuebot,
                 "hostname": host_name_cuebot,
                 "domainname": config_engine.openstudiolandscapes__domain_lan,
@@ -747,7 +783,7 @@ def compose_flyway(
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    compose_flyway_base = compose_opencue_base.get("services", {}).get("flyway")
+    compose_flyway_base = compose_opencue_base.get("services", {}).get("flyway", {})
     compose_flyway_base.pop("profiles", None)
 
     context_ = clone_repository.joinpath(compose_flyway_base["build"]["context"])
@@ -973,7 +1009,7 @@ def compose_db(
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    compose_db_base = compose_opencue_base.get("services", {}).get("db")
+    compose_db_base = compose_opencue_base.get("services", {}).get("db", {})
     compose_db_base.pop("profiles", None)
 
     docker_dict = {
@@ -1028,7 +1064,7 @@ def compose_db(
 #         ),
 #     },
 # )
-# def write_dockerfile(
+# def write_dockerfile_cueweb(
 #     context: AssetExecutionContext,
 #     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
 #     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
@@ -1237,6 +1273,9 @@ def compose_db(
 #         # "feature_in": AssetIn(
 #         #     AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
 #         # ),
+#         "compose_opencue_base": AssetIn(
+#             AssetKey([*ASSET_HEADER["key_prefix"], "compose_opencue_base"]),
+#         ),
 #         "clone_repository": AssetIn(
 #             AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
 #         ),
@@ -1245,9 +1284,10 @@ def compose_db(
 #         ),
 #     },
 # )
-# def write_dockerfile_rqd(
+# def write_dockerfile_cueweb(
 #     context: AssetExecutionContext,
 #     # feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
+#     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
 #     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
 #     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
 # ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
@@ -1271,10 +1311,15 @@ def compose_db(
 #     #     },
 #     # }
 #
-#     docker_file_repo = clone_repository.joinpath(
-#         "rqd",
-#         "Dockerfile",
-#     )
+#     # docker_file_repo = clone_repository.joinpath(
+#     #     "rqd",
+#     #     "Dockerfile",
+#     # )
+#
+#     compose_cueweb_base = compose_opencue_base.get("services", {}).get("cueweb", {})
+#
+#     context_ = clone_repository.joinpath(compose_cueweb_base["build"]["context"])
+#     docker_file_repo = context_.joinpath(compose_cueweb_base["build"]["dockerfile"])
 #
 #     # docker_file = pathlib.Path(
 #     #     env["DOT_LANDSCAPES"],
@@ -1728,8 +1773,31 @@ def compose_rqd(
 
     if CONFIG.OPENCUE_DEPLOY_RQD:
 
-        compose_rqd_base = compose_opencue_base.get("services", {}).get("rqd")
+        compose_rqd_base = compose_opencue_base.get("services", {}).get("rqd", {})
         compose_rqd_base.pop("profiles", None)
+
+        image_name = get_image_name(context=context)
+        context.log.debug(f"{image_name = }")
+
+        docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
+
+        image_prefixes = parse_docker_image_path(
+            docker_config=docker_config,
+            context=context,
+        )
+        context.log.debug(f"{image_prefixes = }")
+
+        tags = [
+            env.get("LANDSCAPE", str(time.time())),
+        ]
+        context.log.debug(f"{tags = }")
+
+        image_data = {
+            "image_name": image_name,
+            "image_prefixes": image_prefixes,
+            "image_tags": tags,
+            "image_parent": {},
+        }
 
         context_ = clone_repository.joinpath(compose_rqd_base["build"]["context"])
         d = {
@@ -1756,6 +1824,9 @@ def compose_rqd(
                     #     build["image_tags"][0],
                     # ),
                     **d,
+                    # name and tag the resulting image:
+                    # - https://docs.docker.com/reference/compose-file/build/#tags
+                    "image": f"{image_data['image_prefixes']}{image_data['image_name']}:{image_data['image_tags'][0]}",
                     "container_name": container_name,
                     "hostname": host_name,
                     "domainname": config_engine.openstudiolandscapes__domain_lan,
@@ -1928,6 +1999,29 @@ def compose_rest_gateway(
     compose_rest_gateway_base = compose_opencue_base.get("services", {}).get("rest-gateway")
     compose_rest_gateway_base.pop("profiles", None)
 
+    image_name = get_image_name(context=context)
+    context.log.debug(f"{image_name = }")
+
+    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
+
+    image_prefixes = parse_docker_image_path(
+        docker_config=docker_config,
+        context=context,
+    )
+    context.log.debug(f"{image_prefixes = }")
+
+    tags = [
+        env.get("LANDSCAPE", str(time.time())),
+    ]
+    context.log.debug(f"{tags = }")
+
+    image_data = {
+        "image_name": image_name,
+        "image_prefixes": image_prefixes,
+        "image_tags": tags,
+        "image_parent": {},
+    }
+
     context_ = clone_repository.joinpath(compose_rest_gateway_base["build"]["context"])
     d = {
         "build": {
@@ -1950,6 +2044,9 @@ def compose_rest_gateway(
                 "container_name": container_name_rest_gateway,
                 "hostname": host_name_rest_gateway,
                 **d,
+                # name and tag the resulting image:
+                # - https://docs.docker.com/reference/compose-file/build/#tags
+                "image": f"{image_data['image_prefixes']}{image_data['image_name']}:{image_data['image_tags'][0]}",
                 # "build": {
                 #     # https://docs.docker.com/reference/compose-file/build/#context
                 #     "context": clone_repository.as_posix(),
@@ -2149,179 +2246,202 @@ def compose_cueweb(
 
     """
     #96 103.5 Route (app)                                        Size  First Load JS
-    #96 103.5 ┌ ƒ /                                           1.64 kB         269 kB
-    #96 103.5 ├ ○ /_not-found                                 1.17 kB         224 kB
-    #96 103.5 ├ ƒ /admin/audit                                4.51 kB         234 kB
-    #96 103.5 ├ ○ /allocations                                2.85 kB         327 kB
-    #96 103.5 ├ ƒ /api/admin/audit                              337 B         223 kB
-    #96 103.5 ├ ƒ /api/allocation/getall                        698 B         230 kB
-    #96 103.5 ├ ƒ /api/auth/[...nextauth]                       336 B         223 kB
-    #96 103.5 ├ ƒ /api/comment/action/delete                    696 B         230 kB
-    #96 103.5 ├ ƒ /api/comment/action/save                      697 B         230 kB
-    #96 103.5 ├ ƒ /api/countlines                               697 B         230 kB
-    #96 103.5 ├ ƒ /api/department/getdepartmentnames            695 B         230 kB
-    #96 103.5 ├ ƒ /api/department/gettasks                      697 B         230 kB
-    #96 103.5 ├ ƒ /api/facility/health                          696 B         230 kB
-    #96 103.5 ├ ƒ /api/filter/getactions                        697 B         230 kB
-    #96 103.5 ├ ƒ /api/filter/getmatchers                       696 B         230 kB
-    #96 103.5 ├ ƒ /api/filter/mutate                            697 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/action/createdependonframe         696 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/action/createdependonjob           698 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/action/createdependonlayer         696 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/action/dropdepends                 698 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/action/eat                         697 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/action/getdepends                  698 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/action/kill                        696 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/action/markaswaiting               697 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/action/retry                       698 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/getframe                           696 B         230 kB
-    #96 103.5 ├ ƒ /api/frame/preview                            337 B         223 kB
-    #96 103.5 ├ ƒ /api/getlines                                 698 B         230 kB
-    #96 103.5 ├ ƒ /api/getlog                                   336 B         223 kB
-    #96 103.5 ├ ƒ /api/getlogversions                           336 B         223 kB
-    #96 103.5 ├ ƒ /api/group/action/createsubgroup              696 B         230 kB
-    #96 103.5 ├ ƒ /api/group/action/delete                      696 B         230 kB
-    #96 103.5 ├ ƒ /api/group/action/reparentgroups              697 B         230 kB
-    #96 103.5 ├ ƒ /api/group/action/reparentjobs                696 B         230 kB
-    #96 103.5 ├ ƒ /api/group/action/update                      697 B         230 kB
-    #96 103.5 ├ ƒ /api/group/getjobs                            697 B         230 kB
-    #96 103.5 ├ ƒ /api/health                                   696 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/addcomment                   695 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/addtags                      697 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/delete                       697 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/lock                         695 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/reboot                       695 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/rebootwhenidle               698 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/redirecttojob                695 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/removetags                   699 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/renametag                    696 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/setallocation                697 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/sethardwarestate             698 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/takeownership                697 B         230 kB
-    #96 103.5 ├ ƒ /api/host/action/unlock                       694 B         230 kB
-    #96 103.5 ├ ƒ /api/host/findhost                            696 B         230 kB
-    #96 103.5 ├ ƒ /api/host/getcomments                         697 B         230 kB
-    #96 103.5 ├ ƒ /api/host/gethosts                            698 B         230 kB
-    #96 103.5 ├ ƒ /api/host/getprocs                            696 B         230 kB
-    #96 103.5 ├ ƒ /api/increment                                699 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/addcomment                    697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/addrenderpart                 696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/addsubscriber                 697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/createdependonframe           695 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/createdependonjob             695 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/createdependonlayer           696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/dropdepends                   696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/eatframes                     696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/getdepends                    697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/getwhatdependsonthis          696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/kill                          697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/killframes                    696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/markdoneframes                695 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/pause                         697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/reorderframes                 697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/retryframes                   697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/setautoeat                    697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/setmaxcores                   696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/setmaxgpus                    697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/setmaxretries                 697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/setmincores                   697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/setmingpus                    697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/setpriority                   696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/staggerframes                 696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/action/unpause                       697 B         230 kB
-    #96 103.5 ├ ƒ /api/job/getcomments                          696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/getframes                            698 B         230 kB
-    #96 103.5 ├ ƒ /api/job/getjob                               696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/getjobs                              696 B         230 kB
-    #96 103.5 ├ ƒ /api/job/getlayers                            698 B         230 kB
-    #96 103.5 ├ ƒ /api/job/submit                               697 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/createdependonframe         697 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/createdependonjob           698 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/createdependonlayer         697 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/createframebyframedepend    696 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/eatframes                   695 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/getdepends                  694 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/getoutputpaths              697 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/kill                        696 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/markdone                    697 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/reorderframes               695 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/retryframes                 697 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/setmincores                 696 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/setmingpumemory             698 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/setminmemory                697 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/settags                     697 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/setthreadable               697 B         230 kB
-    #96 103.5 ├ ƒ /api/layer/action/staggerframes               696 B         230 kB
-    #96 103.5 ├ ƒ /api/limit/action/create                      697 B         230 kB
-    #96 103.5 ├ ƒ /api/limit/action/delete                      698 B         230 kB
-    #96 103.5 ├ ƒ /api/limit/action/rename                      696 B         230 kB
-    #96 103.5 ├ ƒ /api/limit/action/setmaxvalue                 696 B         230 kB
-    #96 103.5 ├ ƒ /api/limit/getall                             697 B         230 kB
-    #96 103.5 ├ ƒ /api/metrics                                  695 B         230 kB
-    #96 103.5 ├ ƒ /api/proc/action/kill                         698 B         230 kB
-    #96 103.5 ├ ƒ /api/proc/action/unbook                       697 B         230 kB
-    #96 103.5 ├ ƒ /api/proc/action/unbookone                    698 B         230 kB
-    #96 103.5 ├ ƒ /api/proc/getprocs                            696 B         230 kB
-    #96 103.5 ├ ƒ /api/redirect/search                          697 B         230 kB
-    #96 103.5 ├ ƒ /api/service/create                           697 B         230 kB
-    #96 103.5 ├ ƒ /api/service/delete                           698 B         230 kB
-    #96 103.5 ├ ƒ /api/service/getdefaultservices               697 B         230 kB
-    #96 103.5 ├ ƒ /api/service/update                           696 B         230 kB
-    #96 103.5 ├ ƒ /api/serviceoverride/mutate                   697 B         230 kB
-    #96 103.5 ├ ƒ /api/show/action/createsubscription           697 B         230 kB
-    #96 103.5 ├ ƒ /api/show/action/enablebooking                698 B         230 kB
-    #96 103.5 ├ ƒ /api/show/action/enabledispatching            696 B         230 kB
-    #96 103.5 ├ ƒ /api/show/action/setcommentemail              696 B         230 kB
-    #96 103.5 ├ ƒ /api/show/action/setdefaultmaxcores           697 B         230 kB
-    #96 103.5 ├ ƒ /api/show/action/setdefaultmincores           696 B         230 kB
-    #96 103.5 ├ ƒ /api/show/createshow                          697 B         230 kB
-    #96 103.5 ├ ƒ /api/show/findshow                            696 B         230 kB
-    #96 103.5 ├ ƒ /api/show/getactiveshows                      696 B         230 kB
-    #96 103.5 ├ ƒ /api/show/getdepartments                      696 B         230 kB
-    #96 103.5 ├ ƒ /api/show/getfilters                          698 B         230 kB
-    #96 103.5 ├ ƒ /api/show/getgroups                           697 B         230 kB
-    #96 103.5 ├ ƒ /api/show/getserviceoverrides                 696 B         230 kB
-    #96 103.5 ├ ƒ /api/show/getshows                            697 B         230 kB
-    #96 103.5 ├ ƒ /api/show/getsubscriptions                    696 B         230 kB
-    #96 103.5 ├ ƒ /api/stuck-frames                             699 B         230 kB
-    #96 103.5 ├ ƒ /api/stuck-frames/lastline                    338 B         223 kB
-    #96 103.5 ├ ƒ /api/subscription/delete                      696 B         230 kB
-    #96 103.5 ├ ƒ /api/subscription/setburst                    696 B         230 kB
-    #96 103.5 ├ ƒ /api/subscription/setsize                     696 B         230 kB
-    #96 103.5 ├ ƒ /api/task/mutate                              694 B         230 kB
-    #96 103.5 ├ ƒ /api/track                                    338 B         223 kB
-    #96 103.5 ├ ○ /cuesubmit                                  39.9 kB         305 kB
-    #96 103.5 ├ ○ /dashboard                                  73.8 kB         333 kB
-    #96 103.5 ├ ƒ /frames/[frame-name]                          67 kB         410 kB
-    #96 103.5 ├ ○ /hosts                                      9.66 kB         393 kB
-    #96 103.5 ├ ƒ /hosts/[host-name]                          5.16 kB         359 kB
-    #96 103.5 ├ ○ /icon.png                                       0 B            0 B
-    #96 103.5 ├ ƒ /jobs/[job-name]                            10.9 kB         366 kB
-    #96 103.5 ├ ƒ /jobs/[job-name]/comments                   7.75 kB         321 kB
-    #96 103.5 ├ ○ /limits                                      5.3 kB         325 kB
-    #96 103.5 ├ ○ /login                                      3.37 kB         248 kB
-    #96 103.5 ├ ○ /login/ldap                                 2.15 kB         247 kB
-    #96 103.5 ├ ○ /monitor-cue                                32.7 kB         391 kB
-    #96 103.5 ├ ○ /plugins                                    11.1 kB         310 kB
-    #96 103.5 ├ ● /plugins/[plugin-name]                      10.4 kB         310 kB
-    #96 103.5 ├   ├ /plugins/hello
-    #96 103.5 ├   └ /plugins/cue-progress-bar
-    #96 103.5 ├ ○ /redirect                                   11.9 kB         286 kB
-    #96 103.5 ├ ○ /services                                   10.5 kB         267 kB
-    #96 103.5 ├ ƒ /settings/facilities                        3.29 kB         233 kB
-    #96 103.5 ├ ○ /shows                                      4.14 kB         337 kB
-    #96 103.5 ├ ƒ /shows/[showName]                           40.9 kB         311 kB
-    #96 103.5 ├ ○ /split                                      5.23 kB         263 kB
-    #96 103.5 ├ ○ /stuck-frames                               13.1 kB         279 kB
-    #96 103.5 ├ ○ /subscription-graphs                        9.82 kB         286 kB
-    #96 103.5 ├ ○ /subscriptions                              4.07 kB         336 kB
-    #96 103.5 └ ○ /unauthorized                               3.45 kB         248 kB
+    #96 103.5   /                                           1.64 kB         269 kB
+    #96 103.5   /_not-found                                 1.17 kB         224 kB
+    #96 103.5   /admin/audit                                4.51 kB         234 kB
+    #96 103.5   /allocations                                2.85 kB         327 kB
+    #96 103.5   /api/admin/audit                              337 B         223 kB
+    #96 103.5   /api/allocation/getall                        698 B         230 kB
+    #96 103.5   /api/auth/[...nextauth]                       336 B         223 kB
+    #96 103.5   /api/comment/action/delete                    696 B         230 kB
+    #96 103.5   /api/comment/action/save                      697 B         230 kB
+    #96 103.5   /api/countlines                               697 B         230 kB
+    #96 103.5   /api/department/getdepartmentnames            695 B         230 kB
+    #96 103.5   /api/department/gettasks                      697 B         230 kB
+    #96 103.5   /api/facility/health                          696 B         230 kB
+    #96 103.5   /api/filter/getactions                        697 B         230 kB
+    #96 103.5   /api/filter/getmatchers                       696 B         230 kB
+    #96 103.5   /api/filter/mutate                            697 B         230 kB
+    #96 103.5   /api/frame/action/createdependonframe         696 B         230 kB
+    #96 103.5   /api/frame/action/createdependonjob           698 B         230 kB
+    #96 103.5   /api/frame/action/createdependonlayer         696 B         230 kB
+    #96 103.5   /api/frame/action/dropdepends                 698 B         230 kB
+    #96 103.5   /api/frame/action/eat                         697 B         230 kB
+    #96 103.5   /api/frame/action/getdepends                  698 B         230 kB
+    #96 103.5   /api/frame/action/kill                        696 B         230 kB
+    #96 103.5   /api/frame/action/markaswaiting               697 B         230 kB
+    #96 103.5   /api/frame/action/retry                       698 B         230 kB
+    #96 103.5   /api/frame/getframe                           696 B         230 kB
+    #96 103.5   /api/frame/preview                            337 B         223 kB
+    #96 103.5   /api/getlines                                 698 B         230 kB
+    #96 103.5   /api/getlog                                   336 B         223 kB
+    #96 103.5   /api/getlogversions                           336 B         223 kB
+    #96 103.5   /api/group/action/createsubgroup              696 B         230 kB
+    #96 103.5   /api/group/action/delete                      696 B         230 kB
+    #96 103.5   /api/group/action/reparentgroups              697 B         230 kB
+    #96 103.5   /api/group/action/reparentjobs                696 B         230 kB
+    #96 103.5   /api/group/action/update                      697 B         230 kB
+    #96 103.5   /api/group/getjobs                            697 B         230 kB
+    #96 103.5   /api/health                                   696 B         230 kB
+    #96 103.5   /api/host/action/addcomment                   695 B         230 kB
+    #96 103.5   /api/host/action/addtags                      697 B         230 kB
+    #96 103.5   /api/host/action/delete                       697 B         230 kB
+    #96 103.5   /api/host/action/lock                         695 B         230 kB
+    #96 103.5   /api/host/action/reboot                       695 B         230 kB
+    #96 103.5   /api/host/action/rebootwhenidle               698 B         230 kB
+    #96 103.5   /api/host/action/redirecttojob                695 B         230 kB
+    #96 103.5   /api/host/action/removetags                   699 B         230 kB
+    #96 103.5   /api/host/action/renametag                    696 B         230 kB
+    #96 103.5   /api/host/action/setallocation                697 B         230 kB
+    #96 103.5   /api/host/action/sethardwarestate             698 B         230 kB
+    #96 103.5   /api/host/action/takeownership                697 B         230 kB
+    #96 103.5   /api/host/action/unlock                       694 B         230 kB
+    #96 103.5   /api/host/findhost                            696 B         230 kB
+    #96 103.5   /api/host/getcomments                         697 B         230 kB
+    #96 103.5   /api/host/gethosts                            698 B         230 kB
+    #96 103.5   /api/host/getprocs                            696 B         230 kB
+    #96 103.5   /api/increment                                699 B         230 kB
+    #96 103.5   /api/job/action/addcomment                    697 B         230 kB
+    #96 103.5   /api/job/action/addrenderpart                 696 B         230 kB
+    #96 103.5   /api/job/action/addsubscriber                 697 B         230 kB
+    #96 103.5   /api/job/action/createdependonframe           695 B         230 kB
+    #96 103.5   /api/job/action/createdependonjob             695 B         230 kB
+    #96 103.5   /api/job/action/createdependonlayer           696 B         230 kB
+    #96 103.5   /api/job/action/dropdepends                   696 B         230 kB
+    #96 103.5   /api/job/action/eatframes                     696 B         230 kB
+    #96 103.5   /api/job/action/getdepends                    697 B         230 kB
+    #96 103.5   /api/job/action/getwhatdependsonthis          696 B         230 kB
+    #96 103.5   /api/job/action/kill                          697 B         230 kB
+    #96 103.5   /api/job/action/killframes                    696 B         230 kB
+    #96 103.5   /api/job/action/markdoneframes                695 B         230 kB
+    #96 103.5   /api/job/action/pause                         697 B         230 kB
+    #96 103.5   /api/job/action/reorderframes                 697 B         230 kB
+    #96 103.5   /api/job/action/retryframes                   697 B         230 kB
+    #96 103.5   /api/job/action/setautoeat                    697 B         230 kB
+    #96 103.5   /api/job/action/setmaxcores                   696 B         230 kB
+    #96 103.5   /api/job/action/setmaxgpus                    697 B         230 kB
+    #96 103.5   /api/job/action/setmaxretries                 697 B         230 kB
+    #96 103.5   /api/job/action/setmincores                   697 B         230 kB
+    #96 103.5   /api/job/action/setmingpus                    697 B         230 kB
+    #96 103.5   /api/job/action/setpriority                   696 B         230 kB
+    #96 103.5   /api/job/action/staggerframes                 696 B         230 kB
+    #96 103.5   /api/job/action/unpause                       697 B         230 kB
+    #96 103.5   /api/job/getcomments                          696 B         230 kB
+    #96 103.5   /api/job/getframes                            698 B         230 kB
+    #96 103.5   /api/job/getjob                               696 B         230 kB
+    #96 103.5   /api/job/getjobs                              696 B         230 kB
+    #96 103.5   /api/job/getlayers                            698 B         230 kB
+    #96 103.5   /api/job/submit                               697 B         230 kB
+    #96 103.5   /api/layer/action/createdependonframe         697 B         230 kB
+    #96 103.5   /api/layer/action/createdependonjob           698 B         230 kB
+    #96 103.5   /api/layer/action/createdependonlayer         697 B         230 kB
+    #96 103.5   /api/layer/action/createframebyframedepend    696 B         230 kB
+    #96 103.5   /api/layer/action/eatframes                   695 B         230 kB
+    #96 103.5   /api/layer/action/getdepends                  694 B         230 kB
+    #96 103.5   /api/layer/action/getoutputpaths              697 B         230 kB
+    #96 103.5   /api/layer/action/kill                        696 B         230 kB
+    #96 103.5   /api/layer/action/markdone                    697 B         230 kB
+    #96 103.5   /api/layer/action/reorderframes               695 B         230 kB
+    #96 103.5   /api/layer/action/retryframes                 697 B         230 kB
+    #96 103.5   /api/layer/action/setmincores                 696 B         230 kB
+    #96 103.5   /api/layer/action/setmingpumemory             698 B         230 kB
+    #96 103.5   /api/layer/action/setminmemory                697 B         230 kB
+    #96 103.5   /api/layer/action/settags                     697 B         230 kB
+    #96 103.5   /api/layer/action/setthreadable               697 B         230 kB
+    #96 103.5   /api/layer/action/staggerframes               696 B         230 kB
+    #96 103.5   /api/limit/action/create                      697 B         230 kB
+    #96 103.5   /api/limit/action/delete                      698 B         230 kB
+    #96 103.5   /api/limit/action/rename                      696 B         230 kB
+    #96 103.5   /api/limit/action/setmaxvalue                 696 B         230 kB
+    #96 103.5   /api/limit/getall                             697 B         230 kB
+    #96 103.5   /api/metrics                                  695 B         230 kB
+    #96 103.5   /api/proc/action/kill                         698 B         230 kB
+    #96 103.5   /api/proc/action/unbook                       697 B         230 kB
+    #96 103.5   /api/proc/action/unbookone                    698 B         230 kB
+    #96 103.5   /api/proc/getprocs                            696 B         230 kB
+    #96 103.5   /api/redirect/search                          697 B         230 kB
+    #96 103.5   /api/service/create                           697 B         230 kB
+    #96 103.5   /api/service/delete                           698 B         230 kB
+    #96 103.5   /api/service/getdefaultservices               697 B         230 kB
+    #96 103.5   /api/service/update                           696 B         230 kB
+    #96 103.5   /api/serviceoverride/mutate                   697 B         230 kB
+    #96 103.5   /api/show/action/createsubscription           697 B         230 kB
+    #96 103.5   /api/show/action/enablebooking                698 B         230 kB
+    #96 103.5   /api/show/action/enabledispatching            696 B         230 kB
+    #96 103.5   /api/show/action/setcommentemail              696 B         230 kB
+    #96 103.5   /api/show/action/setdefaultmaxcores           697 B         230 kB
+    #96 103.5   /api/show/action/setdefaultmincores           696 B         230 kB
+    #96 103.5   /api/show/createshow                          697 B         230 kB
+    #96 103.5   /api/show/findshow                            696 B         230 kB
+    #96 103.5   /api/show/getactiveshows                      696 B         230 kB
+    #96 103.5   /api/show/getdepartments                      696 B         230 kB
+    #96 103.5   /api/show/getfilters                          698 B         230 kB
+    #96 103.5   /api/show/getgroups                           697 B         230 kB
+    #96 103.5   /api/show/getserviceoverrides                 696 B         230 kB
+    #96 103.5   /api/show/getshows                            697 B         230 kB
+    #96 103.5   /api/show/getsubscriptions                    696 B         230 kB
+    #96 103.5   /api/stuck-frames                             699 B         230 kB
+    #96 103.5   /api/stuck-frames/lastline                    338 B         223 kB
+    #96 103.5   /api/subscription/delete                      696 B         230 kB
+    #96 103.5   /api/subscription/setburst                    696 B         230 kB
+    #96 103.5   /api/subscription/setsize                     696 B         230 kB
+    #96 103.5   /api/task/mutate                              694 B         230 kB
+    #96 103.5   /api/track                                    338 B         223 kB
+    #96 103.5   /cuesubmit                                  39.9 kB         305 kB
+    #96 103.5   /dashboard                                  73.8 kB         333 kB
+    #96 103.5   /frames/[frame-name]                          67 kB         410 kB
+    #96 103.5   /hosts                                      9.66 kB         393 kB
+    #96 103.5   /hosts/[host-name]                          5.16 kB         359 kB
+    #96 103.5   /icon.png                                       0 B            0 B
+    #96 103.5   /jobs/[job-name]                            10.9 kB         366 kB
+    #96 103.5   /jobs/[job-name]/comments                   7.75 kB         321 kB
+    #96 103.5   /limits                                      5.3 kB         325 kB
+    #96 103.5   /login                                      3.37 kB         248 kB
+    #96 103.5   /login/ldap                                 2.15 kB         247 kB
+    #96 103.5   /monitor-cue                                32.7 kB         391 kB
+    #96 103.5   /plugins                                    11.1 kB         310 kB
+    #96 103.5   /plugins/[plugin-name]                      10.4 kB         310 kB
+    #96 103.5     /plugins/hello
+    #96 103.5     /plugins/cue-progress-bar
+    #96 103.5   /redirect                                   11.9 kB         286 kB
+    #96 103.5   /services                                   10.5 kB         267 kB
+    #96 103.5   /settings/facilities                        3.29 kB         233 kB
+    #96 103.5   /shows                                      4.14 kB         337 kB
+    #96 103.5   /shows/[showName]                           40.9 kB         311 kB
+    #96 103.5   /split                                      5.23 kB         263 kB
+    #96 103.5   /stuck-frames                               13.1 kB         279 kB
+    #96 103.5   /subscription-graphs                        9.82 kB         286 kB
+    #96 103.5   /subscriptions                              4.07 kB         336 kB
+    #96 103.5   /unauthorized                               3.45 kB         248 kB
     #96 103.5 + First Load JS shared by all                    223 kB
-    #96 103.5   ├ chunks/4969-3bc2e81f6c9abd67.js              119 kB
-    #96 103.5   ├ chunks/4bd1b696-1c51cbc71cf5bae2.js         54.4 kB
-    #96 103.5   ├ chunks/52774a7f-5e6f1d4767aba7ea.js           39 kB
-    #96 103.5   └ other shared chunks (total)                 10.3 kB
+    #96 103.5    chunks/4969-3bc2e81f6c9abd67.js              119 kB
+    #96 103.5    chunks/4bd1b696-1c51cbc71cf5bae2.js         54.4 kB
+    #96 103.5    chunks/52774a7f-5e6f1d4767aba7ea.js           39 kB
+    #96 103.5    other shared chunks (total)                 10.3 kB
     """
+
+    image_name = get_image_name(context=context)
+    context.log.debug(f"{image_name = }")
+
+    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
+
+    image_prefixes = parse_docker_image_path(
+        docker_config=docker_config,
+        context=context,
+    )
+    context.log.debug(f"{image_prefixes = }")
+
+    tags = [
+        env.get("LANDSCAPE", str(time.time())),
+    ]
+    context.log.debug(f"{tags = }")
+
+    image_data = {
+        "image_name": image_name,
+        "image_prefixes": image_prefixes,
+        "image_tags": tags,
+        "image_parent": {},
+    }
 
     context_ = clone_repository.joinpath(compose_cueweb_base["build"]["context"])
     d = {
@@ -2335,7 +2455,8 @@ def compose_cueweb(
             "args": {
                 # https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133
                 "NEXT_PUBLIC_AUTH_PROVIDER": "",
-                # "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{host_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
+                # has to be specified at build time?
+                # - yes
                 "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{container_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
                 # Empty = client builds same-origin relative URLs, so the app
                 # works from any host the user reaches it on (localhost on the
@@ -2344,8 +2465,10 @@ def compose_cueweb(
                 # "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
                 # NEXT_PUBLIC_PREVIEW_URL
                 # NEXTAUTH_URL
-                "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
-                "NEXTAUTH_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
+                # "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
+                # "NEXTAUTH_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
+                "NEXT_JWT_SECRET": "",
+                "NEXTAUTH_SECRET": "",
             },
         },
     }
@@ -2368,7 +2491,7 @@ def compose_cueweb(
                 #        there is a better way.
                 **compose_cueweb_base,
                 "build": {
-                    **compose_cueweb_base.get("build"),
+                    **compose_cueweb_base.get("build", {}),
                     "additional_contexts": d["build"]["additional_contexts"],
                     "context": d["build"]["context"],
                     "dockerfile": d["build"]["dockerfile"],
@@ -2384,6 +2507,9 @@ def compose_cueweb(
                 #     **d.get("build", {}).get("dockerfile", {}),
                 #     **d.get("build", {}).get("args", {}),
                 },
+                # name and tag the resulting image:
+                # - https://docs.docker.com/reference/compose-file/build/#tags
+                "image": f"{image_data['image_prefixes']}{image_data['image_name']}:{image_data['image_tags'][0]}",
                 "container_name": container_name_cueweb,
                 "hostname": host_name_cueweb,
                 # "build": {
@@ -2409,6 +2535,7 @@ def compose_cueweb(
                     # https://docs.opencue.io/docs/getting-started/deploying-cueweb/#environment-configuration
                     # "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{host_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
                     # "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
+                    # "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{container_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
                     "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
                     "NEXTAUTH_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
                     **CONFIG.OPENCUE_CUEWEB_ADDITIONAL_ENV,
