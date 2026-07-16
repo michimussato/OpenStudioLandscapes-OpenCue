@@ -1,5 +1,6 @@
 import enum
 import pathlib
+import textwrap
 from typing import Dict, List
 
 from OpenStudioLandscapes.engine.config.models import FeatureBaseModel
@@ -80,10 +81,19 @@ class Config(FeatureBaseModel):
 
     OPENCUE_DEPLOY_RQD: bool = Field(
         default=False,
+        description=textwrap.dedent(
+            """
+            Do we want to deploy an `rqd` worker within the OpenCue
+            server scope?
+            """
+        ),
     )
 
     OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: bool = Field(
-        default=True,
+        # it looks like the OpenCue Docker Hub images
+        # are no longer maintained. Awaiting confirmation
+        # - https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133#issuecomment-4988922728
+        default=False,
     )
 
     OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: str = Field(
@@ -150,13 +160,18 @@ class Config(FeatureBaseModel):
         # Todo
         #  - [ ] set this dynamically after issue is fixed:
         #        - https://github.com/AcademySoftwareFoundation/OpenCue/issues/2127
-        default="default-secret-key",
+        default="cueweb-nextauth-secret-change-in-production",
     )
+
+    # OPENCUE_SENTRY_ENVIRONMENT: str = Field(
+    #     # # Disable Sentry for sandbox
+    #     default="development",
+    # )
 
     OPENCUE_CUEWEB_ADDITIONAL_ENV: Dict = Field(
         default={
             "NEXT_TELEMETRY_DISABLED": 1,
-            "NEXT_PUBLIC_AUTH_PROVIDER": "",
+            # "NEXT_PUBLIC_AUTH_PROVIDER": "",
         },
         description="Disabling third-party authentication is not possible at the moment. "
         "Bug report pending: https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133",
