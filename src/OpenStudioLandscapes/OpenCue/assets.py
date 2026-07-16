@@ -41,15 +41,15 @@ from OpenStudioLandscapes.engine.constants import (
 from OpenStudioLandscapes.engine.enums import (
     DockerComposePolicies,
 )
-# from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
-# from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
+from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
+from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
 from OpenStudioLandscapes.engine.utils import (
-    # create_image,
+    create_image,
     get_docker_compose_names,
     parse_docker_image_path,
-    # get_docker_run_cmd,
-    # get_image_metadata,
-    # get_pip_install_str,
+    get_docker_run_cmd,
+    get_image_metadata,
+    get_pip_install_str,
     get_relative_path_via_common_root,
     get_image_name,
 )
@@ -2108,6 +2108,188 @@ def compose_rest_gateway(
 @asset(
     **ASSET_HEADER,
     ins={
+        # "feature_in": AssetIn(
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
+        # ),
+        "compose_opencue_base": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_opencue_base"]),
+        ),
+        "clone_repository": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        ),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+        ),
+    },
+)
+def dockerfile_cueweb(
+    context: AssetExecutionContext,
+    # feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
+    compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
+    clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
+    """ """
+
+    env: Dict = CONFIG.env
+
+    compose_cueweb_base = compose_opencue_base.get("services", {}).get("cueweb", {})
+
+    build_context = clone_repository.joinpath(compose_cueweb_base["build"]["context"])
+    docker_file_repo = build_context.joinpath(compose_cueweb_base["build"]["dockerfile"])
+
+    image_name = get_image_name(context=context)
+    context.log.debug(f"{image_name = }")
+
+    with open(docker_file_repo, "r") as fr:
+        docker_file_repo_str = fr.read()
+
+    yield Output(docker_file_repo)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.path(docker_file_repo),
+            docker_file_repo.name: MetadataValue.md(f"```shell\n{docker_file_repo_str}\n```"),
+            "env": MetadataValue.json(env),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
+        "feature_in": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "feature_in"]),
+        ),
+        "CONFIG": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
+        ),
+        "dockerfile_cueweb": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "dockerfile_cueweb"])
+        ),
+        "clone_repository": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        ),
+        "compose_opencue_base": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "compose_opencue_base"]),
+        ),
+    },
+    # retry_policy=build_docker_image_retry_policy,
+)
+def build_docker_image_cueweb(
+    context: AssetExecutionContext,
+    feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
+    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    dockerfile_cueweb: pathlib.Path,  # pylint: disable=redefined-outer-name
+    clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+    compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
+) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
+    """ """
+
+    env: Dict = CONFIG.env
+
+    docker_config_json: pathlib.Path = (
+        feature_in.openstudiolandscapes_base.docker_config_json
+    )
+
+    config_engine: ConfigEngine = CONFIG.config_engine
+
+    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
+
+    docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
+
+    service_name_rest_gateway = CONFIG.opencue_rest_gateway
+    container_name_rest_gateway, host_name_rest_gateway = get_docker_compose_names(
+        context=context,
+        service_name=service_name_rest_gateway,
+        landscape_id=env.get("LANDSCAPE", "default"),
+        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    )
+
+    compose_cueweb_base = compose_opencue_base.get("services", {}).get("cueweb", {})
+    context.log.debug(f"{compose_cueweb_base = }")
+    context.log.debug(f"{compose_cueweb_base['build']['context'] = }")
+    context.log.debug(f"{compose_cueweb_base['build']['additional_contexts'] = }")
+
+    build_context = clone_repository.joinpath(compose_cueweb_base["build"]["context"])
+    additional_build_contexts = {k: clone_repository.joinpath(v) for k, v in compose_cueweb_base["build"]["additional_contexts"].items()}
+
+    build_args: Dict = {
+        # https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133
+        "NEXT_PUBLIC_AUTH_PROVIDER": "",
+        # has to be specified at build time?
+        # - yes
+        "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{container_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
+        # Empty = client builds same-origin relative URLs, so the app
+        # works from any host the user reaches it on (localhost on the
+        # dev environment, the LAN IP from another device, etc.). Set to an
+        # absolute URL only if the API is on a different origin than the UI.
+        # "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
+        # NEXT_PUBLIC_PREVIEW_URL
+        # NEXTAUTH_URL
+        # "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
+        # "NEXTAUTH_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
+        "NEXT_JWT_SECRET": "",
+        "NEXTAUTH_SECRET": "",
+    }
+
+    #################################################
+
+    (
+        image_name,
+        image_prefixes,
+        tags,
+        build_base_parent_image_prefix,
+        build_base_parent_image_name,
+        build_base_parent_image_tags,
+    ) = get_image_metadata(
+        context=context,
+        docker_image=docker_image,
+        docker_config=docker_config,
+        env=env,
+    )
+
+    #################################################
+
+    image_data, logs = create_image(
+        context=context,
+        image_name=image_name,
+        image_prefixes=image_prefixes,
+        tags=tags,
+        docker_image=docker_image,
+        docker_config=docker_config,
+        docker_config_json=docker_config_json,
+        docker_file=dockerfile_cueweb,
+        build_context=build_context,
+        additional_build_contexts=additional_build_contexts,
+        build_args=build_args,
+    )
+
+    yield Output(image_data)
+
+    yield AssetMaterialization(
+        asset_key=context.asset_key,
+        metadata={
+            "__".join(context.asset_key.path): MetadataValue.json(image_data),
+            "env": MetadataValue.json(env),
+            "docker_image": MetadataValue.path(
+                f"{image_data['image_prefixes']}{image_data['image_name']}:{image_data['image_tags'][0]}"
+            ),
+            "docker_cmd": MetadataValue.path(
+                get_docker_run_cmd(
+                    context=context,
+                    image_data=image_data,
+                )
+            ),
+            "logs": MetadataValue.json(logs),
+        },
+    )
+
+
+@asset(
+    **ASSET_HEADER,
+    ins={
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
@@ -2119,6 +2301,9 @@ def compose_rest_gateway(
         ),
         "compose_opencue_base": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_opencue_base"]),
+        ),
+        "build_docker_image_cueweb": AssetIn(
+            AssetKey([*ASSET_HEADER["key_prefix"], "build_docker_image_cueweb"]),
         ),
     },
     description=textwrap.dedent("""
@@ -2136,6 +2321,7 @@ def compose_cueweb(
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
+    build_docker_image_cueweb: Dict,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
     """ """
 
@@ -2222,12 +2408,12 @@ def compose_cueweb(
     )
 
     service_name_rest_gateway = CONFIG.opencue_rest_gateway
-    container_name_rest_gateway, host_name_rest_gateway = get_docker_compose_names(
-        context=context,
-        service_name=service_name_rest_gateway,
-        landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
-    )
+    # container_name_rest_gateway, host_name_rest_gateway = get_docker_compose_names(
+    #     context=context,
+    #     service_name=service_name_rest_gateway,
+    #     landscape_id=env.get("LANDSCAPE", "default"),
+    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    # )
 
     service_name_cueweb = CONFIG.opencue_cueweb
     container_name_cueweb, host_name_cueweb = get_docker_compose_names(
@@ -2237,12 +2423,15 @@ def compose_cueweb(
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    compose_cueweb_base = compose_opencue_base.get("services", {}).get("cueweb", {})
+    compose_cueweb_base = (compose_opencue_base
+                           .get("services", {})
+                           .get("cueweb", {})
+                           )
+    compose_cueweb_base.pop("build", None)
     compose_cueweb_base.pop("profiles", None)
 
     context.log.info(clone_repository)
     context.log.info(compose_cueweb_base)
-    context.log.info(clone_repository.joinpath(compose_cueweb_base["build"]["additional_contexts"]["project_root"]))
 
     """
     #96 103.5 Route (app)                                        Size  First Load JS
@@ -2436,50 +2625,6 @@ def compose_cueweb(
     ]
     context.log.debug(f"{tags = }")
 
-    image_data = {
-        "image_name": image_name,
-        "image_prefixes": image_prefixes,
-        "image_tags": tags,
-        "image_parent": {},
-    }
-
-    context_ = clone_repository.joinpath(compose_cueweb_base["build"]["context"])
-    d = {
-        "build": {
-            "additional_contexts": {
-                "project_root": clone_repository.joinpath(compose_cueweb_base["build"]["additional_contexts"]["project_root"]).as_posix(),
-            },
-            # Just prepend the full path to the cloned repo
-            "context": context_.as_posix(),
-            "dockerfile": context_.joinpath(compose_cueweb_base["build"]["dockerfile"]).as_posix(),
-            "args": {
-                # https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133
-                "NEXT_PUBLIC_AUTH_PROVIDER": "",
-                # has to be specified at build time?
-                # - yes
-                "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{container_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
-                # Empty = client builds same-origin relative URLs, so the app
-                # works from any host the user reaches it on (localhost on the
-                # dev environment, the LAN IP from another device, etc.). Set to an
-                # absolute URL only if the API is on a different origin than the UI.
-                # "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
-                # NEXT_PUBLIC_PREVIEW_URL
-                # NEXTAUTH_URL
-                # "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
-                # "NEXTAUTH_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
-                "NEXT_JWT_SECRET": "",
-                "NEXTAUTH_SECRET": "",
-            },
-        },
-    }
-
-    # Convert list to dict
-    args_ = {}
-    # This comes a list:
-    for i in compose_cueweb_base.get("build", {}).get("args", {}):
-        k, v = i.split("=", maxsplit=1)
-        args_[k] = v
-
     docker_dict = {
         "services": {
             # https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#docker-compose-configuration-separate-file
@@ -2490,45 +2635,14 @@ def compose_cueweb(
                 #        This might be error prone so maybe
                 #        there is a better way.
                 **compose_cueweb_base,
-                "build": {
-                    **compose_cueweb_base.get("build", {}),
-                    "additional_contexts": d["build"]["additional_contexts"],
-                    "context": d["build"]["context"],
-                    "dockerfile": d["build"]["dockerfile"],
-                    "args": {
-                        ** args_,
-                        ** d["build"]["args"],
-                    },
-                    # "additional_contexts": {
-                    #     **compose_cueweb_base.get("additional_contexts", {}),
-                    # },
-                #     **compose_cueweb_base.get("build", {}),
-                #     **d.get("build", {}).get("context", {}),
-                #     **d.get("build", {}).get("dockerfile", {}),
-                #     **d.get("build", {}).get("args", {}),
-                },
-                # name and tag the resulting image:
-                # - https://docs.docker.com/reference/compose-file/build/#tags
-                "image": f"{image_data['image_prefixes']}{image_data['image_name']}:{image_data['image_tags'][0]}",
+                "image": "%s%s:%s"
+                % (
+                    build_docker_image_cueweb["image_prefixes"],
+                    build_docker_image_cueweb["image_name"],
+                    build_docker_image_cueweb["image_tags"][0],
+                ),
                 "container_name": container_name_cueweb,
                 "hostname": host_name_cueweb,
-                # "build": {
-                #     # https://docs.docker.com/reference/compose-file/build/#context
-                #     "context": clone_repository.joinpath(
-                #         "cueweb",
-                #     ).as_posix(),
-                #     # https://docs.docker.com/reference/compose-file/build/#dockerfile
-                #     "dockerfile": clone_repository.joinpath(
-                #         "cueweb",
-                #         "Dockerfile",
-                #     ).as_posix(),
-                #     "args": {
-                #         # https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133
-                #         "NEXT_PUBLIC_AUTH_PROVIDER": "",
-                #         "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{host_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
-                #         "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
-                #     },
-                # },
                 "domainname": config_engine.openstudiolandscapes__domain_lan,
                 "environment": {
                     "TZ": config_engine.tz,
@@ -2542,7 +2656,6 @@ def compose_cueweb(
                     **config_engine.global_environment_variables,
                     **CONFIG.local_environment_variables,
                 },
-                # "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
                 "volumes": [
                     *_volume_relative_cueweb,
                 ],
@@ -2551,20 +2664,6 @@ def compose_cueweb(
                         "condition": "service_healthy",
                     },
                 },
-                # "healthcheck": {
-                #     # Todo
-                #     #  - [ ] Have bug fixed:
-                #     #        https://github.com/AcademySoftwareFoundation/OpenCue/issues/2126
-                #     # "test": [
-                #     #     "CMD",
-                #     #     "curl",
-                #     #     "-f",
-                #     #     f"http://localhost:{CONFIG.OPENCUE_CUEWEB_PORT_CONTAINER}/api/health"
-                #     # ],
-                #     "interval": "30s",
-                #     "timeout": "10s",
-                #     "retries": "3",
-                # },
                 "command": ["npm", "run", "start", "--verbose"],
                 **copy.deepcopy(network_dict),
                 **copy.deepcopy(ports_dict_cueweb),
