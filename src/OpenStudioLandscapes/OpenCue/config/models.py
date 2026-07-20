@@ -89,21 +89,6 @@ class Config(FeatureBaseModel):
         ),
     )
 
-    OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE: bool = Field(
-        # it looks like the OpenCue Docker Hub images
-        # are no longer maintained. Awaiting confirmation
-        # - https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133#issuecomment-4988922728
-        default=False,
-    )
-
-    OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE: str = Field(
-        default="docker.io/opencue/cuebot",
-    )
-
-    OPENCUE_RQD_DOCKER_IMAGE: str = Field(
-        default="docker.io/opencue/rqd",
-    )
-
     # this doesn't seem to work with an override:
     # removing a service from an existing docker-compose
     # file. Maybe we read the original and generate
