@@ -1,13 +1,16 @@
 # pylint: disable=line-too-long,invalid-name
 import copy
+
 # import re
 import enum
-import time
 import json
 import pathlib
+
 # import shutil
 # import subprocess
 import textwrap
+import time
+
 # import urllib.parse
 from typing import Dict, Generator, List, Union
 
@@ -46,12 +49,12 @@ from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_
 from OpenStudioLandscapes.engine.utils import (
     create_image,
     get_docker_compose_names,
-    parse_docker_image_path,
     get_docker_run_cmd,
     get_image_metadata,
+    get_image_name,
     get_pip_install_str,
     get_relative_path_via_common_root,
-    get_image_name,
+    parse_docker_image_path,
 )
 from OpenStudioLandscapes.engine.utils.docker.compose_dicts import (
     get_network_dicts,
@@ -308,7 +311,9 @@ def dockerfile_cuebot(
         asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(docker_file_repo),
-            docker_file_repo.name: MetadataValue.md(f"```shell\n{docker_file_repo_str}\n```"),
+            docker_file_repo.name: MetadataValue.md(
+                f"```shell\n{docker_file_repo_str}\n```"
+            ),
             "env": MetadataValue.json(env),
         },
     )
@@ -684,7 +689,9 @@ def dockerfile_flyway(
     compose_flyway_base = compose_opencue_base.get("services", {}).get("flyway", {})
 
     build_context = clone_repository.joinpath(compose_flyway_base["build"]["context"])
-    docker_file_repo = build_context.joinpath(compose_flyway_base["build"]["dockerfile"])
+    docker_file_repo = build_context.joinpath(
+        compose_flyway_base["build"]["dockerfile"]
+    )
 
     image_name = get_image_name(context=context)
     context.log.debug(f"{image_name = }")
@@ -698,7 +705,9 @@ def dockerfile_flyway(
         asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(docker_file_repo),
-            docker_file_repo.name: MetadataValue.md(f"```shell\n{docker_file_repo_str}\n```"),
+            docker_file_repo.name: MetadataValue.md(
+                f"```shell\n{docker_file_repo_str}\n```"
+            ),
             "env": MetadataValue.json(env),
         },
     )
@@ -1773,7 +1782,9 @@ def dockerfile_rqd(
         asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(docker_file_repo),
-            docker_file_repo.name: MetadataValue.md(f"```shell\n{docker_file_repo_str}\n```"),
+            docker_file_repo.name: MetadataValue.md(
+                f"```shell\n{docker_file_repo_str}\n```"
+            ),
             "env": MetadataValue.json(env),
         },
     )
@@ -2023,7 +2034,9 @@ def compose_rqd(
         image_name = get_image_name(context=context)
         context.log.debug(f"{image_name = }")
 
-        docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
+        docker_config: DockerConfigModel = (
+            config_engine.openstudiolandscapes__docker_config
+        )
 
         image_prefixes = parse_docker_image_path(
             docker_config=docker_config,
@@ -2120,10 +2133,16 @@ def dockerfile_rest_gateway(
 
     env: Dict = CONFIG.env
 
-    compose_rest_gateway_base = compose_opencue_base.get("services", {}).get("rest-gateway", {})
+    compose_rest_gateway_base = compose_opencue_base.get("services", {}).get(
+        "rest-gateway", {}
+    )
 
-    build_context = clone_repository.joinpath(compose_rest_gateway_base["build"]["context"])
-    docker_file_repo = build_context.joinpath(compose_rest_gateway_base["build"]["dockerfile"])
+    build_context = clone_repository.joinpath(
+        compose_rest_gateway_base["build"]["context"]
+    )
+    docker_file_repo = build_context.joinpath(
+        compose_rest_gateway_base["build"]["dockerfile"]
+    )
 
     image_name = get_image_name(context=context)
     context.log.debug(f"{image_name = }")
@@ -2137,7 +2156,9 @@ def dockerfile_rest_gateway(
         asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(docker_file_repo),
-            docker_file_repo.name: MetadataValue.md(f"```shell\n{docker_file_repo_str}\n```"),
+            docker_file_repo.name: MetadataValue.md(
+                f"```shell\n{docker_file_repo_str}\n```"
+            ),
             "env": MetadataValue.json(env),
         },
     )
@@ -2186,10 +2207,14 @@ def build_docker_image_rest_gateway(
 
     docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
 
-    compose_rest_gateway_base = compose_opencue_base.get("services", {}).get("rest-gateway", {})
+    compose_rest_gateway_base = compose_opencue_base.get("services", {}).get(
+        "rest-gateway", {}
+    )
     context.log.debug(f"{compose_rest_gateway_base = }")
 
-    build_context = clone_repository.joinpath(compose_rest_gateway_base["build"]["context"])
+    build_context = clone_repository.joinpath(
+        compose_rest_gateway_base["build"]["context"]
+    )
     context.log.debug(f"{build_context = }")
 
     #################################################
@@ -2366,7 +2391,9 @@ def compose_rest_gateway(
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    compose_rest_gateway_base = compose_opencue_base.get("services", {}).get("rest-gateway", {})
+    compose_rest_gateway_base = compose_opencue_base.get("services", {}).get(
+        "rest-gateway", {}
+    )
     compose_rest_gateway_base.pop("profiles", None)
     compose_rest_gateway_base.pop("build", None)
 
@@ -2471,7 +2498,9 @@ def dockerfile_cueweb(
     compose_cueweb_base = compose_opencue_base.get("services", {}).get("cueweb", {})
 
     build_context = clone_repository.joinpath(compose_cueweb_base["build"]["context"])
-    docker_file_repo = build_context.joinpath(compose_cueweb_base["build"]["dockerfile"])
+    docker_file_repo = build_context.joinpath(
+        compose_cueweb_base["build"]["dockerfile"]
+    )
 
     image_name = get_image_name(context=context)
     context.log.debug(f"{image_name = }")
@@ -2485,7 +2514,9 @@ def dockerfile_cueweb(
         asset_key=context.asset_key,
         metadata={
             "__".join(context.asset_key.path): MetadataValue.path(docker_file_repo),
-            docker_file_repo.name: MetadataValue.md(f"```shell\n{docker_file_repo_str}\n```"),
+            docker_file_repo.name: MetadataValue.md(
+                f"```shell\n{docker_file_repo_str}\n```"
+            ),
             "env": MetadataValue.json(env),
         },
     )
@@ -2547,7 +2578,10 @@ def build_docker_image_cueweb(
 
     build_context = clone_repository.joinpath(compose_cueweb_base["build"]["context"])
     context.log.debug(f"{build_context = }")
-    additional_build_contexts = {k: clone_repository.joinpath(v) for k, v in compose_cueweb_base["build"]["additional_contexts"].items()}
+    additional_build_contexts = {
+        k: clone_repository.joinpath(v)
+        for k, v in compose_cueweb_base["build"]["additional_contexts"].items()
+    }
     context.log.debug(f"{additional_build_contexts = }")
 
     build_args: Dict = {
@@ -2759,10 +2793,7 @@ def compose_cueweb(
         domain_lan=config_engine.openstudiolandscapes__domain_lan,
     )
 
-    compose_cueweb_base = (compose_opencue_base
-                           .get("services", {})
-                           .get("cueweb", {})
-                           )
+    compose_cueweb_base = compose_opencue_base.get("services", {}).get("cueweb", {})
     compose_cueweb_base.pop("build", None)
     compose_cueweb_base.pop("profiles", None)
 

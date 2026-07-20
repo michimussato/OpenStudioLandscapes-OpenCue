@@ -122,25 +122,16 @@ OPENCUE_CUEBOT_GRPC_RQD_PORT_HOST:
   exclusiveMinimum: 0
   title: Opencue Cuebot Grpc Rqd Port Host
   type: integer
-OPENCUE_CUEBOT_PREBUILT_DOCKER_IMAGE:
-  default: docker.io/opencue/cuebot
-  title: Opencue Cuebot Prebuilt Docker Image
-  type: string
-OPENCUE_CUEBOT_USE_PREBUILT_DOCKER_IMAGE:
-  default: true
-  title: Opencue Cuebot Use Prebuilt Docker Image
-  type: boolean
 OPENCUE_CUEWEB_ADDITIONAL_ENV:
   additionalProperties: true
   default:
-    NEXT_PUBLIC_AUTH_PROVIDER: ''
     NEXT_TELEMETRY_DISABLED: 1
   description: 'Disabling third-party authentication is not possible at the moment.
     Bug report pending: https://github.com/AcademySoftwareFoundation/OpenCue/issues/2133'
   title: Opencue Cueweb Additional Env
   type: object
 OPENCUE_CUEWEB_JWT_SECRET:
-  default: default-secret-key
+  default: cueweb-nextauth-secret-change-in-production
   title: Opencue Cueweb Jwt Secret
   type: string
 OPENCUE_CUEWEB_PORT_CONTAINER:
@@ -186,6 +177,13 @@ OPENCUE_DB_PORT_HOST:
   type: integer
 OPENCUE_DEPLOY_RQD:
   default: false
+  description: '
+
+    Do we want to deploy an `rqd` worker within the OpenCue
+
+    server scope?
+
+    '
   title: Opencue Deploy Rqd
   type: boolean
 OPENCUE_REST_GATEWAY_PORT_CONTAINER:
@@ -198,10 +196,6 @@ OPENCUE_REST_GATEWAY_PORT_HOST:
   exclusiveMinimum: 0
   title: Opencue Rest Gateway Port Host
   type: integer
-OPENCUE_RQD_DOCKER_IMAGE:
-  default: docker.io/opencue/rqd
-  title: Opencue Rqd Docker Image
-  type: string
 OPENCUE_WEB_PORT_CONTAINER:
   default: 3000
   exclusiveMinimum: 0
@@ -408,4 +402,4 @@ To follow up on the previous LinkedIn publications, visit:
 
 ***
 
-Last changed: **2026-07-09 12:12:45 UTC**
+Last changed: **2026-07-20 11:16:15 UTC**

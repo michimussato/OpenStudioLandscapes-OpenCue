@@ -81,12 +81,10 @@ class Config(FeatureBaseModel):
 
     OPENCUE_DEPLOY_RQD: bool = Field(
         default=False,
-        description=textwrap.dedent(
-            """
+        description=textwrap.dedent("""
             Do we want to deploy an `rqd` worker within the OpenCue
             server scope?
-            """
-        ),
+            """),
     )
 
     # this doesn't seem to work with an override:
