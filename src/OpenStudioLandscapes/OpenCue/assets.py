@@ -37,6 +37,7 @@ from OpenStudioLandscapes.engine.common_assets import (
     group_out,
 )
 from OpenStudioLandscapes.engine.config.models import ConfigEngine, DockerConfigModel
+from OpenStudioLandscapes.engine.base.configurable_resources.docker_registry_resource import DockerRegistryConfigurableResource
 from OpenStudioLandscapes.engine.constants import (
     ASSET_HEADER_BASE,
     ConfigParent,
@@ -342,6 +343,7 @@ def dockerfile_cuebot(
 )
 def build_docker_image_cuebot(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_cuebot: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -381,6 +383,7 @@ def build_docker_image_cuebot(
         context=context,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -393,6 +396,7 @@ def build_docker_image_cuebot(
         tags=tags,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_cuebot,
         build_context=build_context,
@@ -466,6 +470,7 @@ def build_docker_image_cuebot(
 )
 def compose_cuebot(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -557,6 +562,7 @@ def compose_cuebot(
     image_prefixes = parse_docker_image_path(
         docker_config=docker_config,
         context=context,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
     )
     context.log.debug(f"{image_prefixes = }")
 
@@ -736,6 +742,7 @@ def dockerfile_flyway(
 )
 def build_docker_image_flyway(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_flyway: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -775,6 +782,7 @@ def build_docker_image_flyway(
         context=context,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -787,6 +795,7 @@ def build_docker_image_flyway(
         tags=tags,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_flyway,
         build_context=build_context,
@@ -1813,6 +1822,7 @@ def dockerfile_rqd(
 )
 def build_docker_image_rqd(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_rqd: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -1852,6 +1862,7 @@ def build_docker_image_rqd(
         context=context,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -1864,6 +1875,7 @@ def build_docker_image_rqd(
         tags=tags,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_rqd,
         build_context=build_context,
@@ -1935,6 +1947,7 @@ def build_docker_image_rqd(
 )
 def compose_rqd(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     prepare_volumes: Dict,  # pylint: disable=redefined-outer-name
@@ -2041,6 +2054,7 @@ def compose_rqd(
         image_prefixes = parse_docker_image_path(
             docker_config=docker_config,
             context=context,
+            config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         )
         context.log.debug(f"{image_prefixes = }")
 
@@ -2187,6 +2201,7 @@ def dockerfile_rest_gateway(
 )
 def build_docker_image_rest_gateway(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_rest_gateway: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -2230,6 +2245,7 @@ def build_docker_image_rest_gateway(
         context=context,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -2242,6 +2258,7 @@ def build_docker_image_rest_gateway(
         tags=tags,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_rest_gateway,
         build_context=build_context,
@@ -2295,6 +2312,7 @@ def build_docker_image_rest_gateway(
 )
 def compose_rest_gateway(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -2405,6 +2423,7 @@ def compose_rest_gateway(
     image_prefixes = parse_docker_image_path(
         docker_config=docker_config,
         context=context,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
     )
     context.log.debug(f"{image_prefixes = }")
 
@@ -2545,6 +2564,7 @@ def dockerfile_cueweb(
 )
 def build_docker_image_cueweb(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_cueweb: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -2616,6 +2636,7 @@ def build_docker_image_cueweb(
         context=context,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -2628,6 +2649,7 @@ def build_docker_image_cueweb(
         tags=tags,
         docker_image=docker_image,
         docker_config=docker_config,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_cueweb,
         build_context=build_context,
@@ -2662,9 +2684,9 @@ def build_docker_image_cueweb(
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
-        "clone_repository": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
-        ),
+        # "clone_repository": AssetIn(
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        # ),
         "compose_networks": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
@@ -2686,8 +2708,9 @@ def build_docker_image_cueweb(
 )
 def compose_cueweb(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
-    clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+    # clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     build_docker_image_cueweb: Dict,  # pylint: disable=redefined-outer-name
@@ -2981,6 +3004,7 @@ def compose_cueweb(
     image_prefixes = parse_docker_image_path(
         docker_config=docker_config,
         context=context,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
     )
     context.log.debug(f"{image_prefixes = }")
 
