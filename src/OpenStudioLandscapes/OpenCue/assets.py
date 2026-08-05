@@ -1226,7 +1226,7 @@ def compose_db(
 #     # dnf_install_str_: str = get_dnf_install_str(
 #     #     dnf_install_packages=[
 #     #         *CONFIG.dnf_packages_base,
-#     #         *CONFIG.openstudiolandscapes__rez_config.dnf_packages_rez,
+#     #         *openstudiolandscapes__rez_config.dnf_packages_rez,
 #     #     ],
 #     # )
 #
@@ -1355,7 +1355,7 @@ def compose_db(
 #         ),
 #         dnf_packages_general=" ".join(CONFIG.dnf_packages_general),
 #         dnf_packages_blender_5=" ".join(CONFIG.dnf_packages_blender_5),
-#         rez_version=config_engine.openstudiolandscapes__rez_config.rez_version,
+#         rez_version=openstudiolandscapes__rez_config.rez_version,
 #         timezone=config_engine.tz,
 #         image_name=image_name,
 #         # Todo: this won't work as expected if len(tags) > 1
@@ -1493,7 +1493,7 @@ def compose_db(
 #     # # dnf_install_str_: str = get_dnf_install_str(
 #     # #     dnf_install_packages=[
 #     # #         *CONFIG.dnf_packages_base,
-#     # #         *CONFIG.openstudiolandscapes__rez_config.dnf_packages_rez,
+#     # #         *openstudiolandscapes__rez_config.dnf_packages_rez,
 #     # #     ],
 #     # # )
 #     #
@@ -1622,7 +1622,7 @@ def compose_db(
 #     #     ),
 #     #     dnf_packages_general=" ".join(CONFIG.dnf_packages_general),
 #     #     dnf_packages_blender_5=" ".join(CONFIG.dnf_packages_blender_5),
-#     #     rez_version=config_engine.openstudiolandscapes__rez_config.rez_version,
+#     #     rez_version=openstudiolandscapes__rez_config.rez_version,
 #     #     timezone=config_engine.tz,
 #     #     image_name=image_name,
 #     #     # Todo: this won't work as expected if len(tags) > 1
