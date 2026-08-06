@@ -1,17 +1,13 @@
 # pylint: disable=line-too-long,invalid-name
 import copy
 
-# import re
 import enum
 import json
 import pathlib
 
-# import shutil
-# import subprocess
 import textwrap
 import time
 
-# import urllib.parse
 from typing import Dict, Generator, List, Union
 
 import git
@@ -36,7 +32,9 @@ from OpenStudioLandscapes.engine.common_assets import (
     group_in,
     group_out,
 )
-from OpenStudioLandscapes.engine.config.models import ConfigEngine, DockerConfigModel
+from OpenStudioLandscapes.engine.env.configurable_resources.config_engine import ConfigEngineConfigurableResource
+from OpenStudioLandscapes.engine.base.configurable_resources.docker_registry_resource import DockerRegistryConfigurableResource
+from OpenStudioLandscapes.engine.base.configurable_resources.docker_resource import DockerConfigurableResource
 from OpenStudioLandscapes.engine.constants import (
     ASSET_HEADER_BASE,
     ConfigParent,
@@ -52,7 +50,6 @@ from OpenStudioLandscapes.engine.utils import (
     get_docker_run_cmd,
     get_image_metadata,
     get_image_name,
-    get_pip_install_str,
     get_relative_path_via_common_root,
     parse_docker_image_path,
 )
@@ -66,10 +63,6 @@ from OpenStudioLandscapes.OpenCue import (
     dist,
 )
 
-# Current issue:
-# dnf: command not found for rqd
-# WTF?
-# -> disabled for now
 
 # https://github.com/yaml/pyyaml/issues/722#issuecomment-1969292770
 yaml.SafeDumper.add_multi_representer(
@@ -342,6 +335,8 @@ def dockerfile_cuebot(
 )
 def build_docker_image_cuebot(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
+    config_DockerConfigurableResource: DockerConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_cuebot: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -355,10 +350,6 @@ def build_docker_image_cuebot(
     docker_config_json: pathlib.Path = (
         feature_in.openstudiolandscapes_base.docker_config_json
     )
-
-    config_engine: ConfigEngine = CONFIG.config_engine
-
-    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
 
     docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
 
@@ -380,7 +371,8 @@ def build_docker_image_cuebot(
     ) = get_image_metadata(
         context=context,
         docker_image=docker_image,
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -392,7 +384,8 @@ def build_docker_image_cuebot(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=docker_config,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_cuebot,
         build_context=build_context,
@@ -466,6 +459,9 @@ def build_docker_image_cuebot(
 )
 def compose_cuebot(
     context: AssetExecutionContext,
+    config_ConfigEngineConfigurableResource: ConfigEngineConfigurableResource,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
+    config_DockerConfigurableResource: DockerConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -474,8 +470,6 @@ def compose_cuebot(
     """ """
 
     env: Dict = CONFIG.env
-
-    config_engine: ConfigEngine = CONFIG.config_engine
 
     network_dict = {}
     ports_dict = {}
@@ -515,7 +509,7 @@ def compose_cuebot(
         "volumes": list(
             {
                 *_volume_relative,
-                *config_engine.global_bind_volumes,
+                *config_ConfigEngineConfigurableResource.global_bind_volumes,
                 *CONFIG.local_bind_volumes,
             }
         )
@@ -526,7 +520,7 @@ def compose_cuebot(
         context=context,
         service_name=service_name_cuebot,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     service_name_db = CONFIG.opencue_db
@@ -534,7 +528,7 @@ def compose_cuebot(
         context=context,
         service_name=service_name_db,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     service_name_flyway = CONFIG.opencue_flyway
@@ -542,7 +536,7 @@ def compose_cuebot(
     #     context=context,
     #     service_name=service_name_flyway,
     #     landscape_id=env.get("LANDSCAPE", "default"),
-    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    #     domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     # )
 
     compose_cuebot_base = compose_opencue_base.get("services", {}).get("cuebot", {})
@@ -552,11 +546,10 @@ def compose_cuebot(
     image_name = get_image_name(context=context)
     context.log.debug(f"{image_name = }")
 
-    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
-
     image_prefixes = parse_docker_image_path(
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
         context=context,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
     )
     context.log.debug(f"{image_prefixes = }")
 
@@ -580,15 +573,13 @@ def compose_cuebot(
                     build_docker_image_cuebot["image_name"],
                     build_docker_image_cuebot["image_tags"][0],
                 ),
-                # Todo:
-                #  - [ ] prebuilt image?
                 "container_name": container_name_cuebot,
                 "hostname": host_name_cuebot,
-                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "domainname": config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
                 "environment": {
-                    "TZ": config_engine.tz,
+                    "TZ": config_ConfigEngineConfigurableResource.tz,
                     "CUE_FRAME_LOG_DIR": "/tmp/rqd/logs",
-                    **config_engine.global_environment_variables,
+                    **config_ConfigEngineConfigurableResource.global_environment_variables,
                     **CONFIG.local_environment_variables,
                 },
                 **copy.deepcopy(volumes_dict),
@@ -736,6 +727,8 @@ def dockerfile_flyway(
 )
 def build_docker_image_flyway(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
+    config_DockerConfigurableResource: DockerConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_flyway: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -749,10 +742,6 @@ def build_docker_image_flyway(
     docker_config_json: pathlib.Path = (
         feature_in.openstudiolandscapes_base.docker_config_json
     )
-
-    config_engine: ConfigEngine = CONFIG.config_engine
-
-    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
 
     docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
 
@@ -774,7 +763,8 @@ def build_docker_image_flyway(
     ) = get_image_metadata(
         context=context,
         docker_image=docker_image,
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -786,7 +776,8 @@ def build_docker_image_flyway(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=docker_config,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_flyway,
         build_context=build_context,
@@ -855,6 +846,7 @@ def build_docker_image_flyway(
 )
 def compose_flyway(
     context: AssetExecutionContext,
+    config_ConfigEngineConfigurableResource: ConfigEngineConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -863,8 +855,6 @@ def compose_flyway(
     """ """
 
     env: Dict = CONFIG.env
-
-    config_engine: ConfigEngine = CONFIG.config_engine
 
     network_dict = {}
     ports_dict = {}
@@ -900,7 +890,7 @@ def compose_flyway(
         "volumes": list(
             {
                 *_volume_relative,
-                *config_engine.global_bind_volumes,
+                *config_ConfigEngineConfigurableResource.global_bind_volumes,
                 *CONFIG.local_bind_volumes,
             }
         )
@@ -911,7 +901,7 @@ def compose_flyway(
         context=context,
         service_name=service_name_db,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     service_name_flyway = CONFIG.opencue_flyway
@@ -919,7 +909,7 @@ def compose_flyway(
         context=context,
         service_name=service_name_flyway,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     compose_flyway_base = compose_opencue_base.get("services", {}).get("flyway", {})
@@ -943,15 +933,15 @@ def compose_flyway(
                 ),
                 "container_name": container_name_flyway,
                 "hostname": host_name_flyway,
-                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "domainname": config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
                 "environment": {
-                    "TZ": config_engine.tz,
+                    "TZ": config_ConfigEngineConfigurableResource.tz,
                     "PGHOST": container_name_db,
                     "PGDATABASE": CONFIG.OPENCUE_DB_PGDATABASE,
                     "PGPASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
                     "PGUSER": CONFIG.OPENCUE_DB_PGUSER,
                     "PGPORT": str(CONFIG.OPENCUE_DB_PORT_CONTAINER),
-                    **config_engine.global_environment_variables,
+                    **config_ConfigEngineConfigurableResource.global_environment_variables,
                     **CONFIG.local_environment_variables,
                 },
                 # "command": [
@@ -1053,6 +1043,7 @@ def compose_flyway(
 )
 def compose_db(
     context: AssetExecutionContext,
+    config_ConfigEngineConfigurableResource: ConfigEngineConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     # clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -1060,8 +1051,6 @@ def compose_db(
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
 
     env: Dict = CONFIG.env
-
-    config_engine: ConfigEngine = CONFIG.config_engine
 
     network_dict = {}
     ports_dict = {}
@@ -1110,7 +1099,7 @@ def compose_db(
         "volumes": list(
             {
                 *_volume_relative,
-                *config_engine.global_bind_volumes,
+                *config_ConfigEngineConfigurableResource.global_bind_volumes,
                 *CONFIG.local_bind_volumes,
             }
         )
@@ -1121,7 +1110,7 @@ def compose_db(
         context=context,
         service_name=service_name,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     compose_db_base = compose_opencue_base.get("services", {}).get("db", {})
@@ -1138,14 +1127,14 @@ def compose_db(
                 **compose_db_base,
                 "container_name": container_name,
                 "hostname": host_name,
-                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "domainname": config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
                 # "restart": DockerComposePolicies.RESTART_POLICY.ALWAYS.value,
                 "environment": {
-                    "TZ": config_engine.tz,
+                    "TZ": config_ConfigEngineConfigurableResource.tz,
                     "POSTGRES_USER": CONFIG.OPENCUE_DB_PGUSER,
                     "POSTGRES_PASSWORD": CONFIG.OPENCUE_DB_PGPASSWORD,
                     "POSTGRES_DB": CONFIG.OPENCUE_DB_PGDATABASE,
-                    **config_engine.global_environment_variables,
+                    **config_ConfigEngineConfigurableResource.global_environment_variables,
                     **CONFIG.local_environment_variables,
                 },
                 **copy.deepcopy(volumes_dict),
@@ -1188,7 +1177,7 @@ def compose_db(
 #
 #     env: Dict = CONFIG.env
 #
-#     config_engine: ConfigEngine = CONFIG.config_engine
+#     config_engine: ConfigEngineConfigurableResource = config_ConfigEngineConfigurableResource
 #
 #     docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
 #
@@ -1226,7 +1215,7 @@ def compose_db(
 #     # dnf_install_str_: str = get_dnf_install_str(
 #     #     dnf_install_packages=[
 #     #         *CONFIG.dnf_packages_base,
-#     #         *CONFIG.openstudiolandscapes__rez_config.dnf_packages_rez,
+#     #         *openstudiolandscapes__rez_config.dnf_packages_rez,
 #     #     ],
 #     # )
 #
@@ -1355,7 +1344,7 @@ def compose_db(
 #         ),
 #         dnf_packages_general=" ".join(CONFIG.dnf_packages_general),
 #         dnf_packages_blender_5=" ".join(CONFIG.dnf_packages_blender_5),
-#         rez_version=config_engine.openstudiolandscapes__rez_config.rez_version,
+#         rez_version=openstudiolandscapes__rez_config.rez_version,
 #         timezone=config_engine.tz,
 #         image_name=image_name,
 #         # Todo: this won't work as expected if len(tags) > 1
@@ -1410,7 +1399,7 @@ def compose_db(
 #
 #     env: Dict = CONFIG.env
 #
-#     # config_engine: ConfigEngine = CONFIG.config_engine
+#     # config_engine: ConfigEngineConfigurableResource = config_ConfigEngineConfigurableResource
 #
 #     # docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
 #     #
@@ -1493,7 +1482,7 @@ def compose_db(
 #     # # dnf_install_str_: str = get_dnf_install_str(
 #     # #     dnf_install_packages=[
 #     # #         *CONFIG.dnf_packages_base,
-#     # #         *CONFIG.openstudiolandscapes__rez_config.dnf_packages_rez,
+#     # #         *openstudiolandscapes__rez_config.dnf_packages_rez,
 #     # #     ],
 #     # # )
 #     #
@@ -1622,7 +1611,7 @@ def compose_db(
 #     #     ),
 #     #     dnf_packages_general=" ".join(CONFIG.dnf_packages_general),
 #     #     dnf_packages_blender_5=" ".join(CONFIG.dnf_packages_blender_5),
-#     #     rez_version=config_engine.openstudiolandscapes__rez_config.rez_version,
+#     #     rez_version=openstudiolandscapes__rez_config.rez_version,
 #     #     timezone=config_engine.tz,
 #     #     image_name=image_name,
 #     #     # Todo: this won't work as expected if len(tags) > 1
@@ -1685,7 +1674,7 @@ def compose_db(
 #         feature_in.openstudiolandscapes_base.docker_config_json
 #     )
 #
-#     config_engine: ConfigEngine = CONFIG.config_engine
+#     config_engine: ConfigEngineConfigurableResource = config_ConfigEngineConfigurableResource
 #
 #     docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
 #
@@ -1813,6 +1802,8 @@ def dockerfile_rqd(
 )
 def build_docker_image_rqd(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
+    config_DockerConfigurableResource: DockerConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_rqd: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -1826,10 +1817,6 @@ def build_docker_image_rqd(
     docker_config_json: pathlib.Path = (
         feature_in.openstudiolandscapes_base.docker_config_json
     )
-
-    config_engine: ConfigEngine = CONFIG.config_engine
-
-    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
 
     docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
 
@@ -1851,7 +1838,8 @@ def build_docker_image_rqd(
     ) = get_image_metadata(
         context=context,
         docker_image=docker_image,
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -1863,7 +1851,8 @@ def build_docker_image_rqd(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=docker_config,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_rqd,
         build_context=build_context,
@@ -1935,6 +1924,9 @@ def build_docker_image_rqd(
 )
 def compose_rqd(
     context: AssetExecutionContext,
+    config_ConfigEngineConfigurableResource: ConfigEngineConfigurableResource,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
+    config_DockerConfigurableResource: DockerConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     prepare_volumes: Dict,  # pylint: disable=redefined-outer-name
@@ -1944,8 +1936,6 @@ def compose_rqd(
     """ """
 
     env: Dict = CONFIG.env
-
-    config_engine: ConfigEngine = CONFIG.config_engine
 
     network_dict = {}
     ports_dict = {}
@@ -1990,7 +1980,7 @@ def compose_rqd(
         "volumes": list(
             {
                 *_volume_relative,
-                *config_engine.global_bind_volumes,
+                *config_ConfigEngineConfigurableResource.global_bind_volumes,
                 *CONFIG.local_bind_volumes,
                 # Todo
                 #  - [ ] find a better place for these!
@@ -2014,7 +2004,7 @@ def compose_rqd(
         context=context,
         service_name=service_name_cuebot,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     service_name = CONFIG.opencue_rqd
@@ -2022,7 +2012,7 @@ def compose_rqd(
         context=context,
         service_name=service_name,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     if CONFIG.OPENCUE_DEPLOY_RQD:
@@ -2034,13 +2024,10 @@ def compose_rqd(
         image_name = get_image_name(context=context)
         context.log.debug(f"{image_name = }")
 
-        docker_config: DockerConfigModel = (
-            config_engine.openstudiolandscapes__docker_config
-        )
-
         image_prefixes = parse_docker_image_path(
-            docker_config=docker_config,
+            docker_config=config_DockerConfigurableResource,
             context=context,
+            config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         )
         context.log.debug(f"{image_prefixes = }")
 
@@ -2066,17 +2053,17 @@ def compose_rqd(
                     ),
                     "container_name": container_name,
                     "hostname": host_name,
-                    "domainname": config_engine.openstudiolandscapes__domain_lan,
+                    "domainname": config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
                     "environment": {
-                        "TZ": config_engine.tz,
+                        "TZ": config_ConfigEngineConfigurableResource.tz,
                         "PYTHONUNBUFFERED": "1",
                         # Todo:
                         #  - [ ] use fqdn instead of just hostname?
                         #  - [ ] Better use container name so that we don't have to rely on external DNS
-                        # "CUEBOT_HOSTNAME": host_name_cuebot,  # f"cuebot.{config_engine.openstudiolandscapes__domain_lan}",
+                        # "CUEBOT_HOSTNAME": host_name_cuebot,  # f"cuebot.{config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan}",
                         "OPENRQD__GRPC__CUEBOT_ENDPOINTS": f"{container_name_cuebot}:{CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER}",
                         "OPENRQD__MACHINE__USE_IP_AS_HOSTNAME": False,
-                        **config_engine.global_environment_variables,
+                        **config_ConfigEngineConfigurableResource.global_environment_variables,
                         **CONFIG.local_environment_variables,
                     },
                     "depends_on": {
@@ -2183,10 +2170,12 @@ def dockerfile_rest_gateway(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_opencue_base"]),
         ),
     },
-    # retry_policy=build_docker_image_retry_policy,
+    retry_policy=build_docker_image_retry_policy,
 )
 def build_docker_image_rest_gateway(
     context: AssetExecutionContext,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
+    config_DockerConfigurableResource: DockerConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_rest_gateway: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -2200,10 +2189,6 @@ def build_docker_image_rest_gateway(
     docker_config_json: pathlib.Path = (
         feature_in.openstudiolandscapes_base.docker_config_json
     )
-
-    config_engine: ConfigEngine = CONFIG.config_engine
-
-    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
 
     docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
 
@@ -2229,7 +2214,8 @@ def build_docker_image_rest_gateway(
     ) = get_image_metadata(
         context=context,
         docker_image=docker_image,
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -2241,7 +2227,8 @@ def build_docker_image_rest_gateway(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=docker_config,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_rest_gateway,
         build_context=build_context,
@@ -2295,6 +2282,9 @@ def build_docker_image_rest_gateway(
 )
 def compose_rest_gateway(
     context: AssetExecutionContext,
+    config_ConfigEngineConfigurableResource: ConfigEngineConfigurableResource,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
+    config_DockerConfigurableResource: DockerConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -2303,8 +2293,6 @@ def compose_rest_gateway(
     """ """
 
     env: Dict = CONFIG.env
-
-    config_engine: ConfigEngine = CONFIG.config_engine
 
     network_dict = {}
     ports_dict_rest_gateway = {}
@@ -2351,7 +2339,7 @@ def compose_rest_gateway(
         "volumes": list(
             {
                 *_volume_relative_rest_gateway,
-                *config_engine.global_bind_volumes,
+                *config_ConfigEngineConfigurableResource.global_bind_volumes,
                 *CONFIG.local_bind_volumes,
             }
         )
@@ -2364,7 +2352,7 @@ def compose_rest_gateway(
     #     context=context,
     #     service_name=f"{container_prefix}-{service_name_rqd}",
     #     landscape_id=env.get("LANDSCAPE", "default"),
-    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    #     domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     # )
 
     service_name_cuebot = CONFIG.opencue_cuebot
@@ -2372,7 +2360,7 @@ def compose_rest_gateway(
         context=context,
         service_name=service_name_cuebot,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     service_name_db = CONFIG.opencue_db
@@ -2380,7 +2368,7 @@ def compose_rest_gateway(
     #     context=context,
     #     service_name=f"{container_prefix}-{service_name_db}",
     #     landscape_id=env.get("LANDSCAPE", "default"),
-    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    #     domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     # )
 
     service_name_rest_gateway = CONFIG.opencue_rest_gateway
@@ -2388,7 +2376,7 @@ def compose_rest_gateway(
         context=context,
         service_name=service_name_rest_gateway,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     compose_rest_gateway_base = compose_opencue_base.get("services", {}).get(
@@ -2400,11 +2388,10 @@ def compose_rest_gateway(
     image_name = get_image_name(context=context)
     context.log.debug(f"{image_name = }")
 
-    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
-
     image_prefixes = parse_docker_image_path(
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
         context=context,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
     )
     context.log.debug(f"{image_prefixes = }")
 
@@ -2431,16 +2418,16 @@ def compose_rest_gateway(
                 ),
                 "container_name": container_name_rest_gateway,
                 "hostname": host_name_rest_gateway,
-                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "domainname": config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
                 "environment": {
-                    "TZ": config_engine.tz,
+                    "TZ": config_ConfigEngineConfigurableResource.tz,
                     # https://docs.opencue.io/docs/getting-started/deploying-rest-gateway/#configuration-options
                     "CUEBOT_ENDPOINT": f"{container_name_cuebot}:{CONFIG.OPENCUE_CUEBOT_GRPC_CUE_PORT_CONTAINER}",  # port might be implicit here
                     "REST_PORT": CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER,
                     "JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
                     "LOG_LEVEL": "debug",
                     "CORS_ALLOWED_ORIGINS": "*",
-                    **config_engine.global_environment_variables,
+                    **config_ConfigEngineConfigurableResource.global_environment_variables,
                     **CONFIG.local_environment_variables,
                 },
                 "depends_on": {
@@ -2545,6 +2532,9 @@ def dockerfile_cueweb(
 )
 def build_docker_image_cueweb(
     context: AssetExecutionContext,
+    config_ConfigEngineConfigurableResource: ConfigEngineConfigurableResource,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
+    config_DockerConfigurableResource: DockerConfigurableResource,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_cueweb: pathlib.Path,  # pylint: disable=redefined-outer-name
@@ -2559,10 +2549,6 @@ def build_docker_image_cueweb(
         feature_in.openstudiolandscapes_base.docker_config_json
     )
 
-    config_engine: ConfigEngine = CONFIG.config_engine
-
-    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
-
     docker_image: Dict = feature_in.openstudiolandscapes_base.docker_image_base
 
     service_name_rest_gateway = CONFIG.opencue_rest_gateway
@@ -2570,7 +2556,7 @@ def build_docker_image_cueweb(
         context=context,
         service_name=service_name_rest_gateway,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     compose_cueweb_base = compose_opencue_base.get("services", {}).get("cueweb", {})
@@ -2615,7 +2601,8 @@ def build_docker_image_cueweb(
     ) = get_image_metadata(
         context=context,
         docker_image=docker_image,
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         env=env,
     )
 
@@ -2627,7 +2614,8 @@ def build_docker_image_cueweb(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=docker_config,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_cueweb,
         build_context=build_context,
@@ -2662,9 +2650,9 @@ def build_docker_image_cueweb(
         "CONFIG": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "CONFIG"]),
         ),
-        "clone_repository": AssetIn(
-            AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
-        ),
+        # "clone_repository": AssetIn(
+        #     AssetKey([*ASSET_HEADER["key_prefix"], "clone_repository"]),
+        # ),
         "compose_networks": AssetIn(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_networks"]),
         ),
@@ -2686,8 +2674,11 @@ def build_docker_image_cueweb(
 )
 def compose_cueweb(
     context: AssetExecutionContext,
+    config_ConfigEngineConfigurableResource: ConfigEngineConfigurableResource,
+    config_DockerRegistryConfigurableResource: DockerRegistryConfigurableResource,
+    config_DockerConfigurableResource: DockerConfigurableResource,
     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
-    clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
+    # clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     build_docker_image_cueweb: Dict,  # pylint: disable=redefined-outer-name
@@ -2696,9 +2687,7 @@ def compose_cueweb(
 
     env: Dict = CONFIG.env
 
-    config_engine: ConfigEngine = CONFIG.config_engine
-
-    network_dict = {}
+    network_dconfig_engineict = {}
     ports_dict_cueweb = {}
 
     if "networks" in compose_networks:
@@ -2745,7 +2734,7 @@ def compose_cueweb(
     #     "volumes": list(
     #         {
     #             *_volume_relative,
-    #             *config_engine.global_bind_volumes,
+    #             *config_ConfigEngineConfigurableResource.global_bind_volumes,
     #             *CONFIG.local_bind_volumes,
     #         }
     #     ),
@@ -2758,7 +2747,7 @@ def compose_cueweb(
     #     context=context,
     #     service_name=f"{container_prefix}-{service_name_rqd}",
     #     landscape_id=env.get("LANDSCAPE", "default"),
-    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    #     domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     # )
 
     # service_name_cuebot = "cuebot"
@@ -2766,7 +2755,7 @@ def compose_cueweb(
     #     context=context,
     #     service_name=f"{container_prefix}-{service_name_cuebot}",
     #     landscape_id=env.get("LANDSCAPE", "default"),
-    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    #     domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     # )
 
     service_name_db = CONFIG.opencue_db
@@ -2774,7 +2763,7 @@ def compose_cueweb(
         context=context,
         service_name=service_name_db,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     service_name_rest_gateway = CONFIG.opencue_rest_gateway
@@ -2782,7 +2771,7 @@ def compose_cueweb(
     #     context=context,
     #     service_name=service_name_rest_gateway,
     #     landscape_id=env.get("LANDSCAPE", "default"),
-    #     domain_lan=config_engine.openstudiolandscapes__domain_lan,
+    #     domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     # )
 
     service_name_cueweb = CONFIG.opencue_cueweb
@@ -2790,7 +2779,7 @@ def compose_cueweb(
         context=context,
         service_name=service_name_cueweb,
         landscape_id=env.get("LANDSCAPE", "default"),
-        domain_lan=config_engine.openstudiolandscapes__domain_lan,
+        domain_lan=config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
     )
 
     compose_cueweb_base = compose_opencue_base.get("services", {}).get("cueweb", {})
@@ -2976,11 +2965,10 @@ def compose_cueweb(
     image_name = get_image_name(context=context)
     context.log.debug(f"{image_name = }")
 
-    docker_config: DockerConfigModel = config_engine.openstudiolandscapes__docker_config
-
     image_prefixes = parse_docker_image_path(
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
         context=context,
+        config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
     )
     context.log.debug(f"{image_prefixes = }")
 
@@ -3007,9 +2995,9 @@ def compose_cueweb(
                 ),
                 "container_name": container_name_cueweb,
                 "hostname": host_name_cueweb,
-                "domainname": config_engine.openstudiolandscapes__domain_lan,
+                "domainname": config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
                 "environment": {
-                    "TZ": config_engine.tz,
+                    "TZ": config_ConfigEngineConfigurableResource.tz,
                     # https://docs.opencue.io/docs/getting-started/deploying-cueweb/#environment-configuration
                     # "NEXT_PUBLIC_OPENCUE_ENDPOINT": f"http://{host_name_rest_gateway}:{CONFIG.OPENCUE_REST_GATEWAY_PORT_CONTAINER}",
                     # "NEXT_PUBLIC_URL": f"http://{host_name_cueweb}:{CONFIG.OPENCUE_CUEWEB_PORT_HOST}",
@@ -3017,7 +3005,7 @@ def compose_cueweb(
                     "NEXT_JWT_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
                     "NEXTAUTH_SECRET": CONFIG.OPENCUE_CUEWEB_JWT_SECRET,
                     **CONFIG.OPENCUE_CUEWEB_ADDITIONAL_ENV,
-                    **config_engine.global_environment_variables,
+                    **config_ConfigEngineConfigurableResource.global_environment_variables,
                     **CONFIG.local_environment_variables,
                 },
                 "volumes": [
