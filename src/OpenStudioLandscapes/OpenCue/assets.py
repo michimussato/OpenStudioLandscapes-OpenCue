@@ -384,7 +384,7 @@ def build_docker_image_cuebot(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=config_DockerConfigurableResource,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
         config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_cuebot,
@@ -546,10 +546,8 @@ def compose_cuebot(
     image_name = get_image_name(context=context)
     context.log.debug(f"{image_name = }")
 
-    docker_config: DockerConfigurableResource = config_DockerConfigurableResource
-
     image_prefixes = parse_docker_image_path(
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
         context=context,
         config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
     )
@@ -780,7 +778,7 @@ def build_docker_image_flyway(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=config_DockerConfigurableResource,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
         config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_flyway,
@@ -1855,7 +1853,7 @@ def build_docker_image_rqd(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=config_DockerConfigurableResource,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
         config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_rqd,
@@ -2028,10 +2026,8 @@ def compose_rqd(
         image_name = get_image_name(context=context)
         context.log.debug(f"{image_name = }")
 
-        docker_config: DockerConfigurableResource = config_DockerConfigurableResource
-
         image_prefixes = parse_docker_image_path(
-            docker_config=docker_config,
+            docker_config=config_DockerConfigurableResource,
             context=context,
             config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         )
@@ -2233,7 +2229,7 @@ def build_docker_image_rest_gateway(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=config_DockerConfigurableResource,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
         config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_rest_gateway,
@@ -2394,10 +2390,8 @@ def compose_rest_gateway(
     image_name = get_image_name(context=context)
     context.log.debug(f"{image_name = }")
 
-    docker_config: DockerConfigurableResource = config_DockerConfigurableResource
-
     image_prefixes = parse_docker_image_path(
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
         context=context,
         config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
     )
@@ -2622,7 +2616,7 @@ def build_docker_image_cueweb(
         image_prefixes=image_prefixes,
         tags=tags,
         docker_image=docker_image,
-        docker_config=config_DockerConfigurableResource,
+        config_DockerConfigurableResource=config_DockerConfigurableResource,
         config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
         docker_config_json=docker_config_json,
         docker_file=dockerfile_cueweb,
@@ -2973,10 +2967,8 @@ def compose_cueweb(
     image_name = get_image_name(context=context)
     context.log.debug(f"{image_name = }")
 
-    docker_config: DockerConfigurableResource = config_DockerConfigurableResource
-
     image_prefixes = parse_docker_image_path(
-        docker_config=docker_config,
+        docker_config=config_DockerConfigurableResource,
         context=context,
         config_DockerRegistryConfigurableResource=config_DockerRegistryConfigurableResource,
     )
