@@ -47,7 +47,7 @@ from OpenStudioLandscapes.engine.enums import (
     DockerComposePolicies,
 )
 from OpenStudioLandscapes.engine.link.models import OpenStudioLandscapesFeatureIn
-# from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
+from OpenStudioLandscapes.engine.policies.retry import build_docker_image_retry_policy
 from OpenStudioLandscapes.engine.utils import (
     create_image,
     get_docker_compose_names,
@@ -2185,7 +2185,7 @@ def dockerfile_rest_gateway(
             AssetKey([*ASSET_HEADER["key_prefix"], "compose_opencue_base"]),
         ),
     },
-    # retry_policy=build_docker_image_retry_policy,
+    retry_policy=build_docker_image_retry_policy,
 )
 def build_docker_image_rest_gateway(
     context: AssetExecutionContext,
