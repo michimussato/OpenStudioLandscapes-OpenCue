@@ -1,17 +1,13 @@
 # pylint: disable=line-too-long,invalid-name
 import copy
 
-# import re
 import enum
 import json
 import pathlib
 
-# import shutil
-# import subprocess
 import textwrap
 import time
 
-# import urllib.parse
 from typing import Dict, Generator, List, Union
 
 import git
@@ -54,7 +50,6 @@ from OpenStudioLandscapes.engine.utils import (
     get_docker_run_cmd,
     get_image_metadata,
     get_image_name,
-    # get_pip_install_str,
     get_relative_path_via_common_root,
     parse_docker_image_path,
 )
@@ -68,10 +63,6 @@ from OpenStudioLandscapes.OpenCue import (
     dist,
 )
 
-# Current issue:
-# dnf: command not found for rqd
-# WTF?
-# -> disabled for now
 
 # https://github.com/yaml/pyyaml/issues/722#issuecomment-1969292770
 yaml.SafeDumper.add_multi_representer(
