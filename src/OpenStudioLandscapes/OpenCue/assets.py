@@ -573,8 +573,6 @@ def compose_cuebot(
                     build_docker_image_cuebot["image_name"],
                     build_docker_image_cuebot["image_tags"][0],
                 ),
-                # Todo:
-                #  - [ ] prebuilt image?
                 "container_name": container_name_cuebot,
                 "hostname": host_name_cuebot,
                 "domainname": config_ConfigEngineConfigurableResource.openstudiolandscapes__domain_lan,
