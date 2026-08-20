@@ -3,7 +3,6 @@ __all__ = [
     "dist",
     "LOGGER",
     "__version__",
-    # "config",
     "ASSET_HEADER",
 ]
 
