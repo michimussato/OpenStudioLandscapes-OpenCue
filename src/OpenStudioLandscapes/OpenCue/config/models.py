@@ -10,7 +10,7 @@ from pydantic import (
     PositiveInt,
 )
 
-from OpenStudioLandscapes.OpenCue import (
+from OpenStudioLandscapes.OpenCue.constants import (
     ASSET_HEADER,
     LOGGER,
     dist,
