@@ -60,11 +60,12 @@ from OpenStudioLandscapes.engine.utils.docker.compose_dicts import (
     get_network_dicts,
 )
 
-from OpenStudioLandscapes.OpenCue import (
+from OpenStudioLandscapes.OpenCue.constants import (
     ASSET_HEADER,
-    config,
     dist,
 )
+
+from OpenStudioLandscapes.OpenCue.config import models
 
 # Current issue:
 # dnf: command not found for rqd
@@ -84,8 +85,8 @@ cmd: AssetsDefinition = cmd.get_feature__cmd(
 
 CONFIG: AssetsDefinition = feature.get_feature__CONFIG(
     ASSET_HEADER=ASSET_HEADER,
-    CONFIG_STR=config.models.CONFIG_STR,
-    search_model_of_type=config.models.Config,
+    CONFIG_STR=models.CONFIG_STR,
+    search_model_of_type=models.Config,
 )
 
 feature_in: AssetsDefinition = group_in.get_feature_in(
@@ -150,7 +151,7 @@ feature_in_parent: Union[AssetsDefinition, None] = group_in.get_feature_in_paren
 )
 def clone_repository(
     context: AssetExecutionContext,
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
 
     env: dict = CONFIG.env
@@ -198,7 +199,7 @@ def clone_repository(
 )
 def prepare_volumes(
     context: AssetExecutionContext,
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
     """https://www.opencue.io/docs/quick-starts/quick-start-linux/#deploying-the-opencue-sandbox-environment"""
 
@@ -241,7 +242,7 @@ def prepare_volumes(
 )
 def compose_networks(
     context: AssetExecutionContext,
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[
     Output[Dict[str, Dict[str, Dict[str, str]]]] | AssetMaterialization, None, None
 ]:
@@ -288,7 +289,7 @@ def dockerfile_cuebot(
     context: AssetExecutionContext,
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
     """ """
 
@@ -343,7 +344,7 @@ def dockerfile_cuebot(
 def build_docker_image_cuebot(
     context: AssetExecutionContext,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_cuebot: pathlib.Path,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -466,7 +467,7 @@ def build_docker_image_cuebot(
 )
 def compose_cuebot(
     context: AssetExecutionContext,
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     build_docker_image_cuebot: Dict,  # pylint: disable=redefined-outer-name
@@ -680,7 +681,7 @@ def dockerfile_flyway(
     context: AssetExecutionContext,
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
     """ """
 
@@ -737,7 +738,7 @@ def dockerfile_flyway(
 def build_docker_image_flyway(
     context: AssetExecutionContext,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_flyway: pathlib.Path,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -855,7 +856,7 @@ def build_docker_image_flyway(
 )
 def compose_flyway(
     context: AssetExecutionContext,
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     build_docker_image_flyway: Dict,  # pylint: disable=redefined-outer-name
@@ -1053,7 +1054,7 @@ def compose_flyway(
 )
 def compose_db(
     context: AssetExecutionContext,
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     # clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -1182,7 +1183,7 @@ def compose_db(
 # def write_dockerfile_cueweb(
 #     context: AssetExecutionContext,
 #     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
-#     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+#     CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 # ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
 #     """ """
 #
@@ -1404,7 +1405,7 @@ def compose_db(
 #     # feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
 #     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
 #     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
-#     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+#     CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 # ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
 #     """ """
 #
@@ -1674,7 +1675,7 @@ def compose_db(
 # def build_docker_image_rqd(
 #     context: AssetExecutionContext,
 #     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
-#     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+#     CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 #     write_dockerfile_rqd: pathlib.Path,  # pylint: disable=redefined-outer-name
 # ) -> Generator[Output[Dict] | AssetMaterialization, None, None]:
 #     """ """
@@ -1759,7 +1760,7 @@ def dockerfile_rqd(
     context: AssetExecutionContext,
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
     """ """
 
@@ -1814,7 +1815,7 @@ def dockerfile_rqd(
 def build_docker_image_rqd(
     context: AssetExecutionContext,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_rqd: pathlib.Path,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -1935,7 +1936,7 @@ def build_docker_image_rqd(
 )
 def compose_rqd(
     context: AssetExecutionContext,
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     prepare_volumes: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -2127,7 +2128,7 @@ def dockerfile_rest_gateway(
     context: AssetExecutionContext,
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
     """ """
 
@@ -2188,7 +2189,7 @@ def dockerfile_rest_gateway(
 def build_docker_image_rest_gateway(
     context: AssetExecutionContext,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_rest_gateway: pathlib.Path,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -2295,7 +2296,7 @@ def build_docker_image_rest_gateway(
 )
 def compose_rest_gateway(
     context: AssetExecutionContext,
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     build_docker_image_rest_gateway: Dict,  # pylint: disable=redefined-outer-name
@@ -2489,7 +2490,7 @@ def dockerfile_cueweb(
     # feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 ) -> Generator[Output[pathlib.Path] | AssetMaterialization, None, None]:
     """ """
 
@@ -2546,7 +2547,7 @@ def dockerfile_cueweb(
 def build_docker_image_cueweb(
     context: AssetExecutionContext,
     feature_in: OpenStudioLandscapesFeatureIn,  # pylint: disable=redefined-outer-name
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     dockerfile_cueweb: pathlib.Path,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -2686,7 +2687,7 @@ def build_docker_image_cueweb(
 )
 def compose_cueweb(
     context: AssetExecutionContext,
-    CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+    CONFIG: models.Config,  # pylint: disable=redefined-outer-name
     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
     compose_networks: Dict,  # pylint: disable=redefined-outer-name
     compose_opencue_base: Dict,  # pylint: disable=redefined-outer-name
@@ -3084,7 +3085,7 @@ def compose_cueweb(
 # )
 # def opencue_test_suite__rest_gateway_docker_compose(
 #     context: AssetExecutionContext,
-#     CONFIG: config.models.Config,  # pylint: disable=redefined-outer-name
+#     CONFIG: models.Config,  # pylint: disable=redefined-outer-name
 #     clone_repository: pathlib.Path,  # pylint: disable=redefined-outer-name
 # ) -> Generator[Output[subprocess.CompletedProcess] | AssetMaterialization, None, None]:
 #

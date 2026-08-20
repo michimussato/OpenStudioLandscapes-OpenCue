@@ -4,7 +4,7 @@ from dagster import (
 )
 
 import OpenStudioLandscapes.OpenCue.assets
-from OpenStudioLandscapes.OpenCue import (
+from OpenStudioLandscapes.OpenCue.constants import (
     LOGGER,
     dist,
 )
