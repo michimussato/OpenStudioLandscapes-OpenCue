@@ -60,12 +60,11 @@ from OpenStudioLandscapes.engine.utils.docker.compose_dicts import (
     get_network_dicts,
 )
 
+from OpenStudioLandscapes.OpenCue.config import models
 from OpenStudioLandscapes.OpenCue.constants import (
     ASSET_HEADER,
     dist,
 )
-
-from OpenStudioLandscapes.OpenCue.config import models
 
 # Current issue:
 # dnf: command not found for rqd
