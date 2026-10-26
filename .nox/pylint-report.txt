@@ -1,3 +1,14 @@
+************* Module OpenStudioLandscapes.OpenCue.definitions
+src/OpenStudioLandscapes/OpenCue/definitions.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+src/OpenStudioLandscapes/OpenCue/definitions.py:12:0: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
+************* Module OpenStudioLandscapes.OpenCue.constants
+src/OpenStudioLandscapes/OpenCue/constants.py:14:5: W0511: TODO: Import directly (no need for conditional) when `python_requires = >= 3.8` (fixme)
+src/OpenStudioLandscapes/OpenCue/constants.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+src/OpenStudioLandscapes/OpenCue/constants.py:38:4: C0103: Constant name "fill" doesn't conform to UPPER_CASE naming style (invalid-name)
+************* Module OpenStudioLandscapes.OpenCue
+src/OpenStudioLandscapes/OpenCue/__init__.py:1:0: C0103: Module name "OpenCue" doesn't conform to snake_case naming style (invalid-name)
+************* Module OpenStudioLandscapes.OpenCue._definitions_with_upstream_specs
+src/OpenStudioLandscapes/OpenCue/_definitions_with_upstream_specs.py:1:0: C0114: Missing module docstring (missing-module-docstring)
 ************* Module OpenStudioLandscapes.OpenCue.assets
 src/OpenStudioLandscapes/OpenCue/assets.py:1:0: C0302: Too many lines in module (3174/1000) (too-many-lines)
 src/OpenStudioLandscapes/OpenCue/assets.py:571:17: W0511: Todo (fixme)
@@ -92,17 +103,14 @@ src/OpenStudioLandscapes/OpenCue/assets.py:2773:4: W0612: Unused variable 'conta
 src/OpenStudioLandscapes/OpenCue/assets.py:3154:0: C0116: Missing function or method docstring (missing-function-docstring)
 src/OpenStudioLandscapes/OpenCue/assets.py:48:0: W0611: Unused build_docker_image_retry_policy imported from OpenStudioLandscapes.engine.policies.retry (unused-import)
 src/OpenStudioLandscapes/OpenCue/assets.py:49:0: W0611: Unused get_pip_install_str imported from OpenStudioLandscapes.engine.utils (unused-import)
-************* Module OpenStudioLandscapes.OpenCue.definitions
-src/OpenStudioLandscapes/OpenCue/definitions.py:1:0: C0114: Missing module docstring (missing-module-docstring)
-src/OpenStudioLandscapes/OpenCue/definitions.py:12:0: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
-************* Module OpenStudioLandscapes.OpenCue.constants
-src/OpenStudioLandscapes/OpenCue/constants.py:14:5: W0511: TODO: Import directly (no need for conditional) when `python_requires = >= 3.8` (fixme)
-src/OpenStudioLandscapes/OpenCue/constants.py:1:0: C0114: Missing module docstring (missing-module-docstring)
-src/OpenStudioLandscapes/OpenCue/constants.py:38:4: C0103: Constant name "fill" doesn't conform to UPPER_CASE naming style (invalid-name)
-************* Module OpenStudioLandscapes.OpenCue._definitions_with_upstream_specs
-src/OpenStudioLandscapes/OpenCue/_definitions_with_upstream_specs.py:1:0: C0114: Missing module docstring (missing-module-docstring)
-************* Module OpenStudioLandscapes.OpenCue
-src/OpenStudioLandscapes/OpenCue/__init__.py:1:0: C0103: Module name "OpenCue" doesn't conform to snake_case naming style (invalid-name)
+************* Module OpenStudioLandscapes.OpenCue.doc.readme
+src/OpenStudioLandscapes/OpenCue/doc/readme.py:45:0: C0301: Line too long (123/100) (line-too-long)
+src/OpenStudioLandscapes/OpenCue/doc/readme.py:77:1: W0511: Todo: (fixme)
+src/OpenStudioLandscapes/OpenCue/doc/readme.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+src/OpenStudioLandscapes/OpenCue/doc/readme.py:5:0: W0105: String statement has no effect (pointless-string-statement)
+src/OpenStudioLandscapes/OpenCue/doc/readme.py:62:0: W0105: String statement has no effect (pointless-string-statement)
+src/OpenStudioLandscapes/OpenCue/doc/readme.py:81:0: C0116: Missing function or method docstring (missing-function-docstring)
+src/OpenStudioLandscapes/OpenCue/doc/readme.py:96:8: C2801: Unnecessarily calls dunder method __str__. Use str built-in function. (unnecessary-dunder-call)
 ************* Module OpenStudioLandscapes.OpenCue.config.models
 src/OpenStudioLandscapes/OpenCue/config/models.py:143:9: W0511: Todo (fixme)
 src/OpenStudioLandscapes/OpenCue/config/models.py:1:0: C0114: Missing module docstring (missing-module-docstring)
@@ -115,15 +123,7 @@ src/OpenStudioLandscapes/OpenCue/config/models.py:253:8: W1203: Use lazy % forma
 src/OpenStudioLandscapes/OpenCue/config/models.py:257:8: W1203: Use lazy % formatting in logging functions (logging-fstring-interpolation)
 src/OpenStudioLandscapes/OpenCue/config/models.py:7:0: C0411: third party import "pydantic.Field" should be placed before first party import "OpenStudioLandscapes.engine.config.models.FeatureBaseModel"  (wrong-import-order)
 src/OpenStudioLandscapes/OpenCue/config/models.py:13:0: C0412: Imports from package OpenStudioLandscapes are not grouped (ungrouped-imports)
-************* Module OpenStudioLandscapes.OpenCue.doc.readme
-src/OpenStudioLandscapes/OpenCue/doc/readme.py:45:0: C0301: Line too long (123/100) (line-too-long)
-src/OpenStudioLandscapes/OpenCue/doc/readme.py:77:1: W0511: Todo: (fixme)
-src/OpenStudioLandscapes/OpenCue/doc/readme.py:1:0: C0114: Missing module docstring (missing-module-docstring)
-src/OpenStudioLandscapes/OpenCue/doc/readme.py:5:0: W0105: String statement has no effect (pointless-string-statement)
-src/OpenStudioLandscapes/OpenCue/doc/readme.py:62:0: W0105: String statement has no effect (pointless-string-statement)
-src/OpenStudioLandscapes/OpenCue/doc/readme.py:81:0: C0116: Missing function or method docstring (missing-function-docstring)
-src/OpenStudioLandscapes/OpenCue/doc/readme.py:96:8: C2801: Unnecessarily calls dunder method __str__. Use str built-in function. (unnecessary-dunder-call)
 
 ------------------------------------------------------------------
-Your code has been rated at 7.71/10 (previous run: 7.32/10, +0.39)
+Your code has been rated at 7.71/10 (previous run: 6.57/10, +1.14)
 
